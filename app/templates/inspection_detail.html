@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Kiểm tra {{ inspection.inspection_date }} - {{ ship.name }}{% endblock %}
+{% block content %}
+<p><a href="/ships/{{ ship.id }}">&larr; {{ ship.name }}</a></p>
+<h1>Kiểm tra ngày {{ inspection.inspection_date }}</h1>
+
+<div class="card">
+  <table>
+    <tr><th>Loại kiểm tra</th><td>{{ inspection.inspection_type or "-" }}</td>
+        <th>Người kiểm tra</th><td>{{ inspection.inspector_name or "-" }}</td></tr>
+    <tr><th>Kết quả chung</th><td colspan="3">
+      {% if inspection.result %}
+      <span class="badge {% if inspection.result == 'Đạt' %}ok{% elif inspection.result == 'Không đạt' %}danger{% else %}warn{% endif %}">{{ inspection.result }}</span>
+      {% else %}-{% endif %}
+    </td></tr>
+    {% if inspection.summary %}<tr><th>Mô tả</th><td colspan="3">{{ inspection.summary }}</td></tr>{% endif %}
+  </table>
+</div>
+
+<div class="card">
+  <h2>Hạng mục kiểm tra</h2>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Hạng mục</th><th>Kết quả</th><th>Ghi chú</th></tr></thead>
+    <tbody>
+      {% for f in inspection.findings %}
+      <tr>
+        <td>{{ f.item_name }}</td>
+        <td>{% if f.result %}<span class="badge {% if f.result == 'Đạt' %}ok{% elif f.result == 'Không đạt' %}danger{% else %}warn{% endif %}">{{ f.result }}</span>{% else %}-{% endif %}</td>
+        <td>{{ f.note or "-" }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="3" class="empty-state">Không có hạng mục chi tiết.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Ảnh minh chứng ({{ attachments|length }})</h2>
+  {% if attachments %}
+  <ul class="attachment-list">
+    {% for a in attachments %}
+    <li><a href="/{{ a.file_path }}" target="_blank">{{ a.file_name }}</a></li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty-state">Chưa có ảnh minh chứng.</p>
+  {% endif %}
+</div>
+
+<div class="actions-row">
+  <form method="post" action="/inspections/{{ inspection.id }}/delete" onsubmit="return confirm('Xóa lần kiểm tra này? Không thể hoàn tác.');">
+    <button class="btn danger" type="submit">Xóa lần kiểm tra này</button>
+  </form>
+</div>
+{% endblock %}

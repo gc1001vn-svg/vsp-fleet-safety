@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}{{ ship.name }}{% endblock %}
+{% block content %}
+<p><a href="/">&larr; Danh sách tàu</a></p>
+<h1>{{ ship.name }}</h1>
+
+<div class="card">
+  <h2>Thông tin tàu</h2>
+  <table>
+    <tr><th>Loại tàu</th><td>{{ ship.ship_type or "-" }}</td>
+        <th>Số IMO</th><td>{{ ship.imo_number or "-" }}</td></tr>
+    <tr><th>Số hiệu/Call sign</th><td>{{ ship.call_sign or "-" }}</td>
+        <th>Năm đóng</th><td>{{ ship.build_year or "-" }}</td></tr>
+    <tr><th>Quốc tịch/Cờ tàu</th><td>{{ ship.flag or "-" }}</td>
+        <th>Cảng đăng ký</th><td>{{ ship.home_port or "-" }}</td></tr>
+    <tr><th>Trọng tải (GT)</th><td>{{ ship.gross_tonnage or "-" }}</td>
+        <th>Dài x Rộng (m)</th><td>{{ ship.length_m or "-" }} x {{ ship.width_m or "-" }}</td></tr>
+    <tr><th>Công suất máy chính</th><td>{{ ship.main_engine_power or "-" }}</td>
+        <th>Tình trạng đăng kiểm</th><td>{{ ship.registry_status or "-" }}</td></tr>
+    <tr><th>Hạn đăng kiểm</th><td>{{ ship.registry_expiry_date or "-" }}</td>
+        <th></th><td></td></tr>
+    {% if ship.notes %}<tr><th>Ghi chú</th><td colspan="3">{{ ship.notes }}</td></tr>{% endif %}
+  </table>
+  <div class="actions-row">
+    <a class="btn secondary" href="/ships/{{ ship.id }}/edit">Sửa thông tin tàu</a>
+    <form method="post" action="/ships/{{ ship.id }}/deactivate" onsubmit="return confirm('Vô hiệu hóa tàu này? Dữ liệu lịch sử vẫn được giữ lại.');" style="display:inline">
+      <button class="btn danger" type="submit">Vô hiệu hóa tàu</button>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="toolbar">
+    <h2 style="margin:0">Lịch sử kiểm tra an toàn ({{ ship.inspections|length }})</h2>
+    <a class="btn" href="/ships/{{ ship.id }}/inspections/new">+ Thêm kiểm tra</a>
+  </div>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Ngày</th><th>Loại kiểm tra</th><th>Người kiểm tra</th><th>Kết quả</th><th>Ảnh minh chứng</th></tr></thead>
+    <tbody>
+      {% for insp in ship.inspections %}
+      <tr onclick="window.location='/inspections/{{ insp.id }}'" style="cursor:pointer">
+        <td><a href="/inspections/{{ insp.id }}">{{ insp.inspection_date }}</a></td>
+        <td>{{ insp.inspection_type or "-" }}</td>
+        <td>{{ insp.inspector_name or "-" }}</td>
+        <td>
+          {% if insp.result %}
+          <span class="badge {% if insp.result == 'Đạt' %}ok{% elif insp.result == 'Không đạt' %}danger{% else %}warn{% endif %}">{{ insp.result }}</span>
+          {% else %}-{% endif %}
+        </td>
+        <td>{{ attachments_by_entity.get(('inspection', insp.id), [])|length }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="empty-state">Chưa có lần kiểm tra nào được ghi nhận.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="toolbar">
+    <h2 style="margin:0">Sự cố / vi phạm ({{ ship.incidents|length }})</h2>
+    <a class="btn" href="/ships/{{ ship.id }}/incidents/new">+ Ghi nhận sự cố</a>
+  </div>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Ngày</th><th>Tiêu đề</th><th>Mức độ</th><th>Trạng thái</th></tr></thead>
+    <tbody>
+      {% for inc in ship.incidents %}
+      <tr onclick="window.location='/incidents/{{ inc.id }}'" style="cursor:pointer">
+        <td><a href="/incidents/{{ inc.id }}">{{ inc.incident_date }}</a></td>
+        <td>{{ inc.title }}</td>
+        <td>
+          {% if inc.severity %}
+          <span class="badge {% if inc.severity == 'Nghiêm trọng' %}danger{% elif inc.severity == 'Trung bình' %}warn{% else %}ok{% endif %}">{{ inc.severity }}</span>
+          {% else %}-{% endif %}
+        </td>
+        <td>{{ inc.status }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="empty-state">Chưa có sự cố/vi phạm nào được ghi nhận.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="toolbar">
+    <h2 style="margin:0">Tài liệu liên quan ({{ ship.documents|length }})</h2>
+    <a class="btn" href="/documents/new?ship_id={{ ship.id }}">+ Thêm tài liệu</a>
+  </div>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Ngày ban hành</th><th>Loại</th><th>Tiêu đề</th><th>File</th></tr></thead>
+    <tbody>
+      {% for doc in ship.documents %}
+      <tr>
+        <td>{{ doc.issue_date or "-" }}</td>
+        <td>{{ doc.doc_type or "-" }}</td>
+        <td>{{ doc.title }}</td>
+        <td>{% if doc.file_path %}<a href="/{{ doc.file_path }}" target="_blank">Xem file</a>{% else %}-{% endif %}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="empty-state">Chưa có tài liệu nào gắn với tàu này.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Tài liệu{% endblock %}
+{% block content %}
+<h1>Tài liệu ({{ documents|length }})</h1>
+
+<form class="filter-form" method="get" action="/documents">
+  <input type="text" name="q" placeholder="Tìm theo tiêu đề, số hiệu..." value="{{ q }}">
+  <select name="doc_type">
+    <option value="">-- Tất cả loại --</option>
+    {% for t in existing_types %}
+    <option value="{{ t }}" {% if t == doc_type %}selected{% endif %}>{{ t }}</option>
+    {% endfor %}
+  </select>
+  <select name="ship_id">
+    <option value="">-- Tất cả tàu --</option>
+    <option value="general" {% if ship_id == "general" %}selected{% endif %}>Tài liệu chung toàn Xí nghiệp</option>
+    {% for s in ships %}
+    <option value="{{ s.id }}" {% if ship_id|string == s.id|string %}selected{% endif %}>{{ s.name }}</option>
+    {% endfor %}
+  </select>
+  <button class="btn secondary" type="submit">Lọc</button>
+  <a class="btn" href="/documents/new">+ Thêm tài liệu</a>
+</form>
+
+<div class="card">
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Ngày ban hành</th><th>Loại</th><th>Tiêu đề</th><th>Tàu</th><th>File</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for doc in documents %}
+      <tr>
+        <td>{{ doc.issue_date or "-" }}</td>
+        <td>{{ doc.doc_type or "-" }}</td>
+        <td>{{ doc.title }}</td>
+        <td>{% if doc.ship %}<a href="/ships/{{ doc.ship.id }}">{{ doc.ship.name }}</a>{% else %}<span class="muted">Chung toàn XN</span>{% endif %}</td>
+        <td>{% if doc.file_path %}<a href="/{{ doc.file_path }}" target="_blank">Xem file</a>{% else %}-{% endif %}</td>
+        <td>
+          <form method="post" action="/documents/{{ doc.id }}/delete" onsubmit="return confirm('Xóa tài liệu này?');">
+            <button class="btn danger" type="submit" style="padding:4px 10px;font-size:0.8rem">Xóa</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="empty-state">Chưa có tài liệu nào.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

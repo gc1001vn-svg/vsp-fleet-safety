@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Runtime data - not committed, lives only on the server that runs the app
+data/*.db
+data/*.db-journal
+uploads/*
+!uploads/.gitkeep
+
+.env

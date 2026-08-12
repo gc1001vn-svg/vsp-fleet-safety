@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}{% if incident %}Sửa sự cố{% else %}Ghi nhận sự cố{% endif %} - {{ ship.name }}{% endblock %}
+{% block content %}
+<p><a href="/ships/{{ ship.id }}">&larr; {{ ship.name }}</a></p>
+<h1>{% if incident %}Sửa sự cố{% else %}Ghi nhận sự cố / vi phạm{% endif %} — {{ ship.name }}</h1>
+
+<form class="card" method="post"
+      action="{% if incident %}/incidents/{{ incident.id }}/edit{% else %}/ships/{{ ship.id }}/incidents/new{% endif %}"
+      enctype="multipart/form-data">
+  <div class="form-grid">
+    <div class="form-field">
+      <label>Ngày xảy ra *</label>
+      <input type="date" name="incident_date" required value="{{ incident.incident_date if incident else '' }}">
+    </div>
+    <div class="form-field">
+      <label>Người báo cáo</label>
+      <input type="text" name="reported_by" value="{{ incident.reported_by if incident else '' }}">
+    </div>
+    <div class="form-field full">
+      <label>Tiêu đề *</label>
+      <input type="text" name="title" required value="{{ incident.title if incident else '' }}">
+    </div>
+    <div class="form-field">
+      <label>Mức độ</label>
+      <select name="severity">
+        <option value="">-- Chọn --</option>
+        {% for s in severity_options %}
+        <option value="{{ s }}" {% if incident and incident.severity == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-field">
+      <label>Trạng thái xử lý</label>
+      <select name="status">
+        {% for s in status_options %}
+        <option value="{{ s }}" {% if incident and incident.status == s %}selected{% elif not incident and s == 'Mới ghi nhận' %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-field full">
+      <label>Mô tả</label>
+      <textarea name="description">{{ incident.description if incident else '' }}</textarea>
+    </div>
+    <div class="form-field full">
+      <label>Nguyên nhân</label>
+      <textarea name="cause">{{ incident.cause if incident else '' }}</textarea>
+    </div>
+    <div class="form-field full">
+      <label>Biện pháp khắc phục</label>
+      <textarea name="corrective_action">{{ incident.corrective_action if incident else '' }}</textarea>
+    </div>
+  </div>
+
+  <h3 style="margin-top:16px">Ảnh hiện trường (nếu có)</h3>
+  <input type="file" name="photos" multiple accept="image/*,.pdf">
+  {% if incident and incident.id %}
+  <p class="muted">Ảnh cũ vẫn được giữ lại — chỉ cần chọn file mới nếu muốn thêm.</p>
+  {% endif %}
+
+  <div class="actions-row">
+    <button class="btn" type="submit">Lưu</button>
+    <a class="btn secondary" href="{% if incident %}/incidents/{{ incident.id }}{% else %}/ships/{{ ship.id }}{% endif %}">Hủy</a>
+  </div>
+</form>
+{% endblock %}

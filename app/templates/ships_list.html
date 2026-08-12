@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Danh sách tàu{% endblock %}
+{% block content %}
+<h1>Danh sách tàu ({{ ships|length }})</h1>
+
+<form class="filter-form" method="get" action="/">
+  <input type="text" name="q" placeholder="Tìm theo tên tàu, số IMO..." value="{{ q }}">
+  <select name="ship_type">
+    <option value="">-- Tất cả loại tàu --</option>
+    {% for t in existing_types %}
+    <option value="{{ t }}" {% if t == ship_type %}selected{% endif %}>{{ t }}</option>
+    {% endfor %}
+  </select>
+  <button class="btn secondary" type="submit">Lọc</button>
+  {% if q or ship_type %}<a class="btn secondary" href="/">Xóa lọc</a>{% endif %}
+</form>
+
+<div class="card">
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Tên tàu</th>
+        <th>Loại tàu</th>
+        <th>Số IMO</th>
+        <th>Năm đóng</th>
+        <th>Tình trạng đăng kiểm</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ship in ships %}
+      <tr onclick="window.location='/ships/{{ ship.id }}'" style="cursor:pointer">
+        <td><a href="/ships/{{ ship.id }}">{{ ship.name }}</a></td>
+        <td>{{ ship.ship_type or "-" }}</td>
+        <td>{{ ship.imo_number or "-" }}</td>
+        <td>{{ ship.build_year or "-" }}</td>
+        <td>
+          {% if ship.registry_status %}
+            <span class="badge {% if 'hết hạn' in ship.registry_status.lower() and 'sắp' not in ship.registry_status.lower() %}danger{% elif 'sắp' in ship.registry_status.lower() %}warn{% else %}ok{% endif %}">
+              {{ ship.registry_status }}
+            </span>
+          {% else %}-{% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="empty-state">Chưa có tàu nào. Bấm "+ Thêm tàu" ở trên để bắt đầu.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

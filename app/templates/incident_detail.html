@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ incident.title }}{% endblock %}
+{% block content %}
+<p><a href="/ships/{{ ship.id }}">&larr; {{ ship.name }}</a></p>
+<h1>{{ incident.title }}</h1>
+
+<div class="card">
+  <table>
+    <tr><th>Ngày xảy ra</th><td>{{ incident.incident_date }}</td>
+        <th>Người báo cáo</th><td>{{ incident.reported_by or "-" }}</td></tr>
+    <tr><th>Mức độ</th><td>
+        {% if incident.severity %}<span class="badge {% if incident.severity == 'Nghiêm trọng' %}danger{% elif incident.severity == 'Trung bình' %}warn{% else %}ok{% endif %}">{{ incident.severity }}</span>{% else %}-{% endif %}
+      </td>
+      <th>Trạng thái</th><td>{{ incident.status }}</td></tr>
+    {% if incident.description %}<tr><th>Mô tả</th><td colspan="3">{{ incident.description }}</td></tr>{% endif %}
+    {% if incident.cause %}<tr><th>Nguyên nhân</th><td colspan="3">{{ incident.cause }}</td></tr>{% endif %}
+    {% if incident.corrective_action %}<tr><th>Biện pháp khắc phục</th><td colspan="3">{{ incident.corrective_action }}</td></tr>{% endif %}
+  </table>
+  <div class="actions-row">
+    <a class="btn secondary" href="/incidents/{{ incident.id }}/edit">Sửa</a>
+    <form method="post" action="/incidents/{{ incident.id }}/delete" onsubmit="return confirm('Xóa sự cố này? Không thể hoàn tác.');">
+      <button class="btn danger" type="submit">Xóa</button>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Ảnh hiện trường ({{ attachments|length }})</h2>
+  {% if attachments %}
+  <ul class="attachment-list">
+    {% for a in attachments %}
+    <li><a href="/{{ a.file_path }}" target="_blank">{{ a.file_name }}</a></li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty-state">Chưa có ảnh đính kèm.</p>
+  {% endif %}
+</div>
+{% endblock %}

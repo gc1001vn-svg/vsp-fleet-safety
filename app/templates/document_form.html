@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Thêm tài liệu{% endblock %}
+{% block content %}
+<p><a href="/documents">&larr; Danh sách tài liệu</a></p>
+<h1>Thêm tài liệu</h1>
+
+<form class="card" method="post" action="/documents/new" enctype="multipart/form-data">
+  <div class="form-grid">
+    <div class="form-field full">
+      <label>Tiêu đề *</label>
+      <input type="text" name="title" required>
+    </div>
+    <div class="form-field">
+      <label>Gắn với tàu</label>
+      <select name="ship_id">
+        <option value="">-- Tài liệu chung toàn Xí nghiệp --</option>
+        {% for s in ships %}
+        <option value="{{ s.id }}" {% if preselected_ship_id and preselected_ship_id|string == s.id|string %}selected{% endif %}>{{ s.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-field">
+      <label>Loại văn bản</label>
+      <input type="text" name="doc_type" list="doc-types">
+      <datalist id="doc-types">
+        {% for t in doc_type_suggestions %}<option value="{{ t }}">{% endfor %}
+      </datalist>
+    </div>
+    <div class="form-field">
+      <label>Số hiệu văn bản</label>
+      <input type="text" name="doc_number">
+    </div>
+    <div class="form-field">
+      <label>Ngày ban hành</label>
+      <input type="date" name="issue_date">
+    </div>
+    <div class="form-field">
+      <label>Cơ quan ban hành</label>
+      <input type="text" name="issuing_org">
+    </div>
+    <div class="form-field full">
+      <label>Ghi chú</label>
+      <textarea name="notes"></textarea>
+    </div>
+    <div class="form-field full">
+      <label>File đính kèm</label>
+      <input type="file" name="file">
+    </div>
+  </div>
+  <div class="actions-row">
+    <button class="btn" type="submit">Lưu</button>
+    <a class="btn secondary" href="/documents">Hủy</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Thêm kiểm tra - {{ ship.name }}{% endblock %}
+{% block content %}
+<p><a href="/ships/{{ ship.id }}">&larr; {{ ship.name }}</a></p>
+<h1>Thêm lần kiểm tra an toàn — {{ ship.name }}</h1>
+
+<form class="card" method="post" action="/ships/{{ ship.id }}/inspections/new" enctype="multipart/form-data">
+  <div class="form-grid">
+    <div class="form-field">
+      <label>Ngày kiểm tra *</label>
+      <input type="date" name="inspection_date" required>
+    </div>
+    <div class="form-field">
+      <label>Người kiểm tra</label>
+      <input type="text" name="inspector_name">
+    </div>
+    <div class="form-field">
+      <label>Loại kiểm tra</label>
+      <input type="text" name="inspection_type" list="insp-types">
+      <datalist id="insp-types">
+        {% for t in inspection_type_suggestions %}<option value="{{ t }}">{% endfor %}
+      </datalist>
+    </div>
+    <div class="form-field">
+      <label>Kết quả chung</label>
+      <select name="result">
+        <option value="">-- Chọn --</option>
+        {% for r in inspection_result_options %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="form-field full">
+      <label>Mô tả / Tóm tắt</label>
+      <textarea name="summary"></textarea>
+    </div>
+  </div>
+
+  <h3>Hạng mục kiểm tra</h3>
+  <div class="table-wrap">
+  <table class="findings-table" id="findings-table">
+    <thead><tr><th>Hạng mục</th><th style="width:160px">Kết quả</th><th>Ghi chú</th><th></th></tr></thead>
+    <tbody>
+      <tr>
+        <td><input type="text" name="item_name" placeholder="VD: Thiết bị cứu sinh"></td>
+        <td>
+          <select name="item_result">
+            <option value="">-- Chọn --</option>
+            {% for r in finding_result_options %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
+          </select>
+        </td>
+        <td><input type="text" name="item_note"></td>
+        <td><button type="button" class="btn secondary" onclick="removeRow(this)">Xóa</button></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  <button type="button" class="btn secondary" onclick="addRow()">+ Thêm hạng mục</button>
+
+  <h3 style="margin-top:20px">Ảnh minh chứng</h3>
+  <input type="file" name="photos" multiple accept="image/*,.pdf">
+
+  <div class="actions-row">
+    <button class="btn" type="submit">Lưu kiểm tra</button>
+    <a class="btn secondary" href="/ships/{{ ship.id }}">Hủy</a>
+  </div>
+</form>
+
+<script>
+function addRow() {
+  const tbody = document.querySelector('#findings-table tbody');
+  const row = tbody.rows[0].cloneNode(true);
+  row.querySelectorAll('input').forEach(i => i.value = '');
+  row.querySelectorAll('select').forEach(s => s.value = '');
+  tbody.appendChild(row);
+}
+function removeRow(btn) {
+  const tbody = document.querySelector('#findings-table tbody');
+  if (tbody.rows.length > 1) {
+    btn.closest('tr').remove();
+  }
+}
+</script>
+{% endblock %}
