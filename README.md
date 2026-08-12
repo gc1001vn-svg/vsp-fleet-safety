@@ -65,10 +65,33 @@ trên máy/server chạy ứng dụng.
   cậy) — nếu triển khai trên server nhiều người truy cập, cân nhắc thêm
   xác thực trước khi dùng dữ liệu thật.
 
+## checklist/ — Kiểm tra an toàn tàu (Giai đoạn 2, công cụ độc lập)
+
+`checklist/index.html` là một ứng dụng web PWA **độc lập, 1 file duy nhất**,
+không cần server/backend — mở trực tiếp trong trình duyệt hoặc cài như app
+trên điện thoại (Add to Home Screen). Dùng khi đi kiểm tra thực địa trên tàu.
+
+- 211 mục checklist tổng hợp từ 12 nguồn (nội bộ VSP, PSC, ISM/ISPS...), chia
+  3 tab theo đúng quy trình thực tế: **Hồ sơ** → **Thực địa** (nóc cabin →
+  buồng lái → khu nhà ở → mũi tàu → boong chính → nhà bếp → buồng máy) →
+  **Tổng quan**.
+- Đánh dấu Đạt/Không đạt/N/A từng mục, ghi chú, chụp/đính kèm ảnh minh chứng.
+- Lập **Biên bản kiểm tra an toàn tàu**, nạp tự động các mục "Không đạt",
+  xuất file **.docx thật** (tự sinh, không cần thư viện ngoài) hoặc in trực
+  tiếp.
+- Dữ liệu lưu trong `localStorage` của trình duyệt (không có backend) — phù
+  hợp dùng ngay tại hiện trường; sau này Giai đoạn 3 sẽ đồng bộ kết quả vào
+  kho dữ liệu chính (`app/`) để không phải nhập tay 2 lần.
+- Cùng phong cách/kiến trúc với công cụ "Kiểm soát ATSKMT nhà thầu" đã có
+  của XN VTB&CTL.
+
+Muốn dùng ngay: mở file `checklist/index.html` bằng trình duyệt, hoặc host
+tĩnh qua GitHub Pages nếu bật cho repo này.
+
 ## Lộ trình tiếp theo
 
-1. ~~Kho dữ liệu nền~~ (giai đoạn này)
-2. Checklist kiểm tra đa nguồn (nội bộ, cảng vụ, đăng kiểm, SOLAS/MARPOL/ISM/ISPS)
+1. ~~Kho dữ liệu nền~~ (Giai đoạn 1 — `app/`)
+2. ~~Checklist kiểm tra đa nguồn~~ (Giai đoạn 2 — `checklist/`, xem trên)
 3. Đồng bộ kết quả kiểm tra vào kho dữ liệu (không nhập tay 2 lần)
 4. AI phân tích & tư vấn dựa trên dữ liệu đã lưu
 5. Báo cáo tổng hợp theo thời gian, xuất Word/PDF/Excel
