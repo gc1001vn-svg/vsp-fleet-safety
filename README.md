@@ -71,10 +71,20 @@ trên máy/server chạy ứng dụng.
 không cần server/backend — mở trực tiếp trong trình duyệt hoặc cài như app
 trên điện thoại (Add to Home Screen). Dùng khi đi kiểm tra thực địa trên tàu.
 
-- 211 mục checklist tổng hợp từ 12 nguồn (nội bộ VSP, PSC, ISM/ISPS...), chia
-  3 tab theo đúng quy trình thực tế: **Hồ sơ** → **Thực địa** (nóc cabin →
-  buồng lái → khu nhà ở → mũi tàu → boong chính → nhà bếp → buồng máy) →
-  **Tổng quan**.
+- **278 mục checklist**, chia 4 tab theo đúng quy trình kiểm tra thực tế:
+  - **Hồ sơ** (79 mục / 11 nhóm) — gộp theo loại: đăng kiểm, cứu sinh, cứu
+    hỏa, môi trường, thông tin liên lạc, nhân sự, SMS/ISM, ISPS, kỹ thuật,
+    quyết định nội bộ.
+  - **Thực địa** (128 mục / 9 nhóm) — đi theo lộ trình: nóc cabin → buồng lái
+    → khu nhà ở → mũi tàu → boong chính (kết cấu / cứu sinh / cứu hỏa) → nhà
+    bếp → buồng máy.
+  - **Tổng quan** (14 mục) — các mục xuyên suốt toàn tàu.
+  - **Mới & PSC** (57 mục / 9 nhóm) — quy định có hiệu lực SAU 2016 mà bộ tài
+    liệu nội bộ (soạn 2014–2016) chưa có: CIC 2026 chằng buộc hàng hóa, BWM,
+    MARPOL Annex VI/lưu huỳnh 0,50%, EEXI/CII/SEEMP III, máy đo khí 5 khí theo
+    MSC.581(110), MLC 2006, an ninh mạng ISM.
+- Mỗi mục trích dẫn điều khoản cụ thể (SOLAS, LSA Code, MARPOL, ISM, ISPS,
+  MSC Circ., TCVN, VSP-000-ATMT…) để đối chiếu khi tranh luận với đoàn kiểm tra.
 - Đánh dấu Đạt/Không đạt/N/A từng mục, ghi chú, chụp/đính kèm ảnh minh chứng.
 - Lập **Biên bản kiểm tra an toàn tàu**, nạp tự động các mục "Không đạt",
   xuất file **.docx thật** (tự sinh, không cần thư viện ngoài) hoặc in trực

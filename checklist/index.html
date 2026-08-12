@@ -641,6 +641,104 @@ const DATA = [
     { id:"q14", t:"Tuân thủ quy chế cấm hút thuốc — đúng khu vực, có biển cấm/cho phép", ref:"PMTVR 09-05 · VSP-000-ATMT-440", d:"" },
   ]},
 ]},
+
+/* ========================= TAB 4 — QUY ĐỊNH MỚI & TRỌNG ĐIỂM PSC ========================= */
+{
+  id: "psc", tab: "MỚI & PSC", full: "Quy định mới sau 2016 & trọng điểm PSC đang kiểm tra",
+  groups: [
+  { g: "0. Vì sao có tab này", items: [
+    { id:"ref-psc", refOnly:true, t:"LƯU Ý — Các mục ở tab này KHÔNG có trong bộ tài liệu nội bộ hiện hành", ref:"Rà soát 8/2026",
+      d:"Bộ checklist nội bộ của Xí nghiệp (НОРМ-09-05-GE-01, VTB-07-02-05B, Survey Checklist VTB…) được soạn giai đoạn 2014–2016. Toàn bộ quy định dưới đây có hiệu lực SAU thời điểm đó, nên không nằm trong tài liệu nội bộ — nhưng cảng vụ/đăng kiểm/PSC hiện nay kiểm tra rất kỹ.\n\nĐây chính là nhóm dễ bị bắt lỗi nhất vì tàu quen làm theo checklist cũ.\n\nSố liệu Tokyo MOU 2025: 35.546 lượt kiểm tra, 1.255 tàu bị lưu giữ (tỷ lệ 3,53%), 90.168 khiếm khuyết. Bốn nhóm lỗi lớn nhất: an toàn cháy (18.020), cứu sinh (11.818), điều kiện làm việc–sinh hoạt (9.108), an toàn hàng hải (8.936) — chiếm 53% tổng số." } ]},
+
+  { g: "A. CIC 2026 — Chằng buộc hàng hóa (01/9–30/11/2026) ⚠ SẮP DIỄN RA", items: [
+    { id:"ref-cic", refOnly:true, t:"BỐI CẢNH — Chiến dịch kiểm tra tập trung của Tokyo MOU & Paris MOU", ref:"Tokyo MOU / Paris MOU CIC 2026",
+      d:"Từ 01/9 đến 30/11/2026, mọi đợt kiểm tra PSC thông thường sẽ kèm thêm bộ câu hỏi 10 mục về chằng buộc hàng hóa. 7/10 câu có thể là căn cứ LƯU GIỮ TÀU (câu 1, 6, 10a/10b chỉ là khiếm khuyết không lưu giữ).\n\nChiến dịch tiếp theo dự kiến 2027: Vào không gian kín (enclosed space entry) — chuẩn bị trước từ bây giờ." },
+    { id:"p-a1", t:"Sổ tay chằng buộc hàng hóa (Cargo Securing Manual) có trên tàu, được Chính quyền hàng hải PHÊ DUYỆT", ref:"CIC 2026 · SOLAS VI/5.6 · VII/5", d:"Kiểm tra: đúng phiên bản hiện hành cho chính tàu này (không phải bản của tàu khác cùng loại), có dấu phê duyệt của cơ quan đăng kiểm/chính quyền treo cờ." },
+    { id:"p-a2", t:"CSM phản ánh ĐÚNG loại hàng thực tế đang chở và bố trí chằng buộc thực tế trên tàu", ref:"CIC 2026", d:"⚠ Điểm PSC hay bắt: CSM cũ chỉ mô tả loại hàng ngày xưa, trong khi tàu nay chở loại khác / dùng cách chằng buộc khác. Phải cập nhật CSM cho khớp thực tế." },
+    { id:"p-a3", t:"Đủ số lượng thiết bị chằng buộc được phê duyệt trên tàu (cả loại di động và cố định)", ref:"CIC 2026", d:"Đối chiếu số lượng thực tế với danh mục trong CSM." },
+    { id:"p-a4", t:"Tình trạng vật lý thiết bị chằng buộc — không nứt, biến dạng, ăn mòn quá mức, mòn ren", ref:"CIC 2026", d:"Kiểm tra tăng đơ, xích, dây cáp, ma ní, chốt gù (twistlock), thanh chằng, mắt chằng cố định trên boong/vách." },
+    { id:"p-a5", t:"Thiết bị chằng buộc được SỬ DỤNG ĐÚNG CÁCH theo CSM (so sánh thực tế với sơ đồ)", ref:"CIC 2026", d:"⚠ PSCO sẽ đối chiếu trực tiếp: sơ đồ xếp hàng ↔ cách xếp thực tế ↔ phương án chằng buộc ↔ sổ tay đã duyệt. Ba thứ phải khớp nhau." },
+    { id:"p-a6", t:"Hồ sơ kiểm tra & bảo dưỡng thiết bị chằng buộc — có, đầy đủ và CẬP NHẬT", ref:"CIC 2026", d:"Sổ ghi kiểm tra định kỳ, thay thế thiết bị hỏng, có ngày tháng và chữ ký." },
+    { id:"p-a7", t:"Thuyền viên nắm rõ quy trình chằng buộc và quen thuộc nội dung CSM", ref:"CIC 2026", d:"PSCO sẽ phỏng vấn trực tiếp thủy thủ boong. Cần huấn luyện trước, lưu biên bản huấn luyện." },
+    { id:"p-a8", t:"Hiệu lực thực chất của hệ thống ISM đối với công tác chằng buộc", ref:"CIC 2026 · ISM Code", d:"Có quy trình trong SMS, có ghi chép thực hiện, có kiểm tra nội bộ — không chỉ hình thức." },
+  ]},
+
+  { g: "B. Nước dằn — BWM Convention (hiệu lực 09/2017, CIC 2025)", items: [
+    { id:"ref-bwm", refOnly:true, t:"BỐI CẢNH — Trên 70% khiếm khuyết BWM là do ghi chép sổ nhật ký sai", ref:"Paris MOU · CIC 2025",
+      d:"Công ước Quản lý nước dằn (BWM) có hiệu lực 08/9/2017 — sau khi tài liệu nội bộ của XN được soạn. Thống kê: hơn 30% hệ thống xử lý nước dằn (BWMS) TRƯỢT kiểm tra D-2 của PSC dù 95% đã đạt thử nghiệm nghiệm thu ban đầu. Ghi chép sai/thiếu trong Sổ nhật ký nước dằn chiếm trên 70% tổng khiếm khuyết BWM." },
+    { id:"p-b1", t:"GCN Quản lý nước dằn quốc tế (IBWMC) còn hiệu lực", ref:"BWM Convention", d:"" },
+    { id:"p-b2", t:"Kế hoạch quản lý nước dằn (BWMP) được duyệt, đúng cho tàu này, mô tả đúng hệ thống đang lắp", ref:"BWM Reg. B-1", d:"" },
+    { id:"p-b3", t:"Sổ nhật ký nước dằn — ghi chép đầy đủ, đúng mẫu, khớp thực tế ⚠ nguyên nhân >70% khiếm khuyết BWM", ref:"BWM Reg. B-2", d:"Mỗi thao tác bơm/xả/xử lý phải có bản ghi riêng: ngày giờ, vị trí (tọa độ), thể tích, két liên quan, chữ ký sĩ quan phụ trách. Đối chiếu chéo với nhật ký hàng hải và log của BWMS." },
+    { id:"p-b4", t:"Hệ thống xử lý nước dằn (BWMS) hoạt động được, thuyền viên vận hành thành thạo", ref:"BWM Reg. D-2", d:"⚠ PSC yêu cầu vận hành thử tại chỗ. Thiếu quen thuộc hệ thống là khiếm khuyết phổ biến." },
+    { id:"p-b5", t:"Chứng nhận nghiệm thu vận hành BWMS (commissioning testing) — có trên tàu", ref:"BWM.2/Circ.70/Rev.1", d:"Bắt buộc với hệ thống lắp từ 01/6/2022." },
+    { id:"p-b6", t:"Quy trình dự phòng khi BWMS hỏng (contingency measures) — có bằng văn bản", ref:"BWM.2/Circ.62", d:"⚠ Thiếu quy trình dự phòng là khiếm khuyết NGAY CẢ KHI hệ thống đang chạy tốt. Phương án: thay nước dằn theo D-1, xả về trạm tiếp nhận bờ, hoặc giữ nguyên không xả cho tới khi sửa xong." },
+    { id:"p-b7", t:"Kế hoạch quản lý cặn lắng (sediment management) và hồ sơ vệ sinh két dằn", ref:"BWM Reg. B-1", d:"" },
+  ]},
+
+  { g: "C. Khí thải — MARPOL Annex VI (giới hạn lưu huỳnh 0,50% từ 2020)", items: [
+    { id:"p-c1", t:"GCN IAPP và EIAPP còn hiệu lực; hồ sơ kỹ thuật động cơ (Technical File)", ref:"MARPOL VI Reg. 6", d:"" },
+    { id:"p-c2", t:"Phiếu giao nhận nhiên liệu (Bunker Delivery Note - BDN) lưu đủ 3 năm, kèm mẫu dầu niêm phong", ref:"MARPOL VI Reg. 18.6", d:"BDN phải ghi rõ hàm lượng lưu huỳnh; mẫu dầu đại diện lưu ≥12 tháng." },
+    { id:"p-c3", t:"Nhật ký chuyển đổi nhiên liệu (fuel changeover log) khi ra/vào vùng kiểm soát khí thải (ECA)", ref:"MARPOL VI Reg. 14", d:"Ghi thời điểm, vị trí, thể tích từng loại nhiên liệu trong két khi bắt đầu/kết thúc chuyển đổi." },
+    { id:"p-c4", t:"Tuân thủ giới hạn lưu huỳnh 0,50% (0,10% trong ECA) — đối chiếu BDN với thực tế", ref:"MARPOL VI Reg. 14", d:"PSC có thể lấy mẫu dầu tại chỗ để phân tích." },
+    { id:"p-c5", t:"Nhật ký dầu Phần I ghi đủ mọi thao tác nhận/chuyển/xả dầu, có chữ ký", ref:"MARPOL I Reg. 17", d:"" },
+    { id:"p-c6", t:"Kế hoạch thực hiện IMO 2020 (Ship Implementation Plan) nếu áp dụng", ref:"MEPC.1/Circ.878", d:"" },
+    { id:"p-c7", t:"Hệ thống làm sạch khí thải (scrubber) — nếu có: giấy duyệt, hồ sơ giám sát, xử lý nước rửa", ref:"MEPC.259(68)", d:"" },
+  ]},
+
+  { g: "D. Hiệu quả năng lượng — EEXI / CII / SEEMP (từ 01/2023)", items: [
+    { id:"p-d1", t:"GCN Hiệu quả năng lượng quốc tế (IEEC) có ghi giá trị EEXI đạt yêu cầu", ref:"MARPOL VI Reg. 23-25", d:"" },
+    { id:"p-d2", t:"SEEMP Phần I (kế hoạch quản lý hiệu quả năng lượng) có trên tàu", ref:"MARPOL VI Reg. 26", d:"" },
+    { id:"p-d3", t:"SEEMP Phần II (kế hoạch thu thập dữ liệu tiêu thụ nhiên liệu - DCS)", ref:"MARPOL VI Reg. 27", d:"" },
+    { id:"p-d4", t:"SEEMP Phần III (kế hoạch thực hiện CII) — bắt buộc với tàu ≥5.000 GT từ 01/2023", ref:"MARPOL VI Reg. 28", d:"Kèm kế hoạch hành động khắc phục nếu tàu bị xếp hạng D 3 năm liên tiếp hoặc hạng E." },
+    { id:"p-d5", t:"Statement of Compliance (SoC) về báo cáo tiêu thụ nhiên liệu & xếp hạng CII năm trước", ref:"MARPOL VI Reg. 28", d:"⚠ Thiếu SoC là khiếm khuyết PSC ghi nhận thực tế." },
+  ]},
+
+  { g: "E. Thiết bị đo khí & vào không gian kín (MSC.581(110), hiệu lực 12/2025)", items: [
+    { id:"ref-gas", refOnly:true, t:"THAY ĐỔI LỚN — Máy đo khí cũ 4 khí không còn đạt yêu cầu", ref:"IMO Res. MSC.581(110), hiệu lực 03/12/2025",
+      d:"Từ 03/12/2025, máy đo khí xách tay dùng cho vào không gian kín phải đo được TỐI THIỂU 5 loại khí: O₂ (oxy), LEL (khí cháy), CO (cacbon monoxit), CO₂ (cacbon dioxit) và ít nhất 1 khí độc khác (thường là H₂S).\n\n⚠ Máy đo 4 khí kiểu cũ (O₂/LEL/CO/H₂S — thiếu CO₂) KHÔNG còn đáp ứng. Đây là điểm rất dễ bị bắt lỗi vì hầu hết tàu vẫn dùng máy cũ." },
+    { id:"p-e1", t:"Máy đo khí xách tay đo được ≥5 khí: O₂, LEL, CO, CO₂ và ≥1 khí độc khác", ref:"MSC.581(110) · SOLAS XI-1/7", d:"⚠ Kiểm tra kỹ máy hiện có trên tàu — máy 4 khí cũ không còn đạt." },
+    { id:"p-e2", t:"Tối thiểu 2 bộ thiết bị đo khí trên tàu, có đủ phụ tùng dự phòng và phương tiện hiệu chuẩn", ref:"SOLAS XI-1/7", d:"" },
+    { id:"p-e3", t:"Hiệu chuẩn theo hướng dẫn nhà sản xuất, có khí chuẩn (span gas) — bao gồm khí chuẩn cho cảm biến CO₂", ref:"MSC.581(110)", d:"Còn hạn hiệu chuẩn, tem/chứng nhận có trên tàu." },
+    { id:"p-e4", t:"Thử bump test trước mỗi lần sử dụng, có ghi chép", ref:"Thực hành tốt ngành", d:"" },
+    { id:"p-e5", t:"Diễn tập vào không gian kín & cứu nạn — 2 THÁNG/LẦN, có ghi nhật ký", ref:"SOLAS III/19.3.3", d:"⚠ Chu kỳ 2 tháng, không phải hàng quý. Diễn tập phải bao gồm cả tình huống cứu người bị nạn trong không gian kín." },
+    { id:"p-e6", t:"Giấy phép vào không gian kín — mẫu đúng, đủ chữ ký, đo khí trước và trong khi làm việc", ref:"IMO Res. A.1050(27) sửa đổi", d:"" },
+    { id:"p-e7", t:"Thiết bị cứu nạn không gian kín: dây cứu hộ, ròng rọc/tam chân, SCBA, thiết bị liên lạc", ref:"SOLAS III/19", d:"" },
+  ]},
+
+  { g: "F. Điều kiện làm việc & sinh hoạt — MLC 2006 (nhóm lỗi lớn thứ 3)", items: [
+    { id:"ref-mlc", refOnly:true, t:"BỐI CẢNH — 9.108 khiếm khuyết năm 2025, nhóm lớn thứ 3", ref:"Tokyo MOU 2025",
+      d:"Khiếm khuyết MLC tập trung ở Title 4 (bảo vệ sức khỏe, chăm sóc y tế, phúc lợi), sau đó là Title 3 (chỗ ở và thực phẩm).\n\nCác lỗi thực tế đã bị ghi nhận: phòng tắm hư hỏng, chậu rửa nứt, tủ gỉ, vòi sen không hoạt động · KHÔNG CÓ rau quả tươi trên tàu · không trả lương đúng hạn (phát hiện qua phỏng vấn thuyền viên) · ghi chép giờ nghỉ không đầy đủ/mâu thuẫn." },
+    { id:"p-f1", t:"GCN Lao động hàng hải (MLC) & Bản công bố phù hợp DMLC Phần I & II còn hiệu lực, điền đúng", ref:"MLC 2006 Reg. 5.1.3", d:"⚠ DMLC hết hạn hoặc điền sai là lỗi hay gặp." },
+    { id:"p-f2", t:"Hợp đồng lao động thuyền viên (SEA) — có bản gốc cho từng người, đủ nội dung bắt buộc", ref:"MLC Reg. 2.1", d:"⚠ Thiếu SEA là căn cứ lưu giữ tàu." },
+    { id:"p-f3", t:"Ghi chép giờ làm việc/giờ nghỉ — đầy đủ, nhất quán, không mâu thuẫn với nhật ký khác", ref:"MLC Reg. 2.3 · STCW A-VIII/1", d:"⚠ Vi phạm giờ nghỉ có hệ thống là căn cứ LƯU GIỮ TÀU. Đối chiếu chéo với nhật ký boong, sổ trực ca, hồ sơ làm hàng." },
+    { id:"p-f4", t:"Trả lương đúng hạn — bảng lương, phiếu lương, chứng từ chuyển tiền", ref:"MLC Reg. 2.2", d:"⚠ PSC phỏng vấn trực tiếp thuyền viên. Trả chậm là căn cứ lưu giữ." },
+    { id:"p-f5", t:"GCN bảo đảm tài chính về hồi hương và về bồi thường tai nạn — niêm yết trên tàu", ref:"MLC Reg. 2.5 & 4.2", d:"⚠ Thiếu/hết hạn là căn cứ lưu giữ tàu." },
+    { id:"p-f6", t:"Chỗ ở: phòng tắm, chậu rửa, vòi sen, tủ — hoạt động tốt, không nứt vỡ/gỉ sét", ref:"MLC Reg. 3.1", d:"⚠ Lỗi thực tế PSC đã ghi: chậu rửa nứt, tủ gỉ, vòi sen hỏng." },
+    { id:"p-f7", t:"Thực phẩm: đủ số lượng, chất lượng, đa dạng — CÓ RAU QUẢ TƯƠI", ref:"MLC Reg. 3.2", d:"⚠ Lỗi thực tế PSC đã ghi: \"không có rau quả tươi trên tàu\"." },
+    { id:"p-f8", t:"Đầu bếp có chứng chỉ nấu ăn tàu biển (ship's cook certificate)", ref:"MLC Reg. 3.2", d:"" },
+    { id:"p-f9", t:"Quy trình khiếu nại trên tàu (on-board complaint procedure) — niêm yết, thuyền viên biết", ref:"MLC Reg. 5.1.5", d:"" },
+    { id:"p-f10", t:"Nước uống & nước sinh hoạt — xét nghiệm định kỳ, có kết quả lưu", ref:"MLC Reg. 3.2 · WHO guidance", d:"" },
+  ]},
+
+  { g: "G. An ninh mạng — Cyber security trong ISM (từ 01/2021)", items: [
+    { id:"p-g1", t:"Rủi ro an ninh mạng đã được đưa vào hệ thống SMS của tàu", ref:"IMO Res. MSC.428(98)", d:"Bắt buộc từ đợt kiểm tra DOC hàng năm đầu tiên sau 01/01/2021 — sau khi tài liệu nội bộ XN được soạn." },
+    { id:"p-g2", t:"Quy trình kiểm soát USB/thiết bị ngoại vi, cập nhật phần mềm, phân quyền truy cập", ref:"MSC-FAL.1/Circ.3/Rev.2", d:"" },
+    { id:"p-g3", t:"Danh mục hệ thống công nghệ thông tin/vận hành trọng yếu (ECDIS, GMDSS, máy chính, BWMS…)", ref:"MSC-FAL.1/Circ.3/Rev.2", d:"" },
+    { id:"p-g4", t:"Huấn luyện nhận thức an ninh mạng cho thuyền viên, có biên bản", ref:"MSC.428(98)", d:"" },
+    { id:"p-g5", t:"Quy trình ứng phó & khôi phục khi sự cố mạng (mất ECDIS/mất hệ thống điều khiển)", ref:"MSC-FAL.1/Circ.3/Rev.2", d:"" },
+  ]},
+
+  { g: "H. Các quy định khác sau 2016 cần rà", items: [
+    { id:"p-h1", t:"Bảo dưỡng xuồng cứu sinh & thiết bị hạ theo quy định mới — chỉ đơn vị được ủy quyền thực hiện", ref:"SOLAS III/20 (MSC.402(96), hiệu lực 01/01/2020)", d:"Yêu cầu bắt buộc dùng nhà cung cấp dịch vụ được chứng nhận cho kiểm tra/bảo dưỡng/thử tải định kỳ. Hồ sơ phải do người thực hiện ký VÀ đại diện công ty/thuyền trưởng ký." },
+    { id:"p-h2", t:"Biển báo/áp phích xử lý rác theo mẫu mới (5 nhóm rác)", ref:"MEPC.295(71), hiệu lực 01/3/2018", d:"Mẫu áp phích cũ trước 2018 không còn đúng." },
+    { id:"p-h3", t:"Sổ nhật ký rác chia 2 phần (Part I rác thường, Part II hàng hóa rắn HME)", ref:"MEPC.277(70), từ 01/3/2018", d:"" },
+    { id:"p-h4", t:"GCN hệ thống chống hà (AFS Certificate) — nếu áp dụng", ref:"AFS Convention", d:"Bổ sung kiểm soát cybutryne từ 01/01/2023." },
+    { id:"p-h5", t:"Cửa kín nước — quy trình vận hành, chỉ báo trên buồng lái, diễn tập đóng khẩn cấp", ref:"SOLAS II-1 sửa đổi 2020", d:"" },
+    { id:"p-h6", t:"Thang hoa tiêu (pilot ladder) — kiểm tra định kỳ, hồ sơ, bố trí đúng chuẩn", ref:"SOLAS V/23 · IMO Res. A.1045(27) sửa đổi", d:"⚠ PSC và hoa tiêu kiểm tra rất kỹ; thang hỏng có thể bị từ chối dẫn tàu." },
+    { id:"p-h7", t:"Sổ tay hướng dẫn ổn định & máy tính xếp tải đã được phê duyệt lại nếu tàu có hoán cải", ref:"SOLAS II-1/5", d:"" },
+    { id:"p-h8", t:"Danh mục kiểm tra trước khi vào cảng của Cảng vụ Việt Nam (thủ tục điện tử một cửa)", ref:"NĐ 34/2025/NĐ-CP", d:"Khai báo điện tử qua Cổng thông tin một cửa quốc gia; giấy tờ tàu phải khớp với dữ liệu khai báo." },
+  ]},
+]},
 ];
 var LSR_OPTS = [
   ["", "— Gắn nhãn LSR (tùy chọn) —"],
