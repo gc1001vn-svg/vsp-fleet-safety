@@ -71,18 +71,28 @@ trên máy/server chạy ứng dụng.
 không cần server/backend — mở trực tiếp trong trình duyệt hoặc cài như app
 trên điện thoại (Add to Home Screen). Dùng khi đi kiểm tra thực địa trên tàu.
 
-- **365 mục checklist**, chia 5 tab theo đúng quy trình kiểm tra thực tế:
-  - **Hồ sơ** (79 mục / 11 nhóm) — gộp theo loại: đăng kiểm, cứu sinh, cứu
-    hỏa, môi trường, thông tin liên lạc, nhân sự, SMS/ISM, ISPS, kỹ thuật,
-    quyết định nội bộ.
-  - **Thực địa** (128 mục / 9 nhóm) — đi theo lộ trình: nóc cabin → buồng lái
-    → khu nhà ở → mũi tàu → boong chính (kết cấu / cứu sinh / cứu hỏa) → nhà
-    bếp → buồng máy.
-  - **Tổng quan** (14 mục) — các mục xuyên suốt toàn tàu.
-  - **Mới & PSC** (57 mục / 9 nhóm) — quy định có hiệu lực SAU 2016 mà bộ tài
+- **602 mục checklist**, chia 5 tab, xếp theo đúng **Phiếu đi tuyến kiểm tra
+  tàu** của Phòng An toàn & Môi trường (tổng ≈ 7 giờ làm việc):
+  - **Hồ sơ** (147 mục / 14 nhóm) — Bước 0 chuẩn bị tại phòng, Bước 1 họp mở
+    đầu, rồi hồ sơ gộp theo loại: đăng kiểm, cứu sinh, cứu hỏa, môi trường,
+    thông tin liên lạc, nhân sự, SMS/ISM, ISPS, kỹ thuật, quyết định nội bộ,
+    sổ tay – kế hoạch – sơ đồ được duyệt.
+  - **Thực địa** (270 mục / 12 nhóm) — 12 chặng đi tuyến một chiều, mỗi chặng
+    ghi rõ thời lượng và người đi kèm: buồng lái → nóc cabin → khu nhà ở →
+    khu cứu sinh quanh khu nhà ở → trạm cứu hỏa → mũi tàu → boong chính (kết
+    cấu) → boong chính (thiết bị nâng, trạm hàn, kho, boong sau) → bếp →
+    buồng máy → an toàn điện → thử tính năng & báo động.
+  - **Tổng quan** (41 mục / 5 nhóm) — mục xuyên suốt toàn tàu, phỏng vấn
+    thuyền viên, diễn tập bất ngờ, họp kết thúc (kèm bảng phân loại phát hiện
+    4 mức) và công việc sau kiểm tra.
+  - **Mới & PSC** (76 mục / 11 nhóm) — quy định có hiệu lực SAU 2016 mà bộ tài
     liệu nội bộ (soạn 2014–2016) chưa có: CIC 2026 chằng buộc hàng hóa, BWM,
     MARPOL Annex VI/lưu huỳnh 0,50%, EEXI/CII/SEEMP III, máy đo khí 5 khí theo
-    MSC.581(110), MLC 2006, an ninh mạng ISM.
+    MSC.581(110), MLC 2006, an ninh mạng ISM, SOLAS II-1/3-13 thiết bị nâng và
+    tời neo hiệu lực 01/01/2026.
+  - **Ngoài khơi** (68 mục / 9 nhóm) — chuẩn kiểm tra của khách hàng và tổ
+    chức bên ngoài: eCMID (IMCA M149), OVID (OVIQ4), tàu DP, tàu lặn, tàu cẩu
+    và tàu kéo–thả neo, kiểm tra của đăng kiểm/P&I/chủ hàng.
 - Mỗi mục trích dẫn điều khoản cụ thể (SOLAS, LSA Code, MARPOL, ISM, ISPS,
   MSC Circ., TCVN, VSP-000-ATMT…) để đối chiếu khi tranh luận với đoàn kiểm tra.
 - Đánh dấu Đạt/Không đạt/N/A từng mục, ghi chú, chụp/đính kèm ảnh minh chứng.
