@@ -96,9 +96,13 @@ trên điện thoại (Add to Home Screen). Dùng khi đi kiểm tra thực đ�
 - Mỗi mục trích dẫn điều khoản cụ thể (SOLAS, LSA Code, MARPOL, ISM, ISPS,
   MSC Circ., TCVN, VSP-000-ATMT…) để đối chiếu khi tranh luận với đoàn kiểm tra.
 - Đánh dấu Đạt/Không đạt/N/A từng mục, ghi chú, chụp/đính kèm ảnh minh chứng.
-- Lập **Biên bản kiểm tra an toàn tàu**, nạp tự động các mục "Không đạt",
-  xuất file **.docx thật** (tự sinh, không cần thư viện ngoài) hoặc in trực
-  tiếp.
+- Mỗi mục "Không đạt" chọn được **mức độ khắc phục** theo Phiếu đi tuyến:
+  ① dừng ngay · ② trước khi rời bến · ③ có thời hạn (≤30 ngày) · ④ ghi nhận
+  cải tiến.
+- Lập **Biên bản kiểm tra an toàn tàu**, nạp tự động các mục "Không đạt" và
+  **xếp theo mức độ** (dừng ngay lên đầu), in mức độ thành cột song ngữ Việt–Nga
+  kèm **bảng tổng hợp kết quả**; xuất file **.docx thật** (tự sinh, không cần
+  thư viện ngoài) hoặc in trực tiếp.
 - Dữ liệu lưu trong `localStorage` của trình duyệt (không có backend) — phù
   hợp dùng ngay tại hiện trường; sau này Giai đoạn 3 sẽ đồng bộ kết quả vào
   kho dữ liệu chính (`app/`) để không phải nhập tay 2 lần.

@@ -78,6 +78,22 @@ body{
   padding:9px;font-family:inherit;font-size:14px;resize:vertical;min-height:50px;color:var(--ink)}
 .note:focus{outline:2px solid var(--acc)}
 
+/* Ô chọn mức độ khắc phục — hiện ngay dưới mục đánh dấu ✕ */
+.muc{display:block;width:calc(100% - 24px);margin:10px 12px 8px;padding:9px 8px;border-radius:6px;
+  font-family:inherit;font-size:14px;font-weight:600;background:#fff;color:var(--ink);
+  border:1px solid var(--line);-webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237A8A99'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;background-size:10px 6px;padding-right:26px}
+.muc:focus,.vp-muc:focus{outline:2px solid var(--acc)}
+.muc.m-0{border-style:dashed;color:var(--na)}
+.muc.m-1,.vp-muc.m-1{border-color:var(--ng);color:var(--ng);background-color:#FDF0EE}
+.muc.m-2,.vp-muc.m-2{border-color:var(--acc);color:var(--acc);background-color:#FFF4EC}
+.muc.m-3,.vp-muc.m-3{border-color:#B8860B;color:#8A6508;background-color:#FFFBEF}
+.muc.m-4,.vp-muc.m-4{border-color:var(--ok);color:var(--ok);background-color:#EFF7F2}
+.vp-muc{width:100%;border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-family:inherit;
+  font-weight:600;background:#fff;color:var(--ink);margin-bottom:6px}
+.vp-muc.m-0{border-style:dashed;color:var(--na)}
+
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:#fff;border-top:1px solid var(--line);
   padding:10px 12px calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px}
 .bar-in{display:flex;gap:8px;max-width:760px;margin:0 auto;width:100%}
@@ -206,7 +222,7 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
 .note,
 .bb-field input, .bb-field select, .bb-field textarea,
 .doan-row input,
-.vp-row textarea, .vp-two input, .vp-lsr{font-size:16px}
+.vp-row textarea, .vp-two input, .vp-lsr, .vp-muc, .muc{font-size:16px}
 .vp-two input::placeholder{font-size:13px}
 .radio-opt{font-size:16px}
 
@@ -883,7 +899,7 @@ const DATA = [
   ]},
   { g: "Họp kết thúc & lập biên bản — 30 phút", items: [
     { id:"ref-kt", refOnly:true, t:"PHÂN LOẠI PHÁT HIỆN VÀ YÊU CẦU XỬ LÝ", ref:"VSP-000-ATMT-402",
-      d:"① DỪNG NGAY — nguy cơ mất an toàn trực tiếp cho người, tàu hoặc môi trường → dừng công việc hoặc thiết bị ngay tại chỗ, báo cáo Giám đốc XN trong ngày.\n\n② TRƯỚC KHI RỜI BẾN — khiếm khuyết có thể dẫn tới lưu giữ tàu hoặc vi phạm công ước → khắc phục và có bằng chứng trước khi tàu rời bến.\n\n③ CÓ THỜI HẠN — khiếm khuyết cần vật tư, nhân lực hoặc thời gian sửa chữa → khắc phục theo thời hạn thống nhất, tối đa 30 ngày.\n\n④ GHI NHẬN CẢI TIẾN — chưa vi phạm nhưng nên nâng cao → đưa vào kế hoạch bảo dưỡng hoặc huấn luyện kỳ tới.\n\nGhi mức phân loại vào ô ghi chú của từng mục ✕ để tự động đưa vào biên bản." },
+      d:"① DỪNG NGAY — nguy cơ mất an toàn trực tiếp cho người, tàu hoặc môi trường → dừng công việc hoặc thiết bị ngay tại chỗ, báo cáo Giám đốc XN trong ngày.\n\n② TRƯỚC KHI RỜI BẾN — khiếm khuyết có thể dẫn tới lưu giữ tàu hoặc vi phạm công ước → khắc phục và có bằng chứng trước khi tàu rời bến.\n\n③ CÓ THỜI HẠN — khiếm khuyết cần vật tư, nhân lực hoặc thời gian sửa chữa → khắc phục theo thời hạn thống nhất, tối đa 30 ngày.\n\n④ GHI NHẬN CẢI TIẾN — chưa vi phạm nhưng nên nâng cao → đưa vào kế hoạch bảo dưỡng hoặc huấn luyện kỳ tới.\n\nCách dùng: mỗi mục đánh dấu ✕ đều có ô CHỌN MỨC ĐỘ ngay bên dưới. Chọn xong, bấm 'Lập biên bản' → 'Nạp từ checklist': các phát hiện tự xếp theo mức độ (dừng ngay lên đầu) và in thành một cột riêng trong biên bản Word, kèm bảng tổng hợp kết quả ở cuối bảng." },
     { id:"kt1", t:"Trình bày toàn bộ phát hiện với thuyền trưởng và các trưởng bộ phận, theo thứ tự khu vực đã đi, CÓ ẢNH kèm theo; có mặt người phụ trách từng khu vực", ref:"ISO 19011 · IMCA M149", d:"" },
     { id:"kt2", t:"Phân loại rõ từng phát hiện theo 4 mức: dừng ngay / trước khi rời bến / có thời hạn / ghi nhận cải tiến", ref:"VSP-000-ATMT-402", d:"" },
     { id:"kt3", t:"Xác định rõ với từng phát hiện: nguyên nhân gốc, người chịu trách nhiệm, thời hạn, bằng chứng cần nộp", ref:"ISM 9", d:"" },
@@ -1145,6 +1161,35 @@ function lsrSelect(i, val) {
     }).join("") + '</select>';
 }
 
+/* ===== Phân loại mức độ phát hiện (theo Phiếu đi tuyến / VSP-000-ATMT-402) ===== */
+var MUC_OPTS = [
+  ["",  "— Chọn mức độ khắc phục —"],
+  ["1", "① Dừng ngay"],
+  ["2", "② Trước khi rời bến"],
+  ["3", "③ Có thời hạn (tối đa 30 ngày)"],
+  ["4", "④ Ghi nhận cải tiến"]
+];
+var MUC_SHORT = {
+  "1": "① Dừng ngay",
+  "2": "② Trước khi rời bến",
+  "3": "③ Có thời hạn",
+  "4": "④ Ghi nhận cải tiến"
+};
+var MUC_SONG = {
+  "1": "① Dừng ngay\nНемедленно",
+  "2": "② Trước khi rời bến\nДо отхода",
+  "3": "③ Có thời hạn\nВ срок",
+  "4": "④ Ghi nhận cải tiến\nУлучшение"
+};
+function mucSelect(attrName, key, val, cls) {
+  return '<select class="' + cls + ' m-' + (val || "0") + '" ' + attrName + '="' + esc(key) + '" data-f="muc">' +
+    MUC_OPTS.map(function (o) {
+      return '<option value="' + o[0] + '"' + (o[0] === (val || "") ? " selected" : "") + '>' + esc(o[1]) + '</option>';
+    }).join("") + '</select>';
+}
+/* Thứ tự sắp xếp: mức 1 nặng nhất lên trước; chưa phân loại xuống cuối */
+function mucRank(m) { return m === "1" ? 1 : m === "2" ? 2 : m === "3" ? 3 : m === "4" ? 4 : 5; }
+
 /* ===================== TRẠNG THÁI ===================== */
 var KEY = "atskmt-kiemtratau-vtbctl-v1";
 var MAX_PHOTO = 6;            /* số ảnh tối đa cho mỗi mục vi phạm */
@@ -1179,6 +1224,7 @@ function load() {
       bb.viPham.forEach(function (r) {
         if (!r.photos) r.photos = r.photo ? [r.photo] : [];
         delete r.photo;
+        if (r.muc == null) r.muc = "";   /* dữ liệu cũ chưa có mức độ khắc phục */
       });
     }
   } catch (e) {}
@@ -1260,6 +1306,7 @@ function draw() {
       html += "</div>";
       if (isOpen) html += '<div class="det">' + esc(it.d) + "</div>";
       if (st === "ng") {
+        html += mucSelect("data-muc", it.id, (state[it.id] || {}).m, "muc");
         html += '<textarea class="note" data-note="' + it.id +
           '" placeholder="Mô tả điểm chưa phù hợp, thời hạn khắc phục, người chịu trách nhiệm…">' +
           esc(nt) + "</textarea>";
@@ -1276,11 +1323,24 @@ function allViolations() {
   DATA.forEach(function (d) {
     scored(itemsOf(d)).forEach(function (i) {
       if (state[i.id] && state[i.id].s === "ng") {
-        out.push({ tab: d.tab, t: i.t, ref: i.ref, n: (state[i.id].n || "").trim() });
+        out.push({ tab: d.tab, t: i.t, ref: i.ref,
+          n: (state[i.id].n || "").trim(), m: state[i.id].m || "" });
       }
     });
   });
+  /* Nặng trước nhẹ sau, giữ nguyên thứ tự checklist trong cùng một mức */
+  out.forEach(function (x, k) { x._k = k; });
+  out.sort(function (a, c) {
+    var r = mucRank(a.m) - mucRank(c.m);
+    return r !== 0 ? r : a._k - c._k;
+  });
   return out;
+}
+/* Đếm số phát hiện theo từng mức độ, dùng cho phần tổng hợp kết quả */
+function mucCounts() {
+  var c = { "1": 0, "2": 0, "3": 0, "4": 0, "0": 0 };
+  allViolations().forEach(function (v) { c[v.m || "0"]++; });
+  return c;
 }
 
 /* ===================== BÁO CÁO TỔNG HỢP (text) ===================== */
@@ -1306,13 +1366,18 @@ function report() {
     if (bad.length) {
       L.push("Điểm chưa phù hợp:");
       bad.forEach(function (i, k) {
-        L.push("  " + (k + 1) + ". " + i.t + " (" + i.ref + ")");
+        var m = state[i.id].m;
+        L.push("  " + (k + 1) + ". " + (m ? "[" + MUC_SHORT[m] + "] " : "") + i.t + " (" + i.ref + ")");
         if (state[i.id].n) L.push("     → " + state[i.id].n);
       });
     }
     L.push("");
   });
+  var mc = mucCounts();
   L.push("Tổng số điểm chưa phù hợp: " + tot);
+  L.push("Phân loại: dừng ngay " + mc["1"] + " / trước khi rời bến " + mc["2"] +
+    " / có thời hạn " + mc["3"] + " / ghi nhận cải tiến " + mc["4"] +
+    " / chưa phân loại " + mc["0"]);
   L.push("");
   L.push("Người kiểm tra: ...................   Thuyền trưởng: ...................");
   return L.join("\n");
@@ -1338,6 +1403,7 @@ function drawViPham() {
   }
   el.innerHTML = bb.viPham.map(function (r, i) {
     return '<div class="vp-row">' +
+      mucSelect("data-vp", i, r.muc, "vp-muc") +
       lsrSelect(i, r.lsr) +
       '<textarea placeholder="Nội dung vi phạm / điểm chưa phù hợp – tài liệu liên quan" data-vp="' + i + '" data-f="noidung">' + esc(r.noidung) + '</textarea>' +
       '<div class="vp-two">' +
@@ -1458,7 +1524,7 @@ document.getElementById("bb-doan").addEventListener("click", function (e) {
 
 /* --- Bảng vi phạm --- */
 document.getElementById("bb-add-vipham").onclick = function () {
-  bb.viPham.push({ noidung: "", thoihan: "", trachnhiem: "", lsr: "", photos: [] });
+  bb.viPham.push({ noidung: "", thoihan: "", trachnhiem: "", lsr: "", muc: "", photos: [] });
   drawViPham(); save();
 };
 document.getElementById("bb-nap-vipham").onclick = function () {
@@ -1466,9 +1532,19 @@ document.getElementById("bb-nap-vipham").onclick = function () {
   if (!v.length) { alert("Chưa có mục nào đánh dấu ✕ trong checklist."); return; }
   v.forEach(function (x) {
     var text = x.t + " (" + x.ref + ")" + (x.n ? " — " + x.n : "");
-    var already = bb.viPham.some(function (r) { return r.noidung === text; });
-    if (!already) bb.viPham.push({ noidung: text, thoihan: "", trachnhiem: "", lsr: "", photos: [] });
+    var cu = null;
+    bb.viPham.forEach(function (r) { if (r.noidung === text) cu = r; });
+    if (cu) { if (!cu.muc && x.m) cu.muc = x.m; }        /* dòng đã có: chỉ cập nhật mức độ */
+    else bb.viPham.push({ noidung: text, thoihan: "", trachnhiem: "",
+      lsr: "", muc: x.m || "", photos: [] });
   });
+  /* Xếp lại toàn bảng theo mức độ: dừng ngay lên đầu */
+  bb.viPham.forEach(function (r, k) { r._k = k; });
+  bb.viPham.sort(function (a, c) {
+    var d = mucRank(a.muc) - mucRank(c.muc);
+    return d !== 0 ? d : a._k - c._k;
+  });
+  bb.viPham.forEach(function (r) { delete r._k; });
   drawViPham(); save();
 };
 function onVipEdit(e) {
@@ -1476,6 +1552,7 @@ function onVipEdit(e) {
   if (!t) return;
   var i = +t.getAttribute("data-vp"), f = t.getAttribute("data-f");
   bb.viPham[i][f] = t.value;
+  if (f === "muc") t.className = "vp-muc m-" + (t.value || "0");
   save();
 }
 document.getElementById("bb-vipham").addEventListener("input", onVipEdit);
@@ -1581,6 +1658,34 @@ function f002Footer(n) {
     '<td class="ct">XN VTB&amp;CTL</td><td class="rt">Trang ' + n + ' / 3</td></tr></table>';
 }
 
+/* Tổng hợp kết quả kiểm tra — theo mẫu PHIẾU ĐI TUYẾN KIỂM TRA TÀU */
+function tongHopData() {
+  var all = [];
+  DATA.forEach(function (d) { all = all.concat(scored(itemsOf(d))); });
+  var mc = mucCounts();
+  return {
+    tong: all.length,
+    ng: cnt(all, "ng"),
+    na: cnt(all, "na"),
+    ok: cnt(all, "ok"),
+    m1: mc["1"], m2: mc["2"], m3: mc["3"], m4: mc["4"], m0: mc["0"]
+  };
+}
+function tongHopHTML() {
+  var s = tongHopData();
+  return '<table class="g" style="margin-top:6pt">' +
+    '<tr><th colspan="4">TỔNG HỢP KẾT QUẢ / ИТОГИ ПРОВЕРКИ</th></tr>' +
+    '<tr><td>Tổng số hạng mục kiểm tra: <b>' + s.tong + '</b></td>' +
+    '<td>Đạt: <b>' + s.ok + '</b></td>' +
+    '<td>Không đạt: <b>' + s.ng + '</b></td>' +
+    '<td>N/A: <b>' + s.na + '</b></td></tr>' +
+    '<tr><td>① Dừng ngay: <b>' + s.m1 + '</b></td>' +
+    '<td>② Trước khi rời bến: <b>' + s.m2 + '</b></td>' +
+    '<td>③ Có thời hạn: <b>' + s.m3 + '</b></td>' +
+    '<td>④ Ghi nhận cải tiến: <b>' + s.m4 + '</b></td></tr>' +
+    '</table>';
+}
+
 function buildDocHTML(withPhotos) {
   var doanRows = bb.doan.filter(function (p) { return (p.ten || "").trim() || (p.chuc || "").trim(); });
   var vpRows   = bb.viPham.filter(function (r) { return (r.noidung || "").trim(); });
@@ -1658,12 +1763,14 @@ function buildDocHTML(withPhotos) {
   h += '<p>+ОБЗиОС СП «Вьетсовпетро». Адрес: 105 ул. Лелой, район Тхангни, г.Вунгтау.</p>';
 
   h += '<table class="g" style="margin-top:8pt"><tr>' +
-       '<th style="width:7%">№</th>' +
-       '<th style="width:53%">Các vi phạm / điểm chưa phù hợp cần khắc phục – Tài liệu liên quan<br>' +
+       '<th style="width:6%">№</th>' +
+       '<th style="width:44%">Các vi phạm / điểm chưa phù hợp cần khắc phục – Tài liệu liên quan<br>' +
        'Нарушения/ несоответствия - соответствующие документы</th>' +
-       '<th style="width:20%">Thời hạn hoàn thành<br>Срок исполнения</th>' +
-       '<th style="width:20%">Trách nhiệm thực hiện<br>Ответственный за выполнение</th></tr>' +
-       '<tr><td class="c">(1)</td><td class="c">(2)</td><td class="c">(3)</td><td class="c">(4)</td></tr>';
+       '<th style="width:15%">Mức độ<br>Уровень</th>' +
+       '<th style="width:17%">Thời hạn hoàn thành<br>Срок исполнения</th>' +
+       '<th style="width:18%">Trách nhiệm thực hiện<br>Ответственный за выполнение</th></tr>' +
+       '<tr><td class="c">(1)</td><td class="c">(2)</td><td class="c">(3)</td>' +
+       '<td class="c">(4)</td><td class="c">(5)</td></tr>';
   var nV = Math.max(vpRows.length, 3);
   for (var b1 = 0; b1 < nV; b1++) {
     var r1 = vpRows[b1];
@@ -1673,10 +1780,15 @@ function buildDocHTML(withPhotos) {
           '<div class="cap">Ảnh bằng chứng (' + r1.photos.length + ')</div></div>'
       : "";
     var nd = r1 ? ((r1.lsr ? "<b>[" + esc(r1.lsr) + "]</b> " : "") + nl(r1.noidung) + photoHtml) : (b1 === 0 && !vpRows.length ? "Không phát hiện / Не обнаружено" : "");
-    h += '<tr><td class="c h">' + (b1 + 1) + '</td><td>' + nd + '</td><td class="c">' +
-         esc(r1 ? r1.thoihan : "") + '</td><td class="c">' + esc(r1 ? r1.trachnhiem : "") + '</td></tr>';
+    var mv = r1 && r1.muc ? nl(MUC_SONG[r1.muc]) : "";
+    h += '<tr><td class="c h">' + (b1 + 1) + '</td><td>' + nd + '</td>' +
+         '<td class="c' + (r1 && (r1.muc === "1" || r1.muc === "2") ? " h" : "") + '">' + mv + '</td>' +
+         '<td class="c">' + esc(r1 ? r1.thoihan : "") + '</td>' +
+         '<td class="c">' + esc(r1 ? r1.trachnhiem : "") + '</td></tr>';
   }
   h += '</table>';
+
+  h += tongHopHTML();
 
   h += '<table class="g"><tr><th style="width:7%">№</th>' +
        '<th style="width:46%">Các khuyến cáo (nếu có)<br>Рекомендации (при наличии)</th>' +
@@ -1842,11 +1954,17 @@ function _zipStore(files) {
   var parts = [], cdir = [], off = 0;
   function w16(v) { return [v & 255, (v >>> 8) & 255]; }
   function w32(v) { return [v & 255, (v >>> 8) & 255, (v >>> 16) & 255, (v >>> 24) & 255]; }
+  /* Dấu thời gian kiểu DOS. Ngày 0 / tháng 0 là giá trị KHÔNG hợp lệ và bị một số
+     trình đọc (LibreOffice, vài ứng dụng xem file trên điện thoại) từ chối mở. */
+  var now = new Date();
+  var dosY = Math.min(127, Math.max(0, now.getFullYear() - 1980));
+  var dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
+  var dosDate = (dosY << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
   files.forEach(function (f) {
     var nm = _enc(f.name), d = f.data, crc = _crc32(d);
-    parts.push(new Uint8Array([].concat([80, 75, 3, 4], w16(20), w16(0), w16(0), w16(0), w16(0),
+    parts.push(new Uint8Array([].concat([80, 75, 3, 4], w16(20), w16(0), w16(0), w16(dosTime), w16(dosDate),
       w32(crc), w32(d.length), w32(d.length), w16(nm.length), w16(0))), nm, d);
-    cdir.push(new Uint8Array([].concat([80, 75, 1, 2], w16(20), w16(20), w16(0), w16(0), w16(0), w16(0),
+    cdir.push(new Uint8Array([].concat([80, 75, 1, 2], w16(20), w16(20), w16(0), w16(0), w16(dosTime), w16(dosDate),
       w32(crc), w32(d.length), w32(d.length), w16(nm.length), w16(0), w16(0), w16(0), w16(0),
       w32(0), w32(off))), nm);
     off += 30 + nm.length + d.length;
@@ -1919,6 +2037,7 @@ function _dxBorders(mode) {
 function dxCell(w, content, o) {
   o = o || {};
   return '<w:tc><w:tcPr><w:tcW w:w="' + w + '" w:type="dxa"/>' +
+    (o.span ? '<w:gridSpan w:val="' + o.span + '"/>' : "") +
     (o.vAlign ? '<w:vAlign w:val="' + o.vAlign + '"/>' : "") + "</w:tcPr>" +
     (content || "<w:p/>") + "</w:tc>";
 }
@@ -2052,18 +2171,20 @@ function buildDocxBytes(withPhotos) {
   b += dxPara(dxRun("+\u041e\u0411\u0417\u0438\u041e\u0421 \u0421\u041f \u00ab\u0412\u044c\u0435\u0442\u0441\u043e\u0432\u043f\u0435\u0442\u0440\u043e\u00bb. \u0410\u0434\u0440\u0435\u0441: 105 \u0443\u043b. \u041b\u0435\u043b\u043e\u0439, \u0440\u0430\u0439\u043e\u043d \u0422\u0445\u0430\u043d\u0433\u043d\u0438, \u0433.\u0412\u0443\u043d\u0433\u0442\u0430\u0443."),
     { after: 80 });
 
-  var G2 = [714, 5409, 2041, 2041];
+  var G2 = [652, 4200, 1400, 1976, 1977];
   var rowsV = dxRow(
     dxCell(G2[0], dxPara(dxRun("\u2116", { b: true, sz: 24 }), { align: "center", after: 0 }), { vAlign: "center" }) +
     dxCell(G2[1], dxPara(dxRun("C\u00e1c vi ph\u1ea1m / \u0111i\u1ec3m ch\u01b0a ph\u00f9 h\u1ee3p c\u1ea7n kh\u1eafc ph\u1ee5c \u2013 T\u00e0i li\u1ec7u li\u00ean quan",
       { b: true, sz: 24 }) + dxBr() + dxRun("\u041d\u0430\u0440\u0443\u0448\u0435\u043d\u0438\u044f/ \u043d\u0435\u0441\u043e\u043e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0438\u044f - \u0441\u043e\u043e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044e\u0449\u0438\u0435 \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b",
       { b: true, sz: 24 }), { align: "center", after: 0 }), { vAlign: "center" }) +
-    dxCell(G2[2], dxPara(dxRun("Th\u1eddi h\u1ea1n ho\u00e0n th\u00e0nh", { b: true, sz: 24 }) + dxBr() +
+    dxCell(G2[2], dxPara(dxRun("M\u1ee9c \u0111\u1ed9", { b: true, sz: 24 }) + dxBr() +
+      dxRun("\u0423\u0440\u043e\u0432\u0435\u043d\u044c", { b: true, sz: 24 }), { align: "center", after: 0 }), { vAlign: "center" }) +
+    dxCell(G2[3], dxPara(dxRun("Th\u1eddi h\u1ea1n ho\u00e0n th\u00e0nh", { b: true, sz: 24 }) + dxBr() +
       dxRun("\u0421\u0440\u043e\u043a \u0438\u0441\u043f\u043e\u043b\u043d\u0435\u043d\u0438\u044f", { b: true, sz: 24 }), { align: "center", after: 0 }), { vAlign: "center" }) +
-    dxCell(G2[3], dxPara(dxRun("Tr\u00e1ch nhi\u1ec7m th\u1ef1c hi\u1ec7n", { b: true, sz: 24 }) + dxBr() +
+    dxCell(G2[4], dxPara(dxRun("Tr\u00e1ch nhi\u1ec7m th\u1ef1c hi\u1ec7n", { b: true, sz: 24 }) + dxBr() +
       dxRun("\u041e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0435\u043d\u043d\u044b\u0439 \u0437\u0430 \u0432\u044b\u043f\u043e\u043b\u043d\u0435\u043d\u0438\u0435", { b: true, sz: 24 }), { align: "center", after: 0 }), { vAlign: "center" })
   );
-  rowsV += dxRow(["(1)", "(2)", "(3)", "(4)"].map(function (t, i) {
+  rowsV += dxRow(["(1)", "(2)", "(3)", "(4)", "(5)"].map(function (t, i) {
     return dxCell(G2[i], dxPara(dxRun(t, { sz: 24 }), { align: "center", after: 0 }));
   }).join(""));
   var nV = Math.max(vpRows.length, 3);
@@ -2090,13 +2211,36 @@ function buildDocxBytes(withPhotos) {
     } else if (b2 === 0 && !vpRows.length) {
       cellC = dxPara(dxRun("Kh\u00f4ng ph\u00e1t hi\u1ec7n / \u041d\u0435 \u043e\u0431\u043d\u0430\u0440\u0443\u0436\u0435\u043d\u043e", { sz: 24 }), { after: 0 });
     }
+    var cellM = "";
+    if (r1 && r1.muc) {
+      var mLines = MUC_SONG[r1.muc].split("\n"), nang = (r1.muc === "1" || r1.muc === "2");
+      mLines.forEach(function (ln) {
+        cellM += dxPara(dxRun(ln, { sz: 24, b: nang }), { align: "center", after: 0 });
+      });
+    }
     rowsV += dxRow(
       dxCell(G2[0], dxPara(dxRun(String(b2 + 1), { sz: 24 }), { align: "center", after: 0 })) +
       dxCell(G2[1], cellC) +
-      dxCell(G2[2], dxPara(dxRun(r1 ? (r1.thoihan || "") : "", { sz: 24 }), { align: "center", after: 0 })) +
-      dxCell(G2[3], dxPara(dxRun(r1 ? (r1.trachnhiem || "") : "", { sz: 24 }), { align: "center", after: 0 })), 560);
+      dxCell(G2[2], cellM) +
+      dxCell(G2[3], dxPara(dxRun(r1 ? (r1.thoihan || "") : "", { sz: 24 }), { align: "center", after: 0 })) +
+      dxCell(G2[4], dxPara(dxRun(r1 ? (r1.trachnhiem || "") : "", { sz: 24 }), { align: "center", after: 0 })), 560);
   }
   b += dxTable(G2, rowsV) + dxPara("", { after: 80 });
+
+  /* Bảng tổng hợp kết quả theo Phiếu đi tuyến */
+  var S = tongHopData();
+  var G4 = [2551, 2551, 2551, 2552];
+  function cellTH(txt, val, bold) {
+    return dxCell(2551, dxPara(dxRun(txt + ": ", { sz: 24 }) +
+      dxRun(String(val), { sz: 24, b: true }), { after: 0 }));
+  }
+  var rowsT = dxRow(dxCell(10205, dxPara(dxRun("TỔNG HỢP KẾT QUẢ / ИТОГИ ПРОВЕРКИ",
+    { b: true, sz: 24 }), { align: "center", after: 0 }), { span: 4 }));
+  rowsT += dxRow(cellTH("Tổng số hạng mục", S.tong) + cellTH("Đạt", S.ok) +
+    cellTH("Không đạt", S.ng) + cellTH("N/A", S.na));
+  rowsT += dxRow(cellTH("① Dừng ngay", S.m1) + cellTH("② Trước khi rời bến", S.m2) +
+    cellTH("③ Có thời hạn", S.m3) + cellTH("④ Ghi nhận cải tiến", S.m4));
+  b += dxTable(G4, rowsT) + dxPara("", { after: 80 });
 
   var G3 = [714, 4694, 4797];
   var rowsK = dxRow(
@@ -2323,6 +2467,15 @@ document.getElementById("list").addEventListener("input", function (e) {
   var i = t.getAttribute("data-note");
   if (!state[i]) state[i] = {};
   state[i].n = t.value;
+  save();
+});
+document.getElementById("list").addEventListener("change", function (e) {
+  var t = e.target.closest("[data-muc]");
+  if (!t) return;
+  var i = t.getAttribute("data-muc");
+  if (!state[i]) state[i] = {};
+  state[i].m = t.value;
+  t.className = "muc m-" + (t.value || "0");
   save();
 });
 
