@@ -71,7 +71,7 @@ trên máy/server chạy ứng dụng.
 không cần server/backend — mở trực tiếp trong trình duyệt hoặc cài như app
 trên điện thoại (Add to Home Screen). Dùng khi đi kiểm tra thực địa trên tàu.
 
-- **278 mục checklist**, chia 4 tab theo đúng quy trình kiểm tra thực tế:
+- **365 mục checklist**, chia 5 tab theo đúng quy trình kiểm tra thực tế:
   - **Hồ sơ** (79 mục / 11 nhóm) — gộp theo loại: đăng kiểm, cứu sinh, cứu
     hỏa, môi trường, thông tin liên lạc, nhân sự, SMS/ISM, ISPS, kỹ thuật,
     quyết định nội bộ.
