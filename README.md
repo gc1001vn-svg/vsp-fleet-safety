@@ -71,13 +71,13 @@ trên máy/server chạy ứng dụng.
 không cần server/backend — mở trực tiếp trong trình duyệt hoặc cài như app
 trên điện thoại (Add to Home Screen). Dùng khi đi kiểm tra thực địa trên tàu.
 
-- **592 mục checklist**, chia 5 tab, xếp theo đúng **Phiếu đi tuyến kiểm tra
+- **582 mục checklist**, chia 5 tab, xếp theo đúng **Phiếu đi tuyến kiểm tra
   tàu** của Phòng An toàn & Môi trường (tổng ≈ 7 giờ làm việc):
   - **Hồ sơ** (147 mục / 14 nhóm) — Bước 0 chuẩn bị tại phòng, Bước 1 họp mở
     đầu, rồi hồ sơ gộp theo loại: đăng kiểm, cứu sinh, cứu hỏa, môi trường,
     thông tin liên lạc, nhân sự, SMS/ISM, ISPS, kỹ thuật, quyết định nội bộ,
     sổ tay – kế hoạch – sơ đồ được duyệt.
-  - **Thực địa** (260 mục / 12 nhóm) — 12 chặng đi tuyến một chiều, mỗi chặng
+  - **Thực địa** (250 mục / 12 nhóm) — 12 chặng đi tuyến một chiều, mỗi chặng
     ghi rõ thời lượng và người đi kèm: buồng lái → nóc cabin → khu nhà ở →
     khu cứu sinh quanh khu nhà ở → trạm cứu hỏa → mũi tàu → boong chính (kết
     cấu) → boong chính (thiết bị nâng, trạm hàn, kho, boong sau) → bếp →
