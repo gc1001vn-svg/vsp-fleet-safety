@@ -117,6 +117,35 @@ trên điện thoại (Add to Home Screen). Dùng khi đi kiểm tra thực đ�
 Muốn dùng ngay: mở file `checklist/index.html` bằng trình duyệt, hoặc host
 tĩnh qua GitHub Pages nếu bật cho repo này.
 
+## phantich/ — Phân tích hồ sơ kiểm tra tàu (công cụ độc lập)
+
+`phantich/index.html` cũng là ứng dụng web **1 file duy nhất, chạy offline**,
+dùng ở phòng chứ không phải trên tàu: gom kết quả các kỳ đã kiểm tra của từng
+tàu rồi phân tích.
+
+- **Đưa tài liệu vào** bằng 3 cách:
+  - **Nạp thẳng file Word (.docx)** — tự giải nén và bóc bảng phát hiện, đọc
+    đúng cột theo loại biên bản đã chọn.
+  - **Dán bảng từ Word** — copy bảng trong biên bản rồi dán, máy tự tách dòng.
+  - **Nhập từng dòng** bằng tay.
+  - Biên bản bản scan (ảnh, PDF scan) máy không đọc chữ được — dùng cách dán
+    hoặc nhập tay.
+- Mỗi phát hiện gắn: mảng (boong, máy, điện, cứu sinh, cứu hỏa, hồ sơ, bếp,
+  thiết bị nâng, môi trường, an ninh, con người), mức độ (NC / vi phạm / ghi
+  nhận / khuyến nghị), căn cứ, thời hạn, trách nhiệm, trạng thái khắc phục.
+- **Phân tích tự động**: tỷ lệ khắc phục, số quá hạn, phân bố theo mảng và
+  theo loại kiểm tra, và quan trọng nhất là **lỗi lặp lại qua nhiều kỳ** —
+  so khớp nội dung sau khi bỏ dấu tiếng Việt, đây là dấu hiệu hệ thống quản
+  lý chưa xử lý tận gốc.
+- **Kết luận điểm mạnh – điểm yếu** được sinh tự động từ số liệu.
+- **Xuất file Word thật** theo 4 mẫu:
+  - Báo cáo phân tích điểm mạnh – điểm yếu (tổng hợp nhiều kỳ)
+  - Biên bản kiểm tra cấp IV — mẫu VSP-000-ATMT-452/F-001, đủ 7 mục I–VII
+  - Danh mục sự ghi nhận và sự không phù hợp — mẫu VTB07-02-04A, chia theo
+    bộ phận, cột phân loại NC/Obs
+  - Báo cáo kết quả kiểm tra tình trạng tàu — công văn gửi Giám đốc Xí nghiệp
+- Dữ liệu lưu trong `localStorage`, không gửi đi đâu.
+
 ## Lộ trình tiếp theo
 
 1. ~~Kho dữ liệu nền~~ (Giai đoạn 1 — `app/`)
