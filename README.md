@@ -95,9 +95,10 @@ trên điện thoại (Add to Home Screen). Dùng khi đi kiểm tra thực đ�
     và tàu kéo–thả neo, kiểm tra của đăng kiểm/P&I/chủ hàng.
 - Mỗi mục trích dẫn điều khoản cụ thể (SOLAS, LSA Code, MARPOL, ISM, ISPS,
   MSC Circ., TCVN, VSP-000-ATMT…) để đối chiếu khi tranh luận với đoàn kiểm tra.
-- Tiêu đề mục ngắn gọn (chỉ nêu đối tượng cần kiểm tra); bấm vào mục để mở
-  **hướng dẫn kiểm tra thực tế**: các bước làm, chỗ cần nhìn, con số cần đọc
-  và lỗi hay gặp.
+- Tiêu đề mục ngắn gọn (chỉ nêu đối tượng cần kiểm tra, trung bình 41 ký tự);
+  bấm vào mục để mở **hướng dẫn kiểm tra thực tế**: các bước làm, chỗ cần soi
+  đèn, con số cần đọc trên thiết bị, cách đối chiếu chéo giữa các hồ sơ và lỗi
+  hay gặp. **Cả 578 mục đều đã có hướng dẫn** (trung bình ~300 ký tự/mục).
 - Đánh dấu Đạt/Không đạt/N/A từng mục, ghi chú, chụp/đính kèm ảnh minh chứng.
 - Mỗi mục "Không đạt" chọn được **mức độ khắc phục** theo Phiếu đi tuyến:
   ① dừng ngay · ② trước khi rời bến · ③ có thời hạn (≤30 ngày) · ④ ghi nhận
