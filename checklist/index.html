@@ -345,11 +345,11 @@ const DATA = [
 
 /* ========================= TAB 1 — HỒ SƠ ========================= */
 {
-  id: "hs", tab: "HỒ SƠ", full: "Kiểm tra hồ sơ, giấy tờ thủ tục — trước khi đi thực địa",
+  id: "hs", tab: "HỒ SƠ", full: "Ngồi tại cabin kiểm tra hồ sơ, giấy tờ thủ tục — trước khi đi tuyến",
   groups: [
   { g: "0. Quy trình áp dụng", items: [
     { id:"ref-qt", refOnly:true, t:"QUY TRÌNH — Trình tự kiểm tra an toàn tàu tại XN VTB&CTL", ref:"Thực tế áp dụng tại đơn vị",
-      d:"Sắp xếp theo PHIẾU ĐI TUYẾN KIỂM TRA TÀU của Phòng An toàn & Môi trường — tổng thời gian khoảng 7 giờ làm việc.\n\nBước 0 (30 phút, tại phòng) → Bước 1 họp mở đầu (15 phút) → Bước 2 hồ sơ tại phòng thuyền trưởng (60–90 phút): xem nhóm 0A, 0B và các nhóm A–K của tab HỒ SƠ.\n\nBước 3–12 đi thực địa (tab THỰC ĐỊA), theo đúng thứ tự nhóm 1→12: buồng lái → nóc cabin → khu nhà ở → khu cứu sinh quanh khu nhà ở → trạm cứu hỏa → mũi tàu → boong chính (kết cấu) → boong chính (thiết bị nâng, hàn, kho, boong sau) → bếp → buồng máy → an toàn điện → thử tính năng & báo động.\n\nBước 12–14 (tab TỔNG QUAN): các mục xuyên suốt toàn tàu, phỏng vấn thuyền viên, diễn tập bất ngờ, họp kết thúc và công việc sau kiểm tra.\n\nNguyên tắc đi tuyến: đi MỘT CHIỀU từ trên xuống dưới, từ mũi về lái, không quay lại khu vực đã kiểm tra. Yêu cầu thuyền viên thao tác thiết bị, đoàn chỉ quan sát. Mọi khiếm khuyết chụp ảnh có ngày giờ ngay tại chỗ.\n\nBấm \"Lập biên bản\" để tổng hợp các mục ✕ thành báo cáo, thống nhất biện pháp khắc phục với thuyền trưởng, hai bên ký tên.\n\nLưu ý: số lượng thiết bị cứu sinh/cứu hỏa bắt buộc (phao tròn, áo phao, pháo hiệu, bình chữa cháy...) phụ thuộc kích thước/loại từng tàu — đối chiếu Cargo Ship Safety Equipment Certificate (GCN An toàn trang thiết bị) của chính tàu đó, checklist này chỉ nêu quy tắc chung." },
+      d:"Sắp xếp theo PHIẾU ĐI TUYẾN KIỂM TRA TÀU của Phòng An toàn & Môi trường — tổng thời gian khoảng 7 giờ làm việc.\n\nBước 0 chuẩn bị tại phòng (30 phút) → Bước 1 họp mở đầu (15 phút) → Bước 2 NGỒI TẠI CABIN kiểm tra hồ sơ, giấy tờ (60–90 phút): xem nhóm 0A, 0B và các nhóm A–K của tab HỒ SƠ.\n\nBước 3–12 đi thực địa (tab THỰC ĐỊA), theo đúng thứ tự nhóm 1→12. Lộ trình bám bố trí thật của tàu: ngồi kiểm tra hồ sơ ở cabin xong thì kiểm tra luôn buồng lái, lên nóc cabin, rồi ĐI XUỐNG DẦN qua khu nhà ở và khu cứu sinh quanh khu nhà ở, ra boong đi thẳng RA MŨI, sau đó quay về GIỮA TÀU nơi đặt CẨU và thiết bị nâng, tiếp tục về boong sau, rồi vào bếp và cuối cùng xuống buồng máy.\n\nBước 12–14 (tab TỔNG QUAN): các mục xuyên suốt toàn tàu, phỏng vấn thuyền viên, diễn tập bất ngờ, họp kết thúc và công việc sau kiểm tra.\n\nNguyên tắc đi tuyến: đi MỘT CHIỀU từ trên xuống dưới, từ mũi về lái, không quay lại khu vực đã kiểm tra. Yêu cầu thuyền viên thao tác thiết bị, đoàn chỉ quan sát. Mọi khiếm khuyết chụp ảnh có ngày giờ ngay tại chỗ.\n\nBấm \"Lập biên bản\" để tổng hợp các mục ✕ thành báo cáo, thống nhất biện pháp khắc phục với thuyền trưởng, hai bên ký tên.\n\nLưu ý: số lượng thiết bị cứu sinh/cứu hỏa bắt buộc (phao tròn, áo phao, pháo hiệu, bình chữa cháy...) phụ thuộc kích thước/loại từng tàu — đối chiếu Cargo Ship Safety Equipment Certificate (GCN An toàn trang thiết bị) của chính tàu đó, checklist này chỉ nêu quy tắc chung." },
   ]},
 
   { g: "0A. Chuẩn bị trước khi xuống tàu — tại phòng, 30 phút", items: [
@@ -373,7 +373,7 @@ const DATA = [
 
   { g: "0B. Họp mở đầu với thuyền trưởng — 15 phút", items: [
     { id:"ref-op", refOnly:true, t:"NỘI DUNG HỌP MỞ ĐẦU", ref:"Phiếu đi tuyến · Bước 1",
-      d:"Nêu rõ phạm vi, trình tự đi tuyến và yêu cầu bố trí người đi kèm từng khu vực: đại phó cho boong, máy trưởng cho buồng máy, máy hai cho thử báo động, cấp dưỡng cho bếp. Yêu cầu chuẩn bị sẵn TOÀN BỘ hồ sơ ra bàn trước khi bắt đầu." },
+      d:"Nêu rõ phạm vi, trình tự đi tuyến và yêu cầu bố trí người đi kèm từng khu vực: đại phó cho boong, máy trưởng cho buồng máy, máy hai cho thử báo động, cấp dưỡng cho bếp. Yêu cầu chuẩn bị sẵn TOÀN BỘ hồ sơ ra bàn TẠI CABIN trước khi bắt đầu, để ngồi một chỗ làm hết phần giấy tờ rồi mới đi tuyến." },
     { id:"op1", t:"Ghi nhận nhân sự trên tàu", ref:"SOLAS III/8",
       d:"Ghi: tổng số người trên tàu tại thời điểm kiểm tra, ai vắng mặt và lý do, thuyền viên mới lên tàu trong 2 TUẦN QUA.\nCon số này dùng để đối chiếu suốt buổi: số áo phao, sức chứa xuồng bè, Muster list, định biên an toàn tối thiểu.\nNgười mới lên trong 2 tuần là đối tượng ưu tiên phỏng vấn ở bước diễn tập." },
     { id:"op2", t:"Hỏi thuyền trưởng về tồn tại tàu tự biết", ref:"ISM 5.1",
@@ -687,7 +687,7 @@ const DATA = [
 
 /* ========================= TAB 2 — THỰC ĐỊA ========================= */
 {
-  id: "td", tab: "THỰC ĐỊA", full: "Kiểm tra thực địa — đi theo đúng lộ trình thực tế",
+  id: "td", tab: "THỰC ĐỊA", full: "Đi tuyến — cabin xuống dần, ra mũi, về giữa tàu nơi đặt cẩu, rồi xuống máy",
   groups: [
   { g: "1. Buồng lái & buồng vô tuyến · 30 phút · sỹ quan trực ca", items: [
     { id:"t2-1", t:"Thiết bị định vị & vô tuyến — bảo trì tốt", ref:"SMC audit · ISM 10",
@@ -983,7 +983,7 @@ const DATA = [
       d:"TRƯỚC khi mở nắp lỗ người chui hoặc vào kho mũi kín:\n1) Làm giấy phép vào không gian kín nếu quy trình yêu cầu\n2) ĐO KHÍ bằng máy đã hiệu chuẩn: oxy 20,9%, không có khí cháy, không có khí độc\n3) Thông gió trước và trong khi có người ở trong\n4) Có người trực bên ngoài và thiết bị cứu hộ sẵn sàng\n\nTUYỆT ĐỐI KHÔNG tự ý chui xuống két. Đoàn kiểm tra cũng phải tuân thủ — đây là tai nạn chết người phổ biến nhất trên tàu." },
   ]},
 
-  { g: "7. Boong chính — kết cấu & tính kín nước · 45 phút · đại phó", items: [
+  { g: "7. Boong chính — kết cấu & tính kín nước (đi từ mũi về lái) · 45 phút · đại phó", items: [
     { id:"t5-1", t:"Tôn boong, thượng tầng và lầu trên boong", ref:"Tự tổng hợp · Survey VTB",
       d:"Đi hết mặt boong, soi đèn vào các góc khuất và MẶT DƯỚI của các kết cấu nhô ra.\nGõ búa nhỏ vào vùng nghi ngờ — tiếng đục là tôn mỏng.\nTìm: rỉ mục thành lỗ, vết nứt (nhất là ở góc miệng hầm và chân kết cấu), biến dạng do va đập, sơn bong diện rộng.\nChú ý vùng đọng nước và vùng dưới đường ống hay rò rỉ." },
     { id:"t5-2", t:"Thành quây và nắp miệng hầm hàng", ref:"Tự tổng hợp · LR PSC",
@@ -1022,7 +1022,7 @@ const DATA = [
       d:"• Đủ loại thùng theo phân nhóm rác, mỗi thùng có NHÃN rõ và có NẮP\n• Thùng ngoài trời được CỐ ĐỊNH, không trôi khi tàu lắc\n• Khu tập kết gọn, không rò rỉ nước rác xuống boong\n• Rác nhựa để riêng, không lẫn\n\nĐối chiếu: biên lai giao rác cho bờ có khớp nhật ký rác không (xem chi tiết ở nhóm 5)." },
   ]},
 
-  { g: "8. Boong chính — thiết bị nâng, trạm hàn, kho & boong sau · đại phó", items: [
+  { g: "8. Giữa tàu — cẩu & thiết bị nâng, trạm hàn, kho, boong sau · đại phó", items: [
     { id:"t4-11", t:"Dụng cụ treo buộc hàng (sling, ma ní, xích)", ref:"Tự tổng hợp · PMTVR 09-05 · VSP-000-ATMT-442",
       d:"• ĐÁNH MÃ MÀU theo kỳ kiểm định hiện hành — hỏi kỳ này màu gì, rồi soi xem có món nào màu cũ còn nằm trong khu vực sử dụng\n• Mỗi món có thẻ hoặc dập nổi ghi SWL và số hiệu\n• Cáp: không đứt tao, không bẹp, không rỉ ăn sâu\n• Xích: không giãn dài, không mắt nào biến dạng\n• Ma ní: chốt đúng loại (không thay bằng bulông thường), thân không giãn, ren còn tốt\n• Sling vải: không rách, không cháy, nhãn còn đọc được\n\nDỤNG CỤ KHÔNG ĐẠT PHẢI ĐƯA RA KHỎI KHU VỰC SỬ DỤNG, không để lẫn với đồ tốt — để lẫn là khiếm khuyết dù đã đánh dấu hỏng." },
     { id:"t4-15", t:"Bảng thông tin trên thân cẩu", ref:"ILO 152 · TCVN 4244:2005",
