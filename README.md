@@ -100,6 +100,12 @@ trên điện thoại (Add to Home Screen). Dùng khi đi kiểm tra thực đ�
   bấm vào mục để mở **hướng dẫn kiểm tra thực tế**: các bước làm, chỗ cần soi
   đèn, con số cần đọc trên thiết bị, cách đối chiếu chéo giữa các hồ sơ và lỗi
   hay gặp. **Cả 570 mục đều đã có hướng dẫn** (trung bình ~300 ký tự/mục).
+- **Từ điển chú thích 206 mục** cho người chưa học hàng hải: mọi từ viết tắt và
+  thuật ngữ có trong từ điển đều được **gạch chân chấm** ngay trong tiêu đề, dòng
+  căn cứ và phần hướng dẫn — chạm vào là hiện tên đầy đủ kèm giải thích bằng lời
+  thường (SOLAS, MARPOL, ISM, HRU, EEBD, SWL, LEL, DP, mạn khô, la canh, tu chỉnh
+  hải đồ, cửa kín thời tiết, đại phó, thủy thủ trưởng…). Có nút **📖 Tra từ viết
+  tắt & thuật ngữ** ở đầu danh sách để tra trực tiếp, tìm được cả khi gõ không dấu.
 - Đánh dấu Đạt/Không đạt/N/A từng mục, ghi chú, chụp/đính kèm ảnh minh chứng.
 - Mỗi mục "Không đạt" chọn được **mức độ khắc phục** theo Phiếu đi tuyến:
   ① dừng ngay · ② trước khi rời bến · ③ có thời hạn (≤30 ngày) · ④ ghi nhận
@@ -128,6 +134,11 @@ trên điện thoại (Add to Home Screen). Dùng khi đi kiểm tra thực đ�
 
 Muốn dùng ngay: mở file `checklist/index.html` bằng trình duyệt, hoặc host
 tĩnh qua GitHub Pages nếu bật cho repo này.
+
+**Số phiên bản:** góc trên bên phải app hiện dòng `bản <ngày>/<số>` (biến
+`APP_VER` trong file). Sau khi cập nhật mà số này không đổi thì trình duyệt
+đang giữ bản cũ trong bộ nhớ đệm — tải lại trang, hoặc với app đã cài ra màn
+hình chính thì xóa app rồi thêm lại.
 
 ## phantich/ — Phân tích hồ sơ kiểm tra tàu (công cụ độc lập)
 

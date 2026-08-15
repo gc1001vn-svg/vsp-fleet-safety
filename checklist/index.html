@@ -27,6 +27,7 @@ body{
 .brand{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
 .brand b{font-size:15px;letter-spacing:.02em}
 .brand span{font-size:10px;letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+.brand i{font-style:normal;font-size:10px;opacity:.55;margin-left:auto;white-space:nowrap}
 .tabs{display:flex;margin-top:10px;gap:2px;flex-wrap:wrap}
 .tab{
   flex:1;min-width:76px;min-height:44px;background:transparent;border:0;border-bottom:3px solid transparent;
@@ -41,6 +42,26 @@ body{
 .wrap{max-width:760px;margin:0 auto;padding:14px 12px}
 .stat{display:flex;gap:14px;align-items:baseline;padding:2px 2px 12px;font-size:12px;color:var(--ink2);flex-wrap:wrap}
 .stat b{font-size:22px;color:var(--ink);font-variant-numeric:tabular-nums}
+.gl-open{width:100%;text-align:left;margin-bottom:12px;padding:11px 13px;border-radius:8px;
+  border:1px solid var(--acc);background:#FFF6F4;color:var(--acc);font-family:inherit;
+  font-size:13.5px;font-weight:700;cursor:pointer;line-height:1.35}
+.gl-open span{display:block;margin-top:3px;font-size:11.5px;font-weight:500;color:var(--ink2)}
+b.gl{font-weight:inherit;border-bottom:1px dotted var(--acc);cursor:help;
+  -webkit-tap-highlight-color:rgba(224,90,0,.18)}
+.det b.gl{color:var(--ink)}
+.gl-q{width:100%;border:1px solid var(--line);border-radius:7px;padding:11px 12px;
+  font-family:inherit;font-size:14px;margin-bottom:10px;color:var(--ink);background:var(--paper)}
+.gl-q:focus{outline:2px solid var(--acc)}
+.gl-list{max-height:58vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.gl-cat{margin:14px 0 7px;font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--acc);display:flex;gap:8px;align-items:baseline}
+.gl-cat:first-child{margin-top:2px}
+.gl-cat span{font-size:10px;font-weight:600;color:var(--ink2);letter-spacing:.04em;text-transform:none}
+.gl-item{border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:7px;
+  padding:9px 11px;margin-bottom:7px;background:#fff}
+.gl-k{font-size:14.5px;font-weight:800;color:var(--ink);line-height:1.3}
+.gl-f{font-size:12px;font-style:italic;color:var(--acc);margin-top:2px;line-height:1.35}
+.gl-v{font-size:13px;line-height:1.55;color:var(--ink2);margin-top:5px}
 
 .grp{margin:18px 0 8px;display:flex;align-items:center;gap:9px}
 .grp span{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2)}
@@ -226,13 +247,13 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
 .note,
 .bb-field input, .bb-field select, .bb-field textarea,
 .doan-row input,
-.vp-row textarea, .vp-two input, .vp-lsr, .vp-muc, .vp-sel, .muc{font-size:16px}
+.vp-row textarea, .vp-two input, .vp-lsr, .vp-muc, .vp-sel, .muc, .gl-q{font-size:16px}
 .vp-two input::placeholder{font-size:13px}
 .radio-opt{font-size:16px}
 
 @media print{
   @page{size:A4 portrait;margin:12mm 14mm 10mm 16mm}
-  .top,.bar,.sheet-act,.doan-del,.doan-add,.vp-del,.vp-actions,.doc-switch{display:none!important}
+  .top,.bar,.sheet-act,.doan-del,.doan-add,.vp-del,.vp-actions,.doc-switch,.gl-open{display:none!important}
   body{padding:0;background:#fff}
   body.doc-open>*{display:none!important}
   body.doc-open #sheetDoc{display:block!important;position:static!important;background:none!important;padding:0!important}
@@ -248,7 +269,7 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
 
 <header class="top">
   <div class="top-in">
-    <div class="brand"><b>Checklist kiểm tra tàu</b><span>XN VTB&amp;CTL</span></div>
+    <div class="brand"><b>Checklist kiểm tra tàu</b><span>XN VTB&amp;CTL</span><i id="ver"></i></div>
     <nav class="tabs" id="tabs"></nav>
   </div>
   <div class="rail"><div id="r-ok"></div><div id="r-ng"></div><div id="r-na"></div></div>
@@ -256,6 +277,9 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
 
 <main class="wrap">
   <div class="stat" id="stat"></div>
+  <button class="gl-open" id="btn-gl">📖 Tra từ viết tắt &amp; thuật ngữ
+    <span>Chưa học hàng hải vẫn đi kiểm tra được — chạm vào chữ có gạch chân chấm để xem nghĩa</span>
+  </button>
   <div id="list"></div>
   <p class="save" id="save"></p>
 </main>
@@ -347,6 +371,19 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
       <button id="doc-print">🖨 In / Lưu PDF</button>
       <button id="doc-back">◀ Sửa lại</button>
       <button id="doc-close" class="p">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<!-- TỪ ĐIỂN CHÚ THÍCH -->
+<div class="sheet" id="sheetGl" hidden>
+  <div class="sheet-in">
+    <h3>Từ viết tắt &amp; thuật ngữ</h3>
+    <input id="gl-q" class="gl-q" placeholder="Gõ từ cần tra: SOLAS, phao, HRU, mạn khô…" autocomplete="off">
+    <div id="gl-list" class="gl-list"></div>
+    <div class="sheet-act">
+      <button id="gl-all">Xem toàn bộ</button>
+      <button id="gl-close" class="p">Đóng</button>
     </div>
   </div>
 </div>
@@ -1875,6 +1912,516 @@ function mucSelect(attrName, key, val, cls) {
 /* Thứ tự sắp xếp: mức 1 nặng nhất lên trước; chưa phân loại xuống cuối */
 function mucRank(m) { return m === "1" ? 1 : m === "2" ? 2 : m === "3" ? 3 : m === "4" ? 4 : 5; }
 
+var GL_CATS = [
+  ["tc", "Công ước, tổ chức &amp; chuẩn quốc tế"],
+  ["gcn", "Giấy chứng nhận, hồ sơ &amp; tài liệu tàu"],
+  ["tb", "Thiết bị &amp; hệ thống trên tàu"],
+  ["at", "An toàn lao động &amp; quản lý công việc"],
+  ["vsp", "Nội bộ Vietsovpetro &amp; quy phạm Nga"],
+  ["vn", "Thuật ngữ tiếng Việt chuyên ngành"],
+];
+var GLOSSARY = [
+  { k:"IMO", c:"tc", f:"International Maritime Organization",
+    v:"Tổ chức Hàng hải Quốc tế, cơ quan của Liên Hợp Quốc. Mọi công ước an toàn tàu biển (SOLAS, MARPOL…) đều do IMO ban hành. Khi thấy “Res. A.1050(27)” nghĩa là Nghị quyết số 1050 thông qua tại kỳ họp Đại hội đồng thứ 27." },
+  { k:"SOLAS", c:"tc", f:"Safety of Life at Sea — Công ước quốc tế về an toàn sinh mạng con người trên biển",
+    v:"Bộ luật gốc về an toàn tàu: kết cấu, cứu sinh, cứu hỏa, hàng hải, thông tin liên lạc. Cách đọc trích dẫn: “SOLAS III/20” = Chương III, Quy định 20; “SOLAS II-2/10” = Chương II-2, Quy định 10. Chương II-1 kết cấu – máy – điện, II-2 phòng cháy chữa cháy, III cứu sinh, IV vô tuyến, V an toàn hàng hải, VI chở hàng, IX quản lý an toàn (ISM), XI-2 an ninh (ISPS)." },
+  { k:"MARPOL", c:"tc", f:"Marine Pollution — Công ước quốc tế về ngăn ngừa ô nhiễm do tàu gây ra",
+    v:"Chia thành 6 Phụ lục (Annex): I dầu, II hóa chất lỏng chở xô, III hàng nguy hiểm đóng gói, IV nước thải sinh hoạt, V rác, VI khí thải và lưu huỳnh. “MARPOL Annex I/17” = Phụ lục I, Quy định 17." },
+  { k:"MLC", c:"tc", f:"Maritime Labour Convention 2006 — Công ước Lao động Hàng hải", a:["MLC 2006"],
+    v:"Quy định điều kiện sống và làm việc của thuyền viên: hợp đồng, tiền lương, giờ làm – giờ nghỉ, buồng ở, thức ăn, chăm sóc y tế, hồi hương, khiếu nại. Đây là căn cứ khi kiểm tra phòng ở, bếp, bảng giờ trực." },
+  { k:"STCW", c:"tc", f:"Standards of Training, Certification and Watchkeeping",
+    v:"Công ước về tiêu chuẩn huấn luyện, cấp chứng chỉ và trực ca cho thuyền viên. Dùng để đối chiếu xem người trên tàu có đúng bằng cấp, chứng chỉ còn hạn và có đủ giờ nghỉ hay không." },
+  { k:"ISM", c:"tc", f:"International Safety Management Code — Bộ luật Quản lý an toàn quốc tế", a:["ISM Code"],
+    v:"Bắt buộc công ty phải viết ra một hệ thống quản lý an toàn (SMS) và tàu phải làm đúng theo. Đánh số điều: ISM 5 trách nhiệm thuyền trưởng, ISM 7 quy trình vận hành, ISM 8 sẵn sàng ứng phó sự cố, ISM 9 báo cáo sự không phù hợp, ISM 10 bảo dưỡng, ISM 12 đánh giá nội bộ." },
+  { k:"ISPS", c:"tc", f:"International Ship and Port Facility Security Code — Bộ luật an ninh tàu và bến cảng",
+    v:"Quy định về chống xâm nhập trái phép, khủng bố, cướp biển: kiểm soát người lên tàu, tuần tra, 3 cấp độ an ninh. Ra đời sau sự kiện 11/9/2001." },
+  { k:"LSA Code", c:"tc", f:"Life-Saving Appliances Code — Bộ luật thiết bị cứu sinh", a:["LSA"],
+    v:"Quy định chi tiết phao tròn, áo phao, bè, xuồng cứu sinh phải đạt tiêu chuẩn gì, đánh dấu ra sao, thử thế nào. SOLAS nói “phải có”, LSA Code nói “phải như thế nào”." },
+  { k:"FSS Code", c:"tc", f:"Fire Safety Systems Code — Bộ luật hệ thống an toàn chống cháy",
+    v:"Đi kèm SOLAS Chương II-2, quy định chi tiết kỹ thuật cho hệ thống báo cháy, chữa cháy cố định, bình thở, bơm cứu hỏa." },
+  { k:"BWM", c:"tc", f:"Ballast Water Management Convention — Công ước quản lý nước dằn tàu",
+    v:"Nước dằn (ballast) là nước biển bơm vào két để giữ thăng bằng tàu. Bơm ở vùng biển này rồi xả ở vùng biển khác sẽ mang theo sinh vật lạ, nên công ước bắt phải xử lý nước dằn trước khi xả." },
+  { k:"Load Line", c:"tc", f:"International Convention on Load Lines — Công ước quốc tế về mạn khô", a:["LL 66","LL"],
+    v:"Quy định tàu được chở nặng đến đâu, thể hiện bằng dấu tròn và các vạch sơn trên vỏ tàu. “LL 66” = Công ước Mạn khô 1966." },
+  { k:"Tokyo MOU", c:"tc", f:"Tokyo Memorandum of Understanding", a:["MOU"],
+    v:"Thỏa thuận giữa các nước châu Á – Thái Bình Dương (có Việt Nam) về kiểm tra tàu nước ngoài vào cảng. Là nơi công bố danh sách tàu bị giữ và các chiến dịch kiểm tra tập trung." },
+  { k:"PSC", c:"tc", f:"Port State Control — Kiểm tra của Nhà nước cảng biển",
+    v:"Chính quyền cảng lên tàu kiểm tra giấy tờ và tình trạng thực tế. Nếu phát hiện lỗi nặng họ có quyền GIỮ TÀU (detention) — tàu không được rời cảng cho tới khi khắc phục xong. Đây là rủi ro lớn nhất về mặt thương mại." },
+  { k:"PSCO", c:"tc", f:"Port State Control Officer",
+    v:"Sĩ quan trực tiếp lên tàu kiểm tra PSC." },
+  { k:"CIC", c:"tc", f:"Concentrated Inspection Campaign — Chiến dịch kiểm tra tập trung",
+    v:"Mỗi năm PSC chọn một chủ đề để soi thật kỹ trong khoảng 3 tháng, ngoài phần kiểm tra thường lệ. Năm 2026 chủ đề là chằng buộc hàng hóa." },
+  { k:"APCIS", c:"tc", f:"Asia-Pacific Computerized Information System",
+    v:"Cơ sở dữ liệu tra cứu miễn phí lịch sử kiểm tra PSC của một con tàu trong khu vực châu Á – Thái Bình Dương. Tra trước khi đi kiểm tra để biết tàu từng bị nêu lỗi gì." },
+  { k:"IACS", c:"tc", f:"International Association of Classification Societies", a:["UR"],
+    v:"Hiệp hội các tổ chức đăng kiểm lớn trên thế giới (VR, LR, DNV, ABS, BV…). “IACS UR” = Yêu cầu thống nhất mà mọi đăng kiểm thành viên phải áp dụng giống nhau." },
+  { k:"MSC", c:"tc", f:"Maritime Safety Committee — Ủy ban An toàn Hàng hải của IMO", a:["MSC Circ"],
+    v:"Cơ quan ra các nghị quyết về an toàn. “MSC.581(110)” = Nghị quyết số 581 thông qua tại kỳ họp thứ 110. “MSC Circ.” là thông tư hướng dẫn." },
+  { k:"MEPC", c:"tc", f:"Marine Environment Protection Committee — Ủy ban Bảo vệ Môi trường Biển của IMO",
+    v:"Ra các nghị quyết về môi trường: nước dằn, khí thải, hiệu quả năng lượng." },
+  { k:"IMCA", c:"tc", f:"International Marine Contractors Association",
+    v:"Hiệp hội nhà thầu hàng hải quốc tế — tổ chức đặt ra chuẩn kiểm tra cho tàu dịch vụ dầu khí. Mã tài liệu theo mảng: M = Marine (tàu), D = Diving (lặn), R = Remote systems/ROV, SEL = An toàn – môi trường – pháp lý, HSS = Sức khỏe – an toàn – an ninh. Ví dụ IMCA M149 là mẫu kiểm tra tàu eCMID." },
+  { k:"eCMID", c:"tc", f:"electronic Common Marine Inspection Document", a:["CMID"],
+    v:"Mẫu kiểm tra tàu dùng chung cho ngành dầu khí ngoài khơi (IMCA M149). Kiểm tra một lần, nhiều khách hàng cùng công nhận, đỡ phải kiểm đi kiểm lại." },
+  { k:"OCIMF", c:"tc", f:"Oil Companies International Marine Forum",
+    v:"Diễn đàn hàng hải của các công ty dầu khí quốc tế, đặt ra chuẩn kiểm tra tàu chở dầu và tàu dịch vụ." },
+  { k:"OVID", c:"tc", f:"Offshore Vessel Inspection Database", a:["OVIQ4"],
+    v:"Hệ thống kiểm tra tàu dịch vụ ngoài khơi của OCIMF. “OVIQ4” là bộ câu hỏi kiểm tra phiên bản 4." },
+  { k:"IOGP", c:"tc", f:"International Association of Oil & Gas Producers",
+    v:"Hiệp hội các nhà sản xuất dầu khí quốc tế, ban hành nhiều hướng dẫn an toàn dùng chung trong ngành." },
+  { k:"ILO", c:"tc", f:"International Labour Organization — Tổ chức Lao động Quốc tế",
+    v:"Cơ quan Liên Hợp Quốc về lao động; MLC 2006 là công ước của ILO." },
+  { k:"WHO", c:"tc", f:"World Health Organization — Tổ chức Y tế Thế giới",
+    v:"Liên quan tới Giấy chứng nhận kiểm tra vệ sinh tàu và tủ thuốc trên tàu." },
+  { k:"IHR", c:"tc", f:"International Health Regulations — Điều lệ Y tế Quốc tế",
+    v:"Căn cứ để cấp Giấy chứng nhận miễn/kiểm tra vệ sinh tàu thủy (SSCEC/SSCC), hạn 6 tháng." },
+  { k:"ISO", c:"tc", f:"International Organization for Standardization — Tổ chức Tiêu chuẩn hóa Quốc tế",
+    v:"Ví dụ ISO 9001 quản lý chất lượng, ISO 45001 an toàn sức khỏe nghề nghiệp." },
+  { k:"TCVN", c:"tc", f:"Tiêu chuẩn Việt Nam",
+    v:"Tiêu chuẩn quốc gia; áp dụng tự nguyện trừ khi được viện dẫn bắt buộc." },
+  { k:"QCVN", c:"tc", f:"Quy chuẩn kỹ thuật quốc gia Việt Nam",
+    v:"Khác tiêu chuẩn ở chỗ quy chuẩn là BẮT BUỘC áp dụng." },
+  { k:"BGTVT", c:"tc", f:"Bộ Giao thông Vận tải",
+    v:"Cơ quan ban hành thông tư về đăng kiểm, thuyền viên, an toàn hàng hải trong nước." },
+  { k:"VR", c:"tc", f:"Vietnam Register — Cục Đăng kiểm Việt Nam",
+    v:"Tổ chức đăng kiểm của Việt Nam: kiểm tra và cấp giấy chứng nhận cho tàu mang cờ Việt Nam." },
+  { k:"LR", c:"tc", f:"Lloyd's Register",
+    v:"Tổ chức đăng kiểm của Anh, một trong những tổ chức lâu đời nhất." },
+  { k:"P&I", c:"tc", f:"Protection and Indemnity Club — Hội bảo hiểm trách nhiệm dân sự chủ tàu",
+    v:"Bảo hiểm phần trách nhiệm với người và môi trường (khác bảo hiểm thân tàu). Hội P&I cũng cử người lên kiểm tra tàu." },
+  { k:"CLC", c:"tc", f:"Civil Liability Convention",
+    v:"Công ước về trách nhiệm dân sự đối với thiệt hại do ô nhiễm dầu — căn cứ của giấy chứng nhận bảo hiểm bắt buộc." },
+  { k:"FAL", c:"tc", f:"Facilitation Convention",
+    v:"Công ước tạo thuận lợi trong giao thông hàng hải quốc tế — quy định bộ mẫu khai báo khi tàu vào/rời cảng." },
+  { k:"ICAO", c:"tc", f:"International Civil Aviation Organization", a:["CAP 437"],
+    v:"Tổ chức Hàng không dân dụng quốc tế; “CAP 437” là tiêu chuẩn sàn đỗ trực thăng trên công trình biển." },
+  { k:"IAMSAR", c:"tc", f:"International Aeronautical and Maritime Search and Rescue Manual",
+    v:"Sổ tay tìm kiếm cứu nạn hàng không – hàng hải. Tàu phải có Tập III trên buồng lái." },
+  { k:"GCN", c:"gcn", f:"Giấy chứng nhận",
+    v:"Cách viết tắt dùng trong hồ sơ tàu." },
+  { k:"DOC", c:"gcn", f:"Document of Compliance — Giấy chứng nhận phù hợp",
+    v:"Cấp cho CÔNG TY quản lý tàu theo ISM (không phải cấp cho tàu). Trên tàu phải có BẢN SAO. Hạn 5 năm, xác nhận hằng năm." },
+  { k:"SMC", c:"gcn", f:"Safety Management Certificate — Giấy chứng nhận quản lý an toàn",
+    v:"Cấp cho chính CON TÀU theo ISM, phải là bản gốc trên tàu. Hạn 5 năm, có xác nhận trung gian giữa năm 2 và 3." },
+  { k:"SMS", c:"gcn", f:"Safety Management System — Hệ thống quản lý an toàn",
+    v:"Toàn bộ sổ tay, quy trình, biểu mẫu do công ty ban hành mà tàu phải làm theo. Khi kiểm tra, câu hỏi cốt lõi là: “tàu có làm đúng cái công ty đã viết ra không?”" },
+  { k:"ISSC", c:"gcn", f:"International Ship Security Certificate — Giấy chứng nhận an ninh tàu biển quốc tế",
+    v:"Cấp theo ISPS, hạn 5 năm." },
+  { k:"SSP", c:"gcn", f:"Ship Security Plan — Kế hoạch an ninh tàu",
+    v:"Tài liệu MẬT: chỉ thuyền trưởng và sĩ quan an ninh được đọc. Người kiểm tra KHÔNG được yêu cầu xem chi tiết, chỉ xác nhận có tồn tại và được duyệt." },
+  { k:"SSA", c:"gcn", f:"Ship Security Assessment — Đánh giá an ninh tàu",
+    v:"Bản đánh giá điểm yếu an ninh, làm trước khi viết SSP." },
+  { k:"SSO", c:"gcn", f:"Ship Security Officer — Sĩ quan an ninh tàu",
+    v:"Người trên tàu chịu trách nhiệm thực hiện kế hoạch an ninh, phải có chứng chỉ riêng." },
+  { k:"CSO", c:"gcn", f:"Company Security Officer — Cán bộ an ninh công ty",
+    v:"Người trên bờ phụ trách an ninh cho đội tàu; tàu phải biết số điện thoại liên lạc 24/7." },
+  { k:"DoS", c:"gcn", f:"Declaration of Security — Bản cam kết an ninh",
+    v:"Văn bản ký giữa tàu và cảng (hoặc giữa hai tàu) khi mức an ninh cao hoặc bên kia không thực hiện ISPS." },
+  { k:"CSR", c:"gcn", f:"Continuous Synopsis Record — Bản ghi lịch sử liên tục của tàu",
+    v:"Hồ sơ ghi mọi lần đổi tên, đổi chủ, đổi cờ, đổi công ty quản lý. Phải giữ đủ, không được thiếu số thứ tự." },
+  { k:"IOPP", c:"gcn", f:"International Oil Pollution Prevention Certificate",
+    v:"GCN quốc tế về ngăn ngừa ô nhiễm dầu (MARPOL Annex I). Kèm Bản phụ lục (Supplement) liệt kê thiết bị lọc dầu tàu được lắp — phải khớp với thiết bị thật." },
+  { k:"IAPP", c:"gcn", f:"International Air Pollution Prevention Certificate",
+    v:"GCN ngăn ngừa ô nhiễm không khí (MARPOL Annex VI) — liên quan khí thải, chất làm lạnh, lưu huỳnh trong nhiên liệu." },
+  { k:"EIAPP", c:"gcn", f:"Engine International Air Pollution Prevention Certificate",
+    v:"GCN cấp riêng cho TỪNG ĐỘNG CƠ về mức phát thải NOx, đi kèm Technical File của động cơ đó." },
+  { k:"IEEC", c:"gcn", f:"International Energy Efficiency Certificate",
+    v:"GCN quốc tế về hiệu quả năng lượng của tàu." },
+  { k:"IBWMC", c:"gcn", f:"International Ballast Water Management Certificate",
+    v:"GCN quốc tế về quản lý nước dằn." },
+  { k:"DMLC", c:"gcn", f:"Declaration of Maritime Labour Compliance — Bản công bố phù hợp lao động hàng hải",
+    v:"Đi kèm GCN Lao động hàng hải. Phần I do chính quyền cờ tàu viết (yêu cầu quốc gia), Phần II do công ty viết (biện pháp thực hiện). Thiếu Phần II là lỗi hay gặp." },
+  { k:"SOPEP", c:"gcn", f:"Shipboard Oil Pollution Emergency Plan — Kế hoạch ứng cứu sự cố tràn dầu của tàu",
+    v:"Phải được duyệt, có danh sách liên lạc khẩn cấp CẬP NHẬT, kèm một bộ dụng cụ thấm/hút dầu để đúng chỗ ghi trong kế hoạch." },
+  { k:"SMPEP", c:"gcn", f:"Shipboard Marine Pollution Emergency Plan",
+    v:"Như SOPEP nhưng cho hóa chất lỏng chở xô." },
+  { k:"BWMP", c:"gcn", f:"Ballast Water Management Plan — Kế hoạch quản lý nước dằn",
+    v:"Kèm sổ ghi chép mọi lần bơm, xử lý, xả nước dằn." },
+  { k:"SEEMP", c:"gcn", f:"Ship Energy Efficiency Management Plan — Kế hoạch quản lý hiệu quả năng lượng tàu",
+    v:"Phần I biện pháp tiết kiệm nhiên liệu, Phần II thu thập dữ liệu tiêu thụ, Phần III kế hoạch đạt hạng CII — Phần III bắt buộc từ 01/01/2023." },
+  { k:"EEXI", c:"gcn", f:"Energy Efficiency Existing Ship Index — Chỉ số hiệu quả năng lượng tàu hiện có",
+    v:"Tính một lần cho tàu đang khai thác; nếu không đạt phải giới hạn công suất máy hoặc cải hoán." },
+  { k:"CII", c:"gcn", f:"Carbon Intensity Indicator — Chỉ số cường độ phát thải carbon",
+    v:"Tính hằng năm dựa trên nhiên liệu tiêu thụ và quãng đường; xếp hạng A đến E. Hạng D ba năm liền hoặc hạng E phải lập kế hoạch khắc phục." },
+  { k:"SoC", c:"gcn", f:"Statement of Compliance",
+    v:"Bản xác nhận phù hợp — với CII là văn bản xác nhận tàu đã báo cáo dữ liệu nhiên liệu năm trước." },
+  { k:"IHM", c:"gcn", f:"Inventory of Hazardous Materials — Bản kê vật liệu nguy hại",
+    v:"Danh mục các vật liệu độc hại có trong kết cấu và thiết bị tàu (amiăng, PCB, chì…), kèm GCN. Bắt buộc từ 2020 với tàu chạy tuyến quốc tế." },
+  { k:"AFS", c:"gcn", f:"Anti-Fouling System — Hệ thống chống hà",
+    v:"“Hà” là sinh vật biển bám vào vỏ tàu làm tàu chạy chậm, tốn dầu. Sơn chống hà không được chứa chất cấm (TBT); tàu phải có GCN AFS." },
+  { k:"ODS", c:"gcn", f:"Ozone Depleting Substances — Chất làm suy giảm tầng ozon",
+    v:"Ga lạnh loại cũ (R-22, halon). Nếu tàu còn dùng thì phải có Sổ ghi chép ODS, ghi mọi lần nạp/xả." },
+  { k:"CSM", c:"gcn", f:"Cargo Securing Manual — Sổ tay chằng buộc hàng hóa",
+    v:"Tài liệu ĐƯỢC DUYỆT hướng dẫn buộc giữ hàng trên boong: dùng dây gì, lực bao nhiêu, buộc theo sơ đồ nào. Trọng điểm kiểm tra CIC 2026." },
+  { k:"BDN", c:"gcn", f:"Bunker Delivery Note — Phiếu giao nhận nhiên liệu",
+    v:"Chứng từ mỗi lần nhận dầu, ghi hàm lượng lưu huỳnh. Phải giữ 3 năm, kèm mẫu dầu niêm phong giữ 12 tháng." },
+  { k:"GT", c:"gcn", f:"Gross Tonnage — Dung tích toàn phần",
+    v:"Con số đo “độ lớn” của tàu theo thể tích, KHÔNG phải trọng lượng và không có đơn vị tấn thật. Rất nhiều quy định áp dụng theo ngưỡng GT (ví dụ ≥ 500 GT)." },
+  { k:"NC", c:"gcn", f:"Non-conformity — Sự không phù hợp",
+    v:"Có bằng chứng khách quan cho thấy tàu KHÔNG làm đúng điều mà quy định hoặc hệ thống quản lý an toàn bắt buộc. Nặng hơn là “sự không phù hợp nghiêm trọng” (Major NC) — phải xử lý ngay trước khi tàu chạy." },
+  { k:"Obs", c:"gcn", f:"Observation — Sự ghi nhận", a:["OBS"],
+    v:"Chưa đủ bằng chứng để kết luận là vi phạm, nhưng có dấu hiệu sẽ thành lỗi nếu không xử lý. Ghi lại để lần sau kiểm tra tiếp." },
+  { k:"DPA", c:"gcn", f:"Designated Person Ashore — Người phụ trách trên bờ",
+    v:"Theo ISM, công ty phải cử một người trên bờ có đường dây nói thẳng tới lãnh đạo cao nhất. Bất kỳ thuyền viên nào cũng có quyền gọi trực tiếp cho DPA khi thấy mất an toàn. Số điện thoại phải dán ở nơi ai cũng thấy." },
+  { k:"PMS", c:"gcn", f:"Planned Maintenance System — Hệ thống bảo dưỡng theo kế hoạch",
+    v:"Phần mềm hoặc sổ nhắc việc bảo dưỡng từng thiết bị theo giờ chạy/thời gian. Kiểm tra xem có việc nào quá hạn mà vẫn để “đã hoàn thành” không." },
+  { k:"NP", c:"gcn", f:"Nautical Publication — Ấn phẩm hàng hải", a:["NP133A","NP131","NP234","NP247","NP5011"],
+    v:"Sách hướng dẫn đi biển do cơ quan thủy đạc Anh (Admiralty) phát hành, mỗi loại một mã NP. Ví dụ NP131 mục lục hải đồ, NP133A sổ ghi tu chỉnh hải đồ, NP234 sổ ghi tu chỉnh ấn phẩm, NP247 danh mục hải đăng, NP5011 ký hiệu và chữ viết tắt trên hải đồ." },
+  { k:"ALRS", c:"gcn", f:"Admiralty List of Radio Signals",
+    v:"Bộ sách danh mục tín hiệu vô tuyến: tần số, đài bờ, dịch vụ khí tượng, thủ tục cứu nạn. Gồm nhiều tập, phải còn hiệu lực năm hiện hành." },
+  { k:"T&P", c:"gcn", f:"Temporary and Preliminary Notices — Thông báo tạm thời và sơ bộ",
+    v:"Loại thông báo hàng hải chưa in được lên hải đồ nên phải ghi bằng BÚT CHÌ và giữ danh sách riêng. Người kiểm tra hay quên soát phần này." },
+  { k:"EPIRB", c:"tb", f:"Emergency Position Indicating Radio Beacon — Phao vô tuyến chỉ báo vị trí khẩn cấp",
+    v:"Hộp màu vàng/cam gắn ngoài trời gần buồng lái. Tàu chìm thì nó tự bung, nổi lên và phát tín hiệu cấp cứu kèm tọa độ qua vệ tinh. Kiểm tra: hạn ắc quy, hạn bộ nhả thủy tĩnh, đăng ký đúng tên tàu, lắp nơi nổi tự do được (không bị mái che chặn)." },
+  { k:"SART", c:"tb", f:"Search and Rescue Transponder — Thiết bị phản xạ radar tìm kiếm cứu nạn",
+    v:"Ống nhỏ mang theo khi xuống xuồng; khi radar tàu cứu hộ quét trúng, nó phát lại tín hiệu tạo một dãy chấm trên màn hình chỉ đúng vị trí người bị nạn." },
+  { k:"GMDSS", c:"tb", f:"Global Maritime Distress and Safety System — Hệ thống cấp cứu và an toàn hàng hải toàn cầu", a:["A3"],
+    v:"Bộ thiết bị liên lạc bắt buộc theo vùng biển tàu chạy (A1 gần bờ đến A4 vùng cực). Gồm VHF/MF/HF có DSC, thiết bị vệ tinh, NAVTEX, EPIRB, SART, bộ đàm cầm tay." },
+  { k:"DSC", c:"tb", f:"Digital Selective Calling — Gọi chọn số",
+    v:"Nút cấp cứu (thường có nắp đỏ) trên máy vô tuyến. Bấm giữ là phát đi tín hiệu cấp cứu tự động kèm số nhận dạng tàu và tọa độ." },
+  { k:"VHF", c:"tb", f:"Very High Frequency — Sóng cực ngắn",
+    v:"Máy vô tuyến tầm gần khoảng 25–30 hải lý, dùng liên lạc hằng ngày với tàu khác và cảng. Kênh 16 là kênh trực canh cấp cứu." },
+  { k:"MF/HF", c:"tb", f:"Medium Frequency / High Frequency — Sóng trung / sóng ngắn", a:["MF","HF"],
+    v:"Máy vô tuyến tầm trung và tầm xa, liên lạc được khi ra ngoài vùng phủ VHF." },
+  { k:"NAVTEX", c:"tb", f:"Navigational Telex",
+    v:"Máy tự động thu và in bản tin an toàn hàng hải, cảnh báo và dự báo thời tiết. Kiểm tra xem có giấy in, có bật, có bản tin mới trong ngày không." },
+  { k:"EGC", c:"tb", f:"Enhanced Group Call — Gọi nhóm mở rộng",
+    v:"Nhận bản tin an toàn hàng hải qua vệ tinh cho vùng biển ngoài tầm NAVTEX." },
+  { k:"LRIT", c:"tb", f:"Long Range Identification and Tracking — Nhận dạng và theo dõi tầm xa",
+    v:"Thiết bị tự báo vị trí tàu về chính quyền cờ tàu theo chu kỳ, tàu không tắt được." },
+  { k:"AIS", c:"tb", f:"Automatic Identification System — Hệ thống nhận dạng tự động",
+    v:"Thiết bị tự phát tên tàu, số nhận dạng, tọa độ, hướng đi, tốc độ để tàu khác và trạm bờ nhìn thấy trên màn hình. Kiểm tra: thông tin tĩnh (tên, hô hiệu, kích thước) và thông tin chuyến đi có đúng và cập nhật không." },
+  { k:"MMSI", c:"tb", f:"Maritime Mobile Service Identity — Số nhận dạng dịch vụ di động hàng hải",
+    v:"Dãy 9 chữ số riêng của mỗi tàu, giống như số điện thoại trong thông tin vô tuyến. Số này phải giống nhau trên VHF, AIS, EPIRB và giấy phép đài tàu." },
+  { k:"VDR", c:"tb", f:"Voyage Data Recorder — Thiết bị ghi dữ liệu hành trình", a:["APT"],
+    v:"“Hộp đen” của tàu: ghi lại tọa độ, tốc độ, lệnh lái, ảnh radar và cả tiếng nói trên buồng lái. Phải có chứng nhận thử hằng năm (APT)." },
+  { k:"ECDIS", c:"tb", f:"Electronic Chart Display and Information System — Hệ thống hải đồ điện tử",
+    v:"Màn hình hải đồ được duyệt dùng thay hải đồ giấy. Chỉ hợp lệ khi dùng hải đồ chính thức ENC còn hạn và phần mềm được cập nhật." },
+  { k:"ENC", c:"tb", f:"Electronic Navigational Chart — Hải đồ điện tử chính thức",
+    v:"Hải đồ số do cơ quan thủy đạc nhà nước phát hành (khác bản đồ quét ảnh). Có giấy phép sử dụng và hạn cập nhật hằng tuần." },
+  { k:"GPS", c:"tb", f:"Global Positioning System — Hệ thống định vị toàn cầu",
+    v:"Thiết bị xác định tọa độ tàu bằng vệ tinh; tàu phải có ít nhất hai nguồn định vị độc lập." },
+  { k:"BNWAS", c:"tb", f:"Bridge Navigational Watch Alarm System — Báo động trực ca buồng lái",
+    v:"Thiết bị chống sĩ quan trực ca ngủ gật: sau vài phút không có thao tác nó sẽ kêu, không tắt thì báo lên phòng thuyền trưởng." },
+  { k:"HRU", c:"tb", f:"Hydrostatic Release Unit — Bộ nhả thủy tĩnh",
+    v:"Chốt nhựa giữ bè cứu sinh trên giá. Khi tàu chìm tới khoảng 4 mét, áp lực nước làm nó tự cắt để bè nổi lên và tự bung. HRU có HẠN SỬ DỤNG RIÊNG (thường 2 năm), khác với hạn kiểm định bè — đây là lỗi bị bắt nhiều nhất." },
+  { k:"MOB", c:"tb", f:"Man Overboard — Người rơi xuống nước",
+    v:"Phao tròn MOB là phao có đèn tự sáng và/hoặc bó khói, đặt hai bên cánh gà buồng lái để ném nhanh xuống nước đánh dấu vị trí người rơi." },
+  { k:"SCBA", c:"tb", f:"Self-Contained Breathing Apparatus — Bình thở khí nén độc lập",
+    v:"Bình khí đeo lưng kèm mặt nạ, dùng khi chữa cháy hoặc vào nơi thiếu ôxy. Kiểm tra áp suất bình (thường ≥ 80% mức nạp đầy), hạn thử thủy lực của bình và bình khí dự trữ." },
+  { k:"EEBD", c:"tb", f:"Emergency Escape Breathing Device — Thiết bị thở thoát hiểm khẩn cấp",
+    v:"Mũ trùm cấp khí 10–15 phút, dùng MỘT LẦN, chỉ để CHẠY THOÁT khỏi khu vực có khói. Tuyệt đối không dùng để chữa cháy hay vào không gian kín." },
+  { k:"FFA", c:"tb", f:"Fire Fighting Appliances — Trang thiết bị chữa cháy",
+    v:"Gồm bình xách tay, họng nước, vòi, lăng phun, bộ quần áo chống cháy, hệ thống cố định." },
+  { k:"FiFi", c:"tb", f:"Fire Fighting system — Hệ thống chữa cháy ngoài tàu",
+    v:"Súng phun nước/bọt công suất lớn lắp trên tàu dịch vụ để chữa cháy cho giàn khoan hoặc tàu khác. Phân cấp FiFi 1, 2, 3 theo lưu lượng." },
+  { k:"AFFF", c:"tb", f:"Aqueous Film-Forming Foam — Bọt tạo màng nước",
+    v:"Chất tạo bọt chữa cháy dầu; phủ một lớp màng ngăn hơi dầu bốc lên. Phải lấy mẫu thử chất lượng định kỳ (thường 3 năm/lần)." },
+  { k:"NOVEC", c:"tb", f:"NOVEC 1230 — chất chữa cháy dạng khí",
+    v:"Chất chữa cháy sạch thay thế halon, dùng cho buồng máy và buồng điện; dập cháy mà không hại thiết bị." },
+  { k:"CO2", c:"tb", f:"Carbon dioxide — Khí carbonic",
+    v:"Hệ thống chữa cháy cố định bằng khí CO2 cho buồng máy. Rất nguy hiểm cho người: phải có báo động xả trước, khóa liên động cửa, và cân bình định kỳ để biết còn đủ khí." },
+  { k:"LEL", c:"tb", f:"Lower Explosive Limit — Giới hạn nổ dưới",
+    v:"Nồng độ khí cháy thấp nhất có thể bốc cháy. Máy đo khí hiển thị theo %LEL: 0% là sạch, 100% là đủ nồng độ để nổ. Thường cấm vào khi vượt 10% LEL." },
+  { k:"OWS", c:"tb", f:"Oily Water Separator — Máy phân ly dầu nước",
+    v:"Thiết bị lọc nước lẫn dầu dưới đáy buồng máy trước khi xả ra biển; chỉ được xả khi dưới 15 ppm. Kiểm tra kỹ dấu hiệu lắp “ống ma” (đường ống lén nối tắt qua thiết bị để xả thẳng)." },
+  { k:"ppm", c:"tb", f:"parts per million — phần triệu",
+    v:"Đơn vị đo nồng độ rất nhỏ. 15 ppm dầu trong nước = 15 phần dầu trên một triệu phần nước — ngưỡng tối đa được phép xả." },
+  { k:"BWMS", c:"tb", f:"Ballast Water Management System — Hệ thống xử lý nước dằn",
+    v:"Thiết bị diệt sinh vật trong nước dằn bằng tia cực tím hoặc điện phân. Kiểm tra van đường ống có bị mở tắt (bypass) để né thiết bị không." },
+  { k:"bypass", c:"tb", f:"Đường ống/mạch nối tắt",
+    v:"Đường vòng để dòng chảy đi tắt, không qua thiết bị xử lý. Trên tàu, bypass ở máy phân ly dầu hoặc hệ xử lý nước dằn là dấu hiệu gian lận nghiêm trọng." },
+  { k:"SWL", c:"tb", f:"Safe Working Load — Tải trọng làm việc an toàn", a:["WLL"],
+    v:"Mức nặng tối đa được phép nâng của cẩu, ma ní, cáp, dây cẩu. Phải được đóng chìm hoặc sơn rõ trên thiết bị và khớp với giấy kiểm định." },
+  { k:"LARS", c:"tb", f:"Launch and Recovery System — Hệ thống hạ và thu hồi",
+    v:"Cần và tời chuyên dùng để thả và kéo thiết bị lặn hoặc chuông lặn xuống biển." },
+  { k:"ROV", c:"tb", f:"Remotely Operated Vehicle — Thiết bị lặn điều khiển từ xa",
+    v:"Robot lặn nối cáp với tàu, dùng để quan sát và thao tác dưới nước thay thợ lặn." },
+  { k:"DP", c:"tb", f:"Dynamic Positioning — Định vị động lực",
+    v:"Tàu tự giữ nguyên một vị trí và hướng bằng máy tính điều khiển các chân vịt, không cần thả neo. Phân cấp DP1, DP2, DP3 theo mức dự phòng khi hỏng hóc." },
+  { k:"DPO", c:"tb", f:"Dynamic Positioning Operator — Người vận hành DP",
+    v:"Sĩ quan có chứng chỉ riêng ngồi trực bàn điều khiển DP." },
+  { k:"FMEA", c:"tb", f:"Failure Mode and Effects Analysis — Phân tích dạng hỏng hóc và ảnh hưởng",
+    v:"Tài liệu phân tích: nếu bộ phận nào của hệ DP hỏng thì hậu quả ra sao và tàu có giữ được vị trí không. Phải có thử nghiệm chứng minh FMEA kèm theo." },
+  { k:"ASOG", c:"tb", f:"Activity Specific Operating Guidelines — Hướng dẫn vận hành theo hoạt động",
+    v:"Bảng quy định điều kiện xanh / vàng / đỏ cho từng công việc DP: gió, sóng, số thiết bị còn hoạt động — tới ngưỡng nào thì dừng." },
+  { k:"CAMO", c:"tb", f:"Critical Activity Mode of Operation — Chế độ vận hành khi làm việc trọng yếu",
+    v:"Cấu hình máy móc, điện, chân vịt bắt buộc phải chạy khi làm công việc nguy hiểm trên DP." },
+  { k:"ESP", c:"tb", f:"Enhanced Survey Programme — Chương trình kiểm tra tăng cường",
+    v:"Chế độ kiểm tra kết cấu chặt hơn cho tàu chở hàng rời và tàu dầu." },
+  { k:"OSV", c:"tb", f:"Offshore Support Vessel — Tàu dịch vụ ngoài khơi",
+    v:"Tàu phục vụ giàn khoan: chở hàng, kéo – thả neo, trực cứu hộ, hỗ trợ lặn." },
+  { k:"HLO", c:"tb", f:"Helicopter Landing Officer — Sĩ quan phụ trách sàn đỗ trực thăng",
+    v:"Người chỉ huy khu vực sàn bay khi trực thăng cất/hạ cánh; phải có chứng chỉ." },
+  { k:"TPA", c:"tb", f:"Thermal Protective Aid — Dụng cụ chống mất nhiệt",
+    v:"Túi/áo kín bằng vật liệu phản nhiệt, trùm lên người khi ngồi trong xuồng hoặc bè để chống hạ thân nhiệt." },
+  { k:"NOx", c:"tb", f:"Nitrogen Oxides — Các oxit nitơ",
+    v:"Khí độc sinh ra khi đốt nhiên liệu ở nhiệt độ cao trong động cơ; MARPOL Annex VI giới hạn mức phát thải theo Tier I–III." },
+  { k:"ECA", c:"tb", f:"Emission Control Area — Vùng kiểm soát phát thải",
+    v:"Vùng biển có giới hạn khí thải chặt hơn: lưu huỳnh trong nhiên liệu tối đa 0,10% thay vì 0,50% như vùng thường." },
+  { k:"HME", c:"tb", f:"Harmful to the Marine Environment — Có hại cho môi trường biển",
+    v:"Cách phân loại rác/cặn hàng có hại; loại này cấm xả xuống biển và phải ghi riêng trong Sổ rác." },
+  { k:"PFOS", c:"tb", f:"Perfluorooctane sulfonate",
+    v:"Hóa chất trong bọt chữa cháy đời cũ, khó phân hủy và độc; nay bị hạn chế nên bọt cũ phải kiểm tra và thay." },
+  { k:"ODME", c:"tb", f:"Oil Discharge Monitoring Equipment — Thiết bị giám sát xả dầu",
+    v:"Thiết bị đo và ghi tự động lượng dầu trong nước xả của tàu dầu." },
+  { k:"JSA", c:"at", f:"Job Safety Analysis — Phân tích an toàn công việc",
+    v:"Trước khi làm việc, cả nhóm ngồi lại chia công việc thành từng bước, chỉ ra mối nguy của mỗi bước và biện pháp phòng ngừa, rồi cùng ký. Kiểm tra xem người làm có thật sự tham gia hay chỉ ký cho đủ." },
+  { k:"TRA", c:"at", f:"Task Risk Assessment — Đánh giá rủi ro công việc",
+    v:"Bản đánh giá mức rủi ro của một công việc (khả năng xảy ra × mức nghiêm trọng) và biện pháp giảm rủi ro trước khi bắt tay làm." },
+  { k:"PTW", c:"at", f:"Permit to Work — Giấy phép làm việc",
+    v:"Tờ giấy cho phép làm một công việc nguy hiểm cụ thể trong một khoảng thời gian cụ thể, có người duyệt và người đóng phiếu. Bắt buộc cho làm việc nóng, vào không gian kín, làm việc trên cao, làm việc điện." },
+  { k:"LOTO", c:"at", f:"Lock Out – Tag Out — Khóa và treo thẻ",
+    v:"Trước khi sửa máy phải cắt nguồn (điện, hơi, dầu), khóa công tắc lại bằng khóa cá nhân và treo thẻ ghi tên người đang làm, để không ai đóng nhầm nguồn." },
+  { k:"PPE", c:"at", f:"Personal Protective Equipment — Trang bị bảo hộ cá nhân",
+    v:"Mũ, kính, giày mũi thép, găng tay, nút tai, dây an toàn, áo phao làm việc. Là lớp phòng vệ CUỐI CÙNG, không thay thế được biện pháp kỹ thuật." },
+  { k:"STOP", c:"at", f:"Quyền dừng công việc",
+    v:"Nguyên tắc: bất kỳ ai, kể cả người mới, thấy công việc không an toàn đều được quyền hô dừng mà không bị trách phạt. Kiểm tra bằng cách hỏi thuyền viên: “anh đã từng dừng việc chưa, dừng rồi thì có bị nói gì không?”" },
+  { k:"MoC", c:"at", f:"Management of Change — Quản lý thay đổi",
+    v:"Quy trình bắt buộc phải đánh giá lại rủi ro khi thay đổi thiết bị, quy trình hoặc nhân sự — không được tự ý sửa đổi rồi dùng luôn." },
+  { k:"DROPS", c:"at", f:"Dropped Objects Prevention Scheme — Phòng ngừa vật rơi",
+    v:"Chương trình soát các vật có thể rơi từ trên cao (đèn, ăng ten, bu lông, dụng cụ) và buộc giữ chúng lại. Vật nhỏ rơi từ cao vẫn gây chết người." },
+  { k:"COSHH", c:"at", f:"Control of Substances Hazardous to Health — Kiểm soát chất độc hại cho sức khỏe",
+    v:"Quy tắc quản lý hóa chất: kê danh mục, có phiếu an toàn, cất đúng chỗ, dùng đúng bảo hộ." },
+  { k:"MSDS", c:"at", f:"Material Safety Data Sheet — Phiếu an toàn hóa chất", a:["SDS"],
+    v:"Tờ thông tin đi kèm mỗi loại hóa chất: thành phần, mối nguy, cách xử lý khi đổ/dính người, bảo hộ cần dùng. Phải để ngay tại kho hóa chất, bằng ngôn ngữ thuyền viên đọc được." },
+  { k:"BRM", c:"at", f:"Bridge Resource Management — Quản lý nguồn lực buồng lái",
+    v:"Cách làm việc nhóm trên buồng lái: ai cũng được quyền nói khi thấy sai, không im lặng vì cấp trên." },
+  { k:"PiA", c:"vsp", f:"People in Action — Quan sát hành vi an toàn",
+    v:"Chương trình nội bộ Vietsovpetro: người quan sát ghi lại hành vi an toàn/không an toàn tại hiện trường rồi trao đổi ngay với người lao động. “Thẻ Đỏ” là phiếu ghi hành vi không an toàn." },
+  { k:"HSE", c:"at", f:"Health, Safety and Environment — Sức khỏe, an toàn và môi trường",
+    v:"Tương đương cách gọi ATSKMT trong nước." },
+  { k:"LSR", c:"at", f:"Life Saving Rules — Các quy tắc cứu mạng",
+    v:"Bộ quy tắc vàng của ngành dầu khí, mỗi quy tắc ứng với một loại tai nạn hay gây chết người: vô hiệu hóa thiết bị an toàn, không gian hạn chế, lái xe, cô lập năng lượng, làm việc nóng, vùng nguy hiểm, nâng hạ, giấy phép làm việc, làm việc trên cao." },
+  { k:"VSP", c:"vsp", f:"Vietsovpetro — Liên doanh Việt–Nga Vietsovpetro",
+    v:"Mã tài liệu nội bộ dạng VSP-000-ATMT-xxx là quy trình về an toàn sức khỏe môi trường của Liên doanh." },
+  { k:"ATMT", c:"vsp", f:"An toàn – Môi trường",
+    v:"Cách viết tắt trong mã tài liệu nội bộ, ví dụ VSP-000-ATMT-402." },
+  { k:"ATSKMT", c:"vsp", f:"An toàn – Sức khỏe – Môi trường",
+    v:"Tên gọi đầy đủ của mảng công tác và của Phòng ATSKMT." },
+  { k:"XN VTB&CTL", c:"vsp", f:"Xí nghiệp Vận tải biển và Công tác lặn", a:["VTB&CTL"],
+    v:"Đơn vị quản lý đội tàu của Vietsovpetro." },
+  { k:"PMTVR", c:"vsp", f:"Phần mềm/Quy phạm phân cấp và đóng tàu biển vỏ thép của Đăng kiểm Việt Nam",
+    v:"Ký hiệu viện dẫn quy phạm đăng kiểm dùng trong hồ sơ nội bộ; đi kèm số hiệu phần, ví dụ PMTVR 09-05." },
+  { k:"НОРМ-09-05-GE-01", c:"vsp", f:"Mã tài liệu chuẩn nội bộ theo hệ thống Nga",
+    v:"Bộ danh mục kiểm tra an toàn tàu áp dụng trong Liên doanh; checklist này được tổng hợp theo tài liệu đó." },
+  { k:"PUE", c:"vsp", f:"ПУЭ — Правила устройства электроустановок / Quy phạm lắp đặt thiết bị điện",
+    v:"Quy phạm Nga về lắp đặt thiết bị điện, vẫn được áp dụng trong Vietsovpetro. Yêu cầu điển hình: mọi công tắc, cầu dao phải có ký hiệu rõ vị trí ĐÓNG và MỞ." },
+  { k:"PEEP", c:"vsp", f:"ПЭЭП — Правила эксплуатации электроустановок потребителей / Quy phạm vận hành thiết bị điện",
+    v:"Quy phạm Nga về vận hành an toàn thiết bị điện của hộ tiêu thụ: ai được thao tác, thao tác thế nào, ghi chép ra sao." },
+  { k:"PTEEP", c:"vsp", f:"ПТЭЭП — Правила технической эксплуатации электроустановок потребителей",
+    v:"Quy phạm Nga về vận hành kỹ thuật thiết bị điện: chế độ bảo dưỡng, đo kiểm, hồ sơ thiết bị điện." },
+  { k:"VTB07-02-04A", c:"vsp", f:"Mẫu biên bản nội bộ XN VTB&CTL",
+    v:"“Danh mục sự ghi nhận và sự không phù hợp” — biểu mẫu dùng cho biên bản đánh giá kiểm tra cấp III." },
+  { k:"Kiểm tra cấp III", c:"vsp", f:"Kiểm tra an toàn cấp Xí nghiệp", a:["cấp III","cấp IV"],
+    v:"Cấp kiểm tra do Xí nghiệp tổ chức, kết quả ghi vào biên bản mẫu VTB07-02-04A. Cấp I là tự kiểm tra hằng ngày tại chỗ làm việc, cấp II cấp tổ/đội, cấp IV cấp Liên doanh." },
+  { k:"mạn khô", c:"vn", f:"Freeboard",
+    v:"Chiều cao từ mặt nước lên tới mép boong chính. Mạn khô càng lớn tàu càng an toàn khi sóng lớn. Dấu mạn khô là hình tròn có vạch ngang sơn giữa hai bên vỏ tàu, chỉ mức chở tối đa cho từng vùng biển và mùa." },
+  { k:"mớn nước", c:"vn", f:"Draught / Draft",
+    v:"Chiều sâu phần tàu chìm dưới nước, đọc trên các con số sơn ở mũi, giữa và lái tàu." },
+  { k:"la canh", c:"vn", f:"Bilge",
+    v:"Khoảng thấp nhất trong buồng máy nơi nước và dầu rò rỉ đọng lại. Nước la canh phải qua máy phân ly dầu nước trước khi xả, không được xả thẳng." },
+  { k:"két dằn", c:"vn", f:"Ballast tank", a:["nước dằn","ballast"],
+    v:"Két chứa nước biển bơm vào để giữ thăng bằng và mớn nước cho tàu khi không chở hàng." },
+  { k:"hầm hàng", c:"vn", f:"Cargo hold",
+    v:"Khoang kín dưới boong dùng chứa hàng." },
+  { k:"thượng tầng", c:"vn", f:"Superstructure",
+    v:"Phần nhà xây nổi trên boong chính, thường là khu nhà ở và buồng lái." },
+  { k:"buồng lái", c:"vn", f:"Wheelhouse / Bridge", a:["lầu lái"],
+    v:"Nơi điều khiển tàu, ở tầng cao nhất khu nhà ở, có tầm nhìn bao quát. Còn gọi là lầu lái." },
+  { k:"cánh gà buồng lái", c:"vn", f:"Bridge wing",
+    v:"Phần buồng lái nhô ra hai bên mạn để nhìn dọc thân tàu khi cập cầu. Thường đặt phao tròn MOB tại đây." },
+  { k:"cửa kín nước", c:"vn", f:"Watertight door",
+    v:"Cửa chịu được áp lực nước khi khoang bị ngập, thường ở dưới boong chính. Khác cửa kín thời tiết ở chỗ chịu được cả cột nước, không chỉ sóng tạt." },
+  { k:"cửa kín thời tiết", c:"vn", f:"Weathertight door",
+    v:"Cửa ngăn nước mưa và sóng tạt, có gioăng cao su và các tay khóa quanh mép. Cách thử nhanh: đóng cửa rồi rọi đèn từ phía bên kia, thấy ánh sáng lọt qua là gioăng hỏng." },
+  { k:"tu chỉnh hải đồ", c:"vn", f:"Chart correction", a:["tu chỉnh"],
+    v:"Việc sửa hải đồ giấy theo Thông báo hàng hải hằng tuần: vẽ thêm chướng ngại mới, xóa phao đã bỏ. Người tu chỉnh dùng mực tím, ghi số thông báo ở góc dưới bên trái hải đồ và ghi vào sổ NP133A." },
+  { k:"hải đồ", c:"vn", f:"Nautical chart",
+    v:"Bản đồ biển dùng để dẫn tàu: ghi độ sâu, chướng ngại, phao tiêu, luồng lạch." },
+  { k:"hô hiệu", c:"vn", f:"Call sign",
+    v:"Dãy chữ – số riêng của mỗi tàu dùng khi liên lạc vô tuyến, ghi trên giấy phép đài tàu." },
+  { k:"đại phó", c:"vn", f:"Chief Officer / Chief Mate",
+    v:"Sĩ quan boong cao nhất sau thuyền trưởng; phụ trách hàng hóa, boong, thiết bị cứu sinh và tổ chức công việc của thủy thủ." },
+  { k:"máy trưởng", c:"vn", f:"Chief Engineer",
+    v:"Người đứng đầu bộ phận máy, chịu trách nhiệm toàn bộ máy móc, điện và hệ thống kỹ thuật." },
+  { k:"máy hai", c:"vn", f:"Second Engineer",
+    v:"Sĩ quan máy cấp hai, trực tiếp điều hành công việc hằng ngày trong buồng máy." },
+  { k:"thủy thủ trưởng", c:"vn", f:"Bosun / Boatswain",
+    v:"Người chỉ huy nhóm thủy thủ boong, nắm rõ nhất vị trí và tình trạng của thiết bị cứu sinh, cứu hỏa, dây buộc, sơn – gõ gỉ." },
+  { k:"cấp dưỡng", c:"vn", f:"Cook / Chief Cook",
+    v:"Người nấu ăn trên tàu; phải có chứng chỉ và giấy khám sức khỏe theo MLC." },
+  { k:"sĩ quan trực ca", c:"vn", f:"Officer of the Watch",
+    v:"Sĩ quan chịu trách nhiệm điều khiển tàu trong ca trực của mình, thay mặt thuyền trưởng." },
+  { k:"giữ tàu", c:"vn", f:"Detention", a:["lỗi giữ tàu"],
+    v:"Chính quyền cảng cấm tàu rời cảng cho tới khi khắc phục xong khiếm khuyết nghiêm trọng. Tốn kém rất lớn và bị ghi vào lý lịch tàu nhiều năm." },
+  { k:"khiếm khuyết", c:"vn", f:"Deficiency",
+    v:"Điểm không đạt yêu cầu do người kiểm tra ghi nhận. Khiếm khuyết nặng dẫn tới giữ tàu." },
+  { k:"không gian kín", c:"vn", f:"Enclosed space", a:["không gian hạn chế"],
+    v:"Nơi ra vào hạn chế, thông gió kém, không thiết kế để người làm việc thường xuyên: két, hầm xích neo, khoang cách ly. Vào phải đo khí, có giấy phép, có người canh ngoài và thiết bị cứu nạn sẵn sàng. Đây là nơi gây chết người nhiều nhất trên tàu." },
+  { k:"làm việc nóng", c:"vn", f:"Hot work",
+    v:"Hàn, cắt, mài, bất kỳ việc gì sinh tia lửa hay nhiệt độ cao. Bắt buộc có giấy phép, đo khí, dọn vật cháy trong bán kính an toàn và bố trí người canh lửa trong và sau khi làm." },
+  { k:"người canh lửa", c:"vn", f:"Fire watch",
+    v:"Người đứng gác riêng trong lúc làm việc nóng và ít nhất 30–60 phút SAU khi xong, để phát hiện đám cháy âm ỉ." },
+  { k:"bè cứu sinh", c:"vn", f:"Liferaft",
+    v:"Bè phao tự bung đựng trong hộp tròn màu trắng đặt trên giá nghiêng. Dây mồi (painter) phải nối vào bộ nhả thủy tĩnh HRU, không được buộc chết vào lan can." },
+  { k:"dây mồi", c:"vn", f:"Painter line",
+    v:"Dây nối bè cứu sinh với tàu; khi bè rơi xuống nước, dây căng ra sẽ giật cho bè tự bơm hơi." },
+  { k:"phao tròn", c:"vn", f:"Lifebuoy",
+    v:"Phao cứng hình vành khuyên ném xuống cho người rơi xuống nước. Một số có đèn tự sáng, có bó khói hoặc dây nổi kèm theo, tùy vị trí lắp." },
+  { k:"pháo hiệu", c:"vn", f:"Distress signals / rockets", a:["pháo dù"],
+    v:"Pháo dù, đuốc cầm tay, bó khói dùng báo hiệu cấp cứu. Có hạn dùng (thường 3 năm) — phải soát hạn cả bộ trên buồng lái lẫn bộ trong xuồng và bè." },
+  { k:"thang hoa tiêu", c:"vn", f:"Pilot ladder",
+    v:"Thang dây thả xuống mạn cho hoa tiêu leo lên tàu. Nhiều tai nạn chết người xảy ra do thang buộc sai cách hoặc bậc thang mục." },
+  { k:"lỉn neo", c:"vn", f:"Anchor chain / cable", a:["xích neo"],
+    v:"Xích neo. Được đánh dấu theo từng đoạn (shackle) để biết đã thả bao nhiêu." },
+  { k:"tời neo", c:"vn", f:"Windlass",
+    v:"Máy tời kéo và thả neo ở mũi tàu; từ 01/01/2026 phải kiểm tra theo quy định SOLAS II-1/3-13." },
+  { k:"van thông biển", c:"vn", f:"Sea chest / sea valve",
+    v:"Van lấy nước biển vào tàu để làm mát máy và cấp nước cứu hỏa." },
+  { k:"chân vịt mũi", c:"vn", f:"Bow thruster",
+    v:"Chân vịt lắp ngang ở mũi giúp tàu dịch ngang khi cập cầu hoặc giữ vị trí trên DP." },
+  { k:"máy phát sự cố", c:"vn", f:"Emergency generator",
+    v:"Máy phát điện riêng đặt NGOÀI buồng máy, tự khởi động khi mất điện chính để cấp cho đèn sự cố, thiết bị hàng hải, bơm cứu hỏa. Phải thử chạy và thử tự khởi động hằng tuần." },
+  { k:"bơm cứu hỏa sự cố", c:"vn", f:"Emergency fire pump",
+    v:"Bơm cứu hỏa đặt ngoài buồng máy, có nguồn cấp riêng, dùng khi buồng máy cháy không vào được. Khi thử phải ĐÓNG van cách ly buồng máy mới đúng." },
+  { k:"bảng điện chính", c:"vn", f:"Main switchboard",
+    v:"Tủ phân phối điện chính của tàu; trước tủ phải có thảm cách điện, không được để đồ vật." },
+  { k:"hà", c:"vn", f:"Marine fouling",
+    v:"Sinh vật biển (hàu, rong, hà) bám vào vỏ tàu làm tàu chạy chậm và tốn nhiên liệu; chống bằng sơn chống hà." },
+  { k:"gõ gỉ", c:"vn", f:"Chipping / rust removal", a:["hoen gỉ","han gỉ"],
+    v:"Việc gõ bỏ lớp gỉ sắt trên boong và kết cấu trước khi sơn lại." },
+  { k:"diễn tập", c:"vn", f:"Drill",
+    v:"Buổi tập xử lý tình huống khẩn cấp (cháy, bỏ tàu, người rơi xuống nước, tràn dầu). SOLAS yêu cầu tập bỏ tàu và chữa cháy ít nhất mỗi tháng một lần; thuyền viên mới lên tàu phải được tập trong vòng 24 giờ." },
+  { k:"bảng phân công nhiệm vụ", c:"vn", f:"Muster list", a:["muster list"],
+    v:"Bảng dán ở nơi dễ thấy, ghi rõ tín hiệu báo động và nhiệm vụ của TỪNG NGƯỜI khi cháy, bỏ tàu, người rơi xuống nước, kèm người thay thế. Đối chiếu với thẻ báo động treo ở đầu giường từng người." },
+  { k:"thẻ báo động", c:"vn", f:"Muster card",
+    v:"Tấm thẻ nhỏ treo tại giường mỗi thuyền viên, ghi nhiệm vụ và trạm tập trung của riêng người đó khi có báo động." },
+  { k:"bằng chứng khách quan", c:"vn", f:"Objective evidence",
+    v:"Cái nhìn thấy, đo được, chụp được hoặc đọc được trong hồ sơ — khác với cảm nhận hay lời nói. Mọi kết luận không phù hợp đều phải dựa trên bằng chứng khách quan." },
+  { k:"đánh giá nội bộ", c:"vn", f:"Internal audit",
+    v:"Cuộc kiểm tra do chính công ty tự tổ chức theo ISM 12, ít nhất 12 tháng một lần cho mỗi tàu, do người không phụ trách chính bộ phận đó thực hiện." },
+  { k:"SSAS", c:"tb", f:"Ship Security Alert System — Hệ thống báo động an ninh tàu",
+    v:"Nút bấm bí mật (thường có ít nhất 2 vị trí, một trên buồng lái) gửi tín hiệu báo động thẳng về công ty và chính quyền khi tàu bị cướp hoặc khống chế. Bấm KHÔNG kêu chuông trên tàu để kẻ xâm nhập không biết. Phải thử định kỳ và báo trước cho bên nhận tín hiệu, tránh báo động giả." },
+  { k:"RO", c:"tc", f:"Recognized Organization — Tổ chức được công nhận",
+    v:"Tổ chức đăng kiểm được chính quyền cờ tàu ủy quyền kiểm tra và cấp giấy chứng nhận thay mặt nhà nước. Thiết bị mới lắp phải có chứng nhận của RO mới được coi là hợp lệ." },
+  { k:"PSC.CL", c:"vsp", f:"Danh mục kiểm tra PSC",
+    v:"Bộ danh mục do Đăng kiểm Việt Nam biên soạn theo các hạng mục mà kiểm tra PSC thường soi, dùng để tự kiểm trước khi tàu vào cảng nước ngoài." },
+  { k:"ISPS16", c:"tc", f:"Bộ luật ISPS, Phần A, Mục 16 — Kế hoạch an ninh tàu",
+    v:"Điều khoản quy định nội dung bắt buộc của Kế hoạch an ninh tàu (SSP). Trích dẫn dạng “SSP 1.6” là chỉ tới mục 1.6 trong chính kế hoạch của tàu đó." },
+  { k:"PCCC", c:"vn", f:"Phòng cháy chữa cháy",
+    v:"Cách gọi trong nước cho mảng an toàn cháy nổ." },
+  { k:"CO", c:"tb", f:"Carbon monoxide — Khí carbon monoxit (CO)",
+    v:"Khí độc không màu không mùi, sinh ra khi cháy thiếu ôxy. Không gây khó thở nên nạn nhân thường ngất mà không kịp nhận ra. Máy đo khí đo bằng ppm." },
+  { k:"H₂S", c:"tb", f:"Hydrogen sulfide — Khí hydro sunfua", a:["H2S"],
+    v:"Khí cực độc mùi trứng thối, nặng hơn không khí nên đọng dưới đáy két và hầm. Ở nồng độ cao mất luôn cảm giác mùi rồi gục ngay — có mặt tại nhiều mỏ dầu khí." },
+  { k:"O₂", c:"tb", f:"Oxygen — Ôxy", a:["O2"],
+    v:"Không khí bình thường có 20,9% ôxy. Dưới 19,5% là thiếu ôxy, trên 23,5% là dư ôxy (dễ cháy). Đo khí trước khi vào không gian kín luôn phải ghi con số cụ thể." },
+  { k:"IMCA M149", c:"tc", f:"eCMID — Common Marine Inspection Document", a:["M149"],
+    v:"Tài liệu IMCA số M149: mẫu kiểm tra tàu dùng chung cho ngành dầu khí ngoài khơi. Trích dẫn dạng “m.11.2” là mục 11.2 trong mẫu này." },
+  { k:"IMCA M190", c:"tc", f:"Hướng dẫn xây dựng và thực hiện chương trình thử DP hằng năm", a:["M190"],
+    v:"Tài liệu IMCA số M190, căn cứ để kiểm tra biên bản thử hệ định vị động lực hằng năm." },
+  { k:"IMCA M103", c:"tc", f:"Hướng dẫn thiết kế và vận hành tàu định vị động lực", a:["M103"],
+    v:"Tài liệu IMCA số M103 về tàu DP." },
+  { k:"IMCA M117", c:"tc", f:"Huấn luyện và kinh nghiệm của nhân sự chủ chốt trên tàu DP", a:["M117"],
+    v:"Tài liệu IMCA số M117, căn cứ kiểm tra chứng chỉ và sổ ghi giờ của người vận hành DP." },
+  { k:"IMCA M166", c:"tc", f:"Hướng dẫn phân tích dạng hỏng hóc và ảnh hưởng (FMEA)", a:["M166"],
+    v:"Tài liệu IMCA số M166 về cách lập và thử nghiệm chứng minh FMEA cho hệ DP." },
+  { k:"IMCA D014", c:"tc", f:"Quy tắc thực hành quốc tế về công tác lặn ngoài khơi", a:["D014"],
+    v:"Tài liệu IMCA số D014 — văn bản gốc về an toàn lặn ngoài khơi." },
+  { k:"IMCA D018", c:"tc", f:"Quy tắc kiểm tra, thử và chứng nhận thiết bị lặn", a:["D018"],
+    v:"Tài liệu IMCA số D018 về kiểm tra ban đầu và định kỳ hệ thống, thiết bị lặn." },
+  { k:"DESIGN", c:"tc", f:"Diving Equipment Systems Inspection Guidance Note", a:["D023","D024"],
+    v:"Bộ hướng dẫn kiểm tra hệ thống thiết bị lặn của IMCA: D023 cho lặn từ mặt nước, D024 cho lặn bão hòa (dùng chuông lặn)." },
+];
+
+/* ===================== TỪ ĐIỂN CHÚ THÍCH =====================
+   Mục tiêu: người chưa học hàng hải vẫn đọc hiểu và đi kiểm tra được.
+   Mọi từ viết tắt và thuật ngữ có trong từ điển sẽ được gạch chân chấm
+   trong tiêu đề, căn cứ và phần hướng dẫn — chạm vào là hiện giải thích. */
+var GL_MAP = {}, GL_RE = null;
+(function () {
+  var keys = [];
+  function add(k, g) {
+    var e = esc(k);                 /* khớp trên chuỗi đã đổi & < > thành thực thể */
+    if (GL_MAP[e]) return;
+    GL_MAP[e] = g; keys.push(e);
+  }
+  GLOSSARY.forEach(function (g) {
+    var all = [g.k].concat(g.a || []);
+    all.forEach(function (k) {
+      add(k, g);
+      var up = k.charAt(0).toUpperCase() + k.substring(1);
+      if (up !== k) add(up, g);     /* thuật ngữ tiếng Việt viết hoa đầu câu */
+    });
+  });
+  keys.sort(function (a, b) { return b.length - a.length; });   /* cụm dài khớp trước */
+  GL_RE = new RegExp(
+    "([^0-9A-Za-zÀ-ỹ]|^)(" +
+    keys.map(function (k) { return k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }).join("|") +
+    ")(?![0-9A-Za-zÀ-ỹ])", "g");
+})();
+var glCache = {};
+/* Nhận chuỗi ĐÃ escape, trả lại chuỗi có gắn nhãn tra cứu */
+function glMark(escaped) {
+  var s = String(escaped == null ? "" : escaped);
+  if (glCache[s] != null) return glCache[s];
+  var out = s.replace(GL_RE, function (m, pre, term) {
+    return pre + '<b class="gl" data-gl="' + term + '">' + term + "</b>";
+  });
+  if (s.length < 900) glCache[s] = out;
+  return out;
+}
+
+var glQ = "";
+function glRender() {
+  var q = noDia(glQ).replace(/\s+/g, " ").replace(/^ | $/g, "");
+  var html = "", i, j;
+  if (q) {
+    var hit = [];
+    for (i = 0; i < GLOSSARY.length; i++) {
+      var g = GLOSSARY[i];
+      var hay = noDia(g.k + " " + (g.a || []).join(" ") + " " + g.f + " " + g.v);
+      if (hay.indexOf(q) >= 0) {
+        /* khớp ngay ở từ khóa thì xếp lên trước */
+        hit.push([noDia(g.k).indexOf(q) === 0 ? 0 : 1, g]);
+      }
+    }
+    hit.sort(function (a, b) { return a[0] - b[0]; });
+    if (!hit.length) {
+      html = '<div class="viol-empty">Không tìm thấy “' + esc(glQ) + '”. ' +
+             'Thử gõ ngắn hơn, ví dụ “phao”, “cứu sinh”, “SOLAS”.</div>';
+    } else {
+      html += '<div class="gl-cat">Tìm thấy ' + hit.length + ' mục</div>';
+      for (i = 0; i < hit.length; i++) html += glCard(hit[i][1]);
+    }
+  } else {
+    for (j = 0; j < GL_CATS.length; j++) {
+      var ck = GL_CATS[j][0], list = [];
+      for (i = 0; i < GLOSSARY.length; i++) if (GLOSSARY[i].c === ck) list.push(GLOSSARY[i]);
+      if (!list.length) continue;
+      html += '<div class="gl-cat">' + GL_CATS[j][1] + ' <span>' + list.length + ' mục</span></div>';
+      for (i = 0; i < list.length; i++) html += glCard(list[i]);
+    }
+  }
+  document.getElementById("gl-list").innerHTML = html;
+}
+function glCard(g) {
+  return '<div class="gl-item" id="gl-' + esc(g.k).replace(/[^A-Za-z0-9]/g, "_") + '">' +
+    '<div class="gl-k">' + esc(g.k) + '</div>' +
+    '<div class="gl-f">' + esc(g.f) + '</div>' +
+    '<div class="gl-v">' + esc(g.v) + '</div></div>';
+}
+function openGl(term) {
+  glQ = term ? String(term).replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">") : "";
+  document.getElementById("gl-q").value = glQ;
+  glRender();
+  document.getElementById("sheetGl").hidden = false;
+  var box = document.getElementById("gl-list");
+  if (box) box.scrollTop = 0;
+  syncModalLock();
+}
+
 /* ===================== TRẠNG THÁI ===================== */
 var KEY = "atskmt-kiemtratau-vtbctl-v1";
 var MAX_PHOTO = 6;            /* số ảnh tối đa cho mỗi mục vi phạm */
@@ -1987,8 +2534,8 @@ function draw() {
       var isOpen = !!open[it.id];
       html += '<article class="item ' + (it.refOnly ? "ref" : st) + '">';
       html += '<div class="row">';
-      html += '<button class="ttl" data-open="' + it.id + '"><h4>' + esc(it.t) + "</h4>" +
-        "<small>" + esc(it.ref) + "</small><em>" +
+      html += '<button class="ttl" data-open="' + it.id + '"><h4>' + glMark(esc(it.t)) + "</h4>" +
+        "<small>" + glMark(esc(it.ref)) + "</small><em>" +
         (isOpen ? "▲ thu gọn" : it.refOnly ? "▼ mở bảng tra" : "▼ xem lưu ý") + "</em></button>";
       if (!it.refOnly) {
         html += '<div class="btns">' +
@@ -1998,7 +2545,7 @@ function draw() {
           "</div>";
       }
       html += "</div>";
-      if (isOpen) html += '<div class="det">' + esc(it.d) + "</div>";
+      if (isOpen) html += '<div class="det">' + glMark(esc(it.d)) + "</div>";
       if (st === "ng") {
         html += mucSelect("data-muc", it.id, (state[it.id] || {}).m, "muc");
         html += '<textarea class="note" data-note="' + it.id +
@@ -2160,7 +2707,7 @@ function giaidoanLabel(key) {
 /* Khóa cuộn nền phía sau khi có modal (.sheet) đang mở, tránh chạm nhầm cuộn trang nền */
 var modalScrollY = 0;
 function syncModalLock() {
-  var anyOpen = ["sheetBB", "sheetDoc", "sheet"].some(function (id) {
+  var anyOpen = ["sheetBB", "sheetDoc", "sheet", "sheetGl"].some(function (id) {
     var el = document.getElementById(id);
     return el && !el.hidden;
   });
@@ -3357,6 +3904,8 @@ document.getElementById("tabs").addEventListener("click", function (e) {
 });
 
 document.getElementById("list").addEventListener("click", function (e) {
+  var gt = e.target.closest("[data-gl]");
+  if (gt) { openGl(gt.getAttribute("data-gl")); return; }
   var o = e.target.closest("[data-open]");
   if (o) { var id = o.getAttribute("data-open"); open[id] = !open[id]; draw(); return; }
   var s = e.target.closest("[data-set]");
@@ -3384,6 +3933,23 @@ document.getElementById("list").addEventListener("change", function (e) {
   state[i].m = t.value;
   t.className = "muc m-" + (t.value || "0");
   save();
+});
+
+document.getElementById("btn-gl").onclick = function () { openGl(""); };
+document.getElementById("gl-all").onclick = function () {
+  glQ = ""; document.getElementById("gl-q").value = ""; glRender();
+  document.getElementById("gl-list").scrollTop = 0;
+};
+document.getElementById("gl-close").onclick = function () {
+  document.getElementById("sheetGl").hidden = true; syncModalLock();
+};
+document.getElementById("sheetGl").onclick = function (e) {
+  if (e.target.id === "sheetGl") {
+    document.getElementById("sheetGl").hidden = true; syncModalLock();
+  }
+};
+document.getElementById("gl-q").addEventListener("input", function () {
+  glQ = this.value; glRender();
 });
 
 document.getElementById("btn-rep").onclick = function () {
@@ -3422,7 +3988,11 @@ document.getElementById("btn-new").onclick = function () {
   draw(); save();
 };
 
-/* ===================== KHỞI ĐỘNG ===================== */
+/* ===================== KHỞI ĐỘNG =====================
+   APP_VER hiện ở góc phải đầu trang. Nếu số này không đổi sau khi cập nhật,
+   nghĩa là trình duyệt còn giữ bản cũ trong bộ nhớ đệm — tải lại trang. */
+var APP_VER = "b\u1ea3n 2026-08-15/4";
+document.getElementById("ver").textContent = APP_VER;
 load();
 drawTabs();
 draw();
