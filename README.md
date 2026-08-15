@@ -71,19 +71,19 @@ trên máy/server chạy ứng dụng.
 không cần server/backend — mở trực tiếp trong trình duyệt hoặc cài như app
 trên điện thoại (Add to Home Screen). Dùng khi đi kiểm tra thực địa trên tàu.
 
-- **578 mục checklist**, chia 5 tab, xếp theo đúng **Phiếu đi tuyến kiểm tra
+- **570 mục checklist**, chia 5 tab, xếp theo đúng **Phiếu đi tuyến kiểm tra
   tàu** của Phòng An toàn & Môi trường (tổng ≈ 7 giờ làm việc):
-  - **Hồ sơ** (143 mục / 14 nhóm) — Bước 0 chuẩn bị tại phòng, Bước 1 họp mở
+  - **Hồ sơ** (144 mục / 14 nhóm) — Bước 0 chuẩn bị tại phòng, Bước 1 họp mở
     đầu, rồi **ngồi tại cabin** kiểm tra hồ sơ gộp theo loại: đăng kiểm, cứu sinh, cứu hỏa, môi trường,
     thông tin liên lạc, nhân sự, SMS/ISM, ISPS, kỹ thuật, quyết định nội bộ,
     sổ tay – kế hoạch – sơ đồ được duyệt.
-  - **Thực địa** (250 mục / 12 nhóm) — 12 chặng đi tuyến một chiều theo đúng
+  - **Thực địa** (243 mục / 12 nhóm) — 12 chặng đi tuyến một chiều theo đúng
     bố trí thật của tàu, mỗi chặng ghi rõ thời lượng và người đi kèm: buồng
     lái → nóc cabin → khu nhà ở (xuống dần) → khu cứu sinh quanh khu nhà ở →
     trạm cứu hỏa → **ra mũi tàu** → boong chính đi từ mũi về lái → **giữa tàu
     nơi đặt cẩu** và thiết bị nâng, trạm hàn, kho, boong sau → bếp → buồng máy
     → an toàn điện → thử tính năng & báo động.
-  - **Tổng quan** (41 mục / 5 nhóm) — mục xuyên suốt toàn tàu, phỏng vấn
+  - **Tổng quan** (39 mục / 5 nhóm) — mục xuyên suốt toàn tàu, phỏng vấn
     thuyền viên, diễn tập bất ngờ, họp kết thúc (kèm bảng phân loại phát hiện
     4 mức) và công việc sau kiểm tra.
   - **Mới & PSC** (76 mục / 11 nhóm) — quy định có hiệu lực SAU 2016 mà bộ tài
@@ -99,7 +99,7 @@ trên điện thoại (Add to Home Screen). Dùng khi đi kiểm tra thực đ�
 - Tiêu đề mục ngắn gọn (chỉ nêu đối tượng cần kiểm tra, trung bình 41 ký tự);
   bấm vào mục để mở **hướng dẫn kiểm tra thực tế**: các bước làm, chỗ cần soi
   đèn, con số cần đọc trên thiết bị, cách đối chiếu chéo giữa các hồ sơ và lỗi
-  hay gặp. **Cả 578 mục đều đã có hướng dẫn** (trung bình ~300 ký tự/mục).
+  hay gặp. **Cả 570 mục đều đã có hướng dẫn** (trung bình ~300 ký tự/mục).
 - Đánh dấu Đạt/Không đạt/N/A từng mục, ghi chú, chụp/đính kèm ảnh minh chứng.
 - Mỗi mục "Không đạt" chọn được **mức độ khắc phục** theo Phiếu đi tuyến:
   ① dừng ngay · ② trước khi rời bến · ③ có thời hạn (≤30 ngày) · ④ ghi nhận
