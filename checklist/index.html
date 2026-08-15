@@ -130,6 +130,8 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
 .viol-item .vr{font-size:10px;color:var(--acc);font-weight:700}
 .viol-item .vn{font-size:12.5px;color:var(--ink2);margin-top:4px;white-space:pre-wrap}
 .viol-empty{font-size:13px;color:var(--ink2);padding:12px;text-align:center;background:#F7F9FA;border-radius:7px}
+.vp-hint{font-size:11.5px;line-height:1.45;color:var(--ink2);margin-bottom:7px}
+.vp-hint b{color:var(--ink)}
 
 /* ---- Radio giai đoạn ---- */
 .radio-row{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
@@ -160,6 +162,16 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
 .vp-actions button{flex:1;padding:9px;border-radius:6px;border:1px dashed var(--line);background:#F7F9FA;
   color:var(--ink2);font-family:inherit;font-size:12px;cursor:pointer}
 .vp-actions button.acc2{border-style:solid;border-color:var(--acc);color:var(--acc);font-weight:700}
+.vp-sel{width:100%;border:1px solid var(--line);border-radius:6px;padding:7px 8px;font-family:inherit;
+  font-size:12.5px;background:#fff;color:var(--ink)}
+.vp-c3{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;line-height:1.35;margin:6px 0 0;
+  padding:8px 9px;border:1px solid var(--acc);border-radius:6px;background:#FFF6F4;cursor:pointer}
+.vp-c3 input{margin-top:2px;flex-shrink:0;width:17px;height:17px}
+.vp-c3.off{border-color:var(--line);background:#F7F9FA;color:var(--ink2)}
+.doc-switch{display:flex;gap:6px;margin-bottom:11px}
+.doc-switch button{flex:1;padding:10px 8px;border-radius:6px;border:1px solid var(--line);background:#F7F9FA;
+  font-family:inherit;font-size:12px;font-weight:700;color:var(--ink2);line-height:1.3}
+.doc-switch button.on{background:var(--acc);border-color:var(--acc);color:#fff}
 
 /* ---- Bản in / xuất file biên bản kiểm tra an toàn tàu ---- */
 .doc{background:#fff}
@@ -214,13 +226,13 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
 .note,
 .bb-field input, .bb-field select, .bb-field textarea,
 .doan-row input,
-.vp-row textarea, .vp-two input, .vp-lsr, .vp-muc, .muc{font-size:16px}
+.vp-row textarea, .vp-two input, .vp-lsr, .vp-muc, .vp-sel, .muc{font-size:16px}
 .vp-two input::placeholder{font-size:13px}
 .radio-opt{font-size:16px}
 
 @media print{
   @page{size:A4 portrait;margin:12mm 14mm 10mm 16mm}
-  .top,.bar,.sheet-act,.doan-del,.doan-add,.vp-del,.vp-actions{display:none!important}
+  .top,.bar,.sheet-act,.doan-del,.doan-add,.vp-del,.vp-actions,.doc-switch{display:none!important}
   body{padding:0;background:#fff}
   body.doc-open>*{display:none!important}
   body.doc-open #sheetDoc{display:block!important;position:static!important;background:none!important;padding:0!important}
@@ -297,7 +309,14 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
     <div class="bb-sec">3. Trưởng đoàn kiểm tra</div>
     <div class="bb-field"><label>Ông (bà)</label><input id="bb-truongdoan" placeholder="Họ tên trưởng đoàn kiểm tra"></div>
 
-    <div class="bb-sec">Các vi phạm / điểm chưa phù hợp cần khắc phục</div>
+    <div class="bb-sec">4. Thuyền trưởng — nơi gửi báo cáo</div>
+    <div class="bb-field"><label>Thuyền trưởng tàu</label><input id="bb-thuyentruong" placeholder="Họ tên thuyền trưởng — ký nhận báo cáo"></div>
+    <div class="bb-field"><label>Kính gửi — mỗi dòng một nơi nhận</label><textarea id="bb-kinhgui" style="min-height:78px" placeholder="- Giám đốc XN VTB&CTL;"></textarea></div>
+    <div class="bb-field"><label>Số kiểm soát — Biên bản đánh giá kiểm tra cấp III</label><input id="bb-soc3" placeholder="Số của biên bản VTB07-02-04A (nếu có)"></div>
+
+    <div class="bb-sec">Các điểm ghi nhận / chưa phù hợp</div>
+    <div class="vp-hint">Mỗi dòng in vào <b>Báo cáo kết quả kiểm tra tình trạng tàu</b>. Dòng nào
+      tích ô ở cuối thì in thêm vào <b>Biên bản đánh giá kiểm tra cấp III</b> (mẫu VTB07-02-04A).</div>
     <div class="vp-actions">
       <button id="bb-nap-vipham" class="acc2">↓ Nạp từ checklist (mục ✕)</button>
       <button id="bb-add-vipham">+ Thêm dòng trống</button>
@@ -318,9 +337,13 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
 <!-- BẢN IN / XUẤT FILE -->
 <div class="sheet" id="sheetDoc" hidden>
   <div class="sheet-in">
+    <div class="doc-switch">
+      <button id="doc-tab-bc" class="on">Báo cáo kết quả<br>kiểm tra tình trạng tàu</button>
+      <button id="doc-tab-c3">Biên bản đánh giá<br>kiểm tra cấp III</button>
+    </div>
     <div id="docOut" class="doc"></div>
     <div class="sheet-act">
-      <button id="doc-download" class="acc">⬇ Tải Word (.docx)</button>
+      <button id="doc-download" class="acc">⬇ Tải bản đang xem (.docx)</button>
       <button id="doc-print">🖨 In / Lưu PDF</button>
       <button id="doc-back">◀ Sửa lại</button>
       <button id="doc-close" class="p">Đóng</button>
@@ -1714,6 +1737,115 @@ function lsrSelect(i, val) {
     }).join("") + '</select>';
 }
 
+/* ===== Bộ phận phụ trách — dùng khi chia nhóm trong Biên bản cấp III ===== */
+var BO_PHAN = [
+  ["boong",     "Boong"],
+  ["may",       "Máy"],
+  ["dien",      "Điện"],
+  ["cuusinh",   "Cứu sinh"],
+  ["cuuhoa",    "Cứu hỏa"],
+  ["hoso",      "Hồ sơ – giấy tờ"],
+  ["bep",       "Bếp – sinh hoạt"],
+  ["nang",      "Thiết bị nâng"],
+  ["moitruong", "Môi trường"],
+  ["anninh",    "An ninh"],
+  ["nguoi",     "Con người – huấn luyện"],
+  ["khac",      "Khác"]
+];
+var BP_NAME = {};
+BO_PHAN.forEach(function (o) { BP_NAME[o[0]] = o[1]; });
+/* Thứ tự trình bày trong biên bản cấp III */
+var BP_ORDER = ["boong", "may", "dien", "cuusinh", "cuuhoa", "bep", "hoso",
+                "nang", "moitruong", "anninh", "nguoi", "khac"];
+
+/* Phân loại phát hiện theo ISM: NC / Obs, và khuyến nghị (đưa xuống mục II) */
+var PL_OPTS = [
+  ["nc",  "NC — Sự không phù hợp"],
+  ["obs", "Obs — Sự ghi nhận"],
+  ["kn",  "Khuyến nghị (mục II biên bản cấp III)"]
+];
+
+/* Bỏ dấu tiếng Việt để dò từ khóa khi tự xếp bộ phận */
+function noDia(s) {
+  return String(s == null ? "" : s).toLowerCase()
+    .replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, "a")
+    .replace(/[èéẹẻẽêềếệểễ]/g, "e")
+    .replace(/[ìíịỉĩ]/g, "i")
+    .replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, "o")
+    .replace(/[ùúụủũưừứựửữ]/g, "u")
+    .replace(/[ỳýỵỷỹ]/g, "y")
+    .replace(/đ/g, "d");
+}
+/* Từ khóa tự xếp bộ phận — so khớp theo TỪ TRỌN VẸN, xét từ đặc thù đến chung.
+   Muốn sửa: mở dòng đó trong biên bản rồi chọn lại bộ phận bằng tay. */
+var BP_KEYS = [
+  ["cuusinh",   ["cuu sinh","xuong cuu sinh","xuong cap cuu","be cuu sinh","phao tron","ao phao",
+                 "phao ap nhiet","hru","epirb","sart","muster list","bo tau","day nem","phao khoi",
+                 "phao hieu","du tru cuu sinh","thang day","tram tap trung","bang phan cong nhiem vu",
+                 "the bao dong","thiet bi cuu nan","nha tai","cuu nan"]],
+  ["cuuhoa",    ["cuu hoa","chua chay","chong chay","binh bot","binh co2","binh chua chay","bao chay",
+                 "bao khoi","dau bao","sprinkler","bo tho","bo quan ao chong chay","fifi","voi rong",
+                 "lang phun","cua chong chay","chan lua","van chan lua","quat thoi khoi","cua sap",
+                 "scba","eebd","do khi","may do khi","khi chuan","bump test","hieu chuan","binh tho"]],
+  ["nang",      ["can cau","cau tau","thiet bi nang","toi nang","cap nang","ma ni","puly","sling",
+                 "xich nang","palang","swl","tai trong lam viec","dang kiem thiet bi nang","tang tro",
+                 "nang ha vat","cau va thiet bi nang"]],
+  ["moitruong", ["moi truong","dau thai","rac thai","nuoc thai","ows","phan ly dau","marpol","bwm",
+                 "nuoc dan","nuoc ballast","khi thai","luu huynh","sopep","sopep","eexi","cii","seemp",
+                 "iopp","oil record book","garbage","nhat ki dau","dau can","chat thai",
+                 "kho hoa chat","hoa chat","chong ha","afs","phat thai","tran dau","amiang","con trung","chuot"]],
+  ["anninh",    ["an ninh","isps","ssp","ssas","canh gioi","kiem soat len tau","the len tau","ship security"]],
+  ["bep",       ["bep","luong thuc","cau lac bo","nha an","kho lanh","kho thuc pham","nuoc ngot",
+                 "phong o","giat","ve sinh sinh hoat","cap duong","dung cu an uong",
+                 "khu nha o","phong tam","ve sinh"]],
+  ["dien",      ["dien","thiet bi dien","he thong dien","bang dien","tu dien","ac quy","may phat dien",
+                 "may phat su co","cau dao","chieu sang","den su co","cach dien","noi dat","dong dien",
+                 "an toan dien","o cam","day dan dien","phong no","dien tro cach dien"]],
+  ["may",       ["may","buong may","may chinh","may phu","may den","noi hoi","binh khi nen","bom",
+                 "duong ong","van chan","he thong lai","may lai","nhien lieu","dau nhon","khi nen",
+                 "phin loc","truc chan vit","hop so","la canh","san may","buong dieu khien may"]],
+  ["nguoi",     ["thuyen vien","huan luyen","dien tap","phong van","chung chi","stcw","mlc","gio nghi",
+                 "gio lam viec","suc khoe","hop mo dau","hop ket thuc","dinh bien","hop dong lao dong",
+                 "nguoi lam quen tau","bao ho lao dong","ppe",
+                 "giay phep lam viec","jsa","stop","loto","khoa treo the","canh lua","gia cong nong","lam viec tren cao","vat roi","dropped objects","tieng on","tram xa","tu thuoc","y te","lam quen tau","nha thau","ngan nap","hut thuoc","lam viec nhom","khong gian kin","ve sinh cong nghiep"]],
+  ["hoso",      ["ho so","giay to","giay chung nhan","dang kiem","nhat ki","nhat ky","hai do",
+                 "an pham","an pham hang hai","quyet dinh","so tay","ke hoach","so do","sms","ism",
+                 "tai lieu","bien ban","danh muc kiem tra","chung nhan","so nhat ki","bao cao",
+                 "quy trinh","huong dan","danh muc",
+                 "apcis","tokyo mou","lich hoat dong","thong bao truoc","bang theo doi","bang chung","loi lap lai","thu tuc vao cang","lich su tau"]],
+  ["boong",     ["boong","mui tau","lai tau","neo","toi neo","day buoc","cua kin nuoc","cua kin thoi tiet",
+                 "nap ham","lan can","cau thang","hanh lang","son","han gi","vo tau","ket cau","khoang",
+                 "thuong tang","noc cabin","buong lai","buong vo tuyen","hang hai","la ban","radar",
+                 "gps","ais","vdr","do gio","do sau","lai su co","cot den","den hanh trinh","coi",
+                 "may do gio","tinh kin nuoc","ket","ham hang","san boong",
+                 "loi thoat hiem","bien chi dan","ky hieu chi dan","thang hoa tieu","pilot ladder","len xuong tau","kho vat tu","dp","fmea","dinh vi dong luc","nha o"]]
+];
+/* Chuẩn hóa: bỏ dấu, quy mọi ký tự lạ về khoảng trắng, chèn khoảng trắng hai đầu
+   để so khớp trọn từ (tránh "chằng buộc" dính vào "điện"). */
+function bpNorm(s) { return " " + noDia(s).replace(/[^a-z0-9]+/g, " ") + " "; }
+function guessBP(groupName, title) {
+  var s = bpNorm(groupName + " " + title);
+  for (var i = 0; i < BP_KEYS.length; i++) {
+    var ks = BP_KEYS[i][1];
+    for (var k = 0; k < ks.length; k++) if (s.indexOf(" " + ks[k] + " ") >= 0) return BP_KEYS[i][0];
+  }
+  return "khac";
+}
+function bpSelect(i, val) {
+  return '<select class="vp-sel" data-vp="' + i + '" data-f="bp">' +
+    BO_PHAN.map(function (o) {
+      return '<option value="' + o[0] + '"' + (o[0] === (val || "khac") ? " selected" : "") +
+        ">Bộ phận: " + esc(o[1]) + "</option>";
+    }).join("") + "</select>";
+}
+function plSelect(i, val) {
+  return '<select class="vp-sel" data-vp="' + i + '" data-f="pl">' +
+    PL_OPTS.map(function (o) {
+      return '<option value="' + o[0] + '"' + (o[0] === (val || "nc") ? " selected" : "") +
+        ">" + esc(o[1]) + "</option>";
+    }).join("") + "</select>";
+}
+
 /* ===== Phân loại mức độ phát hiện (theo Phiếu đi tuyến / VSP-000-ATMT-402) ===== */
 var MUC_OPTS = [
   ["",  "— Chọn mức độ khắc phục —"],
@@ -1755,6 +1887,9 @@ function blankBB() {
     nhathau: "", giaidoan: "chuanbi", diadiem: "", donvi: "XN VTB&CTL",
     doan: [{ ten: "", chuc: "", donvi: "" }],
     coso: "", truongdoan: "",
+    thuyentruong: "", soc3: "",
+    kinhgui: "- Giám đốc XN VTB&CTL;\n- Trưởng phòng TCNS XN VTB&CTL;\n" +
+             "- Trưởng phòng KH-KTT;\n- Trưởng phòng BDKT&SC XN VTB&CTL.",
     viPham: [],
     khuyenCao: []
   };
@@ -1772,10 +1907,18 @@ function load() {
       if (!bb.viPham) bb.viPham = [];
       if (!bb.khuyenCao) bb.khuyenCao = [];
       /* Dữ liệu cũ chỉ có 1 ảnh (photo) — chuyển sang danh sách ảnh (photos) */
+      if (bb.thuyentruong == null) bb.thuyentruong = "";
+      if (bb.soc3 == null) bb.soc3 = "";
+      if (!bb.kinhgui) bb.kinhgui = blankBB().kinhgui;
       bb.viPham.forEach(function (r) {
         if (!r.photos) r.photos = r.photo ? [r.photo] : [];
         delete r.photo;
         if (r.muc == null) r.muc = "";   /* dữ liệu cũ chưa có mức độ khắc phục */
+        if (r.bp == null) r.bp = "khac";     /* bộ phận phụ trách */
+        if (r.pl == null) r.pl = "nc";       /* NC / Obs / khuyến nghị */
+        if (r.c3 == null) r.c3 = true;       /* có đưa vào biên bản cấp III không */
+        if (r.cc == null) r.cc = "";         /* căn cứ ISM / VSP */
+        if (r.ykien == null) r.ykien = "";   /* ý kiến của tàu */
       });
     }
   } catch (e) {}
@@ -1872,11 +2015,14 @@ function draw() {
 function allViolations() {
   var out = [];
   DATA.forEach(function (d) {
-    scored(itemsOf(d)).forEach(function (i) {
-      if (state[i.id] && state[i.id].s === "ng") {
-        out.push({ tab: d.tab, t: i.t, ref: i.ref,
-          n: (state[i.id].n || "").trim(), m: state[i.id].m || "" });
-      }
+    d.groups.forEach(function (gr) {
+      gr.items.forEach(function (i) {
+        if (i.refOnly) return;
+        if (state[i.id] && state[i.id].s === "ng") {
+          out.push({ tab: d.tab, g: gr.g, t: i.t, ref: i.ref,
+            n: (state[i.id].n || "").trim(), m: state[i.id].m || "" });
+        }
+      });
     });
   });
   /* Nặng trước nhẹ sau, giữ nguyên thứ tự checklist trong cùng một mức */
@@ -1961,6 +2107,17 @@ function drawViPham() {
         '<input placeholder="Thời hạn hoàn thành" data-vp="' + i + '" data-f="thoihan" value="' + esc(r.thoihan) + '">' +
         '<input placeholder="Trách nhiệm thực hiện" data-vp="' + i + '" data-f="trachnhiem" value="' + esc(r.trachnhiem) + '">' +
       '</div>' +
+      '<div class="vp-two" style="margin-top:6px">' +
+        bpSelect(i, r.bp) + plSelect(i, r.pl) +
+      '</div>' +
+      '<div class="vp-two" style="margin-top:6px">' +
+        '<input placeholder="Căn cứ (ISM 10.1, SOLAS III/20…)" data-vp="' + i + '" data-f="cc" value="' + esc(r.cc || "") + '">' +
+        '<input placeholder="Ý kiến của tàu" data-vp="' + i + '" data-f="ykien" value="' + esc(r.ykien || "") + '">' +
+      '</div>' +
+      '<label class="vp-c3' + (r.c3 ? "" : " off") + '">' +
+        '<input type="checkbox" data-vpc3="' + i + '"' + (r.c3 ? " checked" : "") + '>' +
+        '<span>Đưa mục này vào <b>Biên bản đánh giá kiểm tra cấp III</b></span></label>' +
+      '<div style="height:7px"></div>' +
       '<div class="vp-photo-row">' +
         (r.photos || []).map(function (ph, k) {
           return '<div class="vp-photo-thumb"><img src="' + ph + '">' +
@@ -2028,6 +2185,9 @@ function openBB() {
   document.getElementById("bb-donvi").value = bb.donvi;
   document.getElementById("bb-coso").value = bb.coso;
   document.getElementById("bb-truongdoan").value = bb.truongdoan;
+  document.getElementById("bb-thuyentruong").value = bb.thuyentruong || "";
+  document.getElementById("bb-kinhgui").value = bb.kinhgui || "";
+  document.getElementById("bb-soc3").value = bb.soc3 || "";
   var radio = document.querySelector('input[name="gd"][value="' + bb.giaidoan + '"]');
   if (radio) radio.checked = true;
   drawDoan();
@@ -2037,12 +2197,14 @@ function openBB() {
   syncModalLock();
 }
 
-["bb-so","bb-tungay","bb-denngay","bb-nhathau","bb-diadiem","bb-donvi","bb-coso","bb-truongdoan"]
+["bb-so","bb-tungay","bb-denngay","bb-nhathau","bb-diadiem","bb-donvi","bb-coso","bb-truongdoan",
+ "bb-thuyentruong","bb-kinhgui","bb-soc3"]
 .forEach(function (id) {
   document.getElementById(id).addEventListener("input", function () {
     var map = { "bb-so":"so","bb-tungay":"tuNgay","bb-denngay":"denNgay",
       "bb-nhathau":"nhathau","bb-diadiem":"diadiem","bb-donvi":"donvi",
-      "bb-coso":"coso","bb-truongdoan":"truongdoan" };
+      "bb-coso":"coso","bb-truongdoan":"truongdoan",
+      "bb-thuyentruong":"thuyentruong","bb-kinhgui":"kinhgui","bb-soc3":"soc3" };
     bb[map[id]] = this.value;
     save();
   });
@@ -2073,7 +2235,8 @@ document.getElementById("bb-doan").addEventListener("click", function (e) {
 
 /* --- Bảng vi phạm --- */
 document.getElementById("bb-add-vipham").onclick = function () {
-  bb.viPham.push({ noidung: "", thoihan: "", trachnhiem: "", lsr: "", muc: "", photos: [] });
+  bb.viPham.push({ noidung: "", thoihan: "", trachnhiem: "", lsr: "", muc: "",
+    bp: "khac", pl: "nc", c3: true, cc: "", ykien: "", photos: [] });
   drawViPham(); save();
 };
 document.getElementById("bb-nap-vipham").onclick = function () {
@@ -2083,9 +2246,14 @@ document.getElementById("bb-nap-vipham").onclick = function () {
     var text = x.t + " (" + x.ref + ")" + (x.n ? " — " + x.n : "");
     var cu = null;
     bb.viPham.forEach(function (r) { if (r.noidung === text) cu = r; });
-    if (cu) { if (!cu.muc && x.m) cu.muc = x.m; }        /* dòng đã có: chỉ cập nhật mức độ */
-    else bb.viPham.push({ noidung: text, thoihan: "", trachnhiem: "",
-      lsr: "", muc: x.m || "", photos: [] });
+    if (cu) {                                            /* dòng đã có: chỉ bù phần còn trống */
+      if (!cu.muc && x.m) cu.muc = x.m;
+      if (!cu.cc) cu.cc = x.ref || "";
+      if (!cu.bp || cu.bp === "khac") cu.bp = guessBP(x.g, x.t);
+    } else bb.viPham.push({ noidung: text, thoihan: "", trachnhiem: "",
+      lsr: "", muc: x.m || "", bp: guessBP(x.g, x.t),
+      pl: (x.m === "4" ? "obs" : "nc"), c3: true,
+      cc: x.ref || "", ykien: "", photos: [] });
   });
   /* Xếp lại toàn bảng theo mức độ: dừng ngay lên đầu */
   bb.viPham.forEach(function (r, k) { r._k = k; });
@@ -2097,6 +2265,15 @@ document.getElementById("bb-nap-vipham").onclick = function () {
   drawViPham(); save();
 };
 function onVipEdit(e) {
+  var c = e.target.closest("[data-vpc3]");
+  if (c) {
+    var ci = +c.getAttribute("data-vpc3");
+    bb.viPham[ci].c3 = !!c.checked;
+    var lb = c.parentNode;
+    if (lb) lb.className = "vp-c3" + (c.checked ? "" : " off");
+    save();
+    return;
+  }
   var t = e.target.closest("[data-vp]");
   if (!t) return;
   var i = +t.getAttribute("data-vp"), f = t.getAttribute("data-f");
@@ -2193,18 +2370,94 @@ function dots(n) { return new Array(n + 1).join("."); }
 function fld(v, n) { v = (v == null ? "" : String(v)).trim(); return v ? esc(v) : dots(n); }
 function nl(v) { return esc(v).replace(/\n/g, "<br>"); }
 
-function f002Header() {
+function f002Header(t1, t2) {
   var lg = F002_LOGO
     ? '<img src="' + F002_LOGO + '" alt="Vietsovpetro">'
     : '<div class="txt">VIETSOVPETRO</div>';
   return '<table class="hdr"><tr><td class="lg">' + lg + '</td>' +
-    '<td class="ti">DANH MỤC KIỂM TRA AN TOÀN TÀU — XN VTB&amp;CTL<br>' +
-    'КОНТРОЛЬНЫЙ ЛИСТ ПРОВЕРКИ БЕЗОПАСНОСТИ СУДНА</td></tr></table>';
+    '<td class="ti">' + esc(t1 || DOC_TITLES.bc[0]) + '<br>' + esc(t2 || DOC_TITLES.bc[1]) +
+    '</td></tr></table>';
 }
 
-function f002Footer(n) {
-  return '<table class="ft"><tr><td>Tổng hợp theo НОРМ-09-05-GE-01</td>' +
-    '<td class="ct">XN VTB&amp;CTL</td><td class="rt">Trang ' + n + ' / 3</td></tr></table>';
+function f002Footer(left) {
+  return '<table class="ft"><tr><td>' + esc(left || DOC_TITLES.bc[2]) + '</td>' +
+    '<td class="ct">XN VTB&amp;CTL</td>' +
+    '<td class="rt">' + fmtDate(bb.denNgay || bb.tuNgay) + '</td></tr></table>';
+}
+
+/* Tên hai bản in: [đầu trang dòng 1, đầu trang dòng 2, chân trang] */
+var DOC_TITLES = {
+  bc: ["BÁO CÁO KẾT QUẢ KIỂM TRA TÌNH TRẠNG TÀU",
+       "XN VẬN TẢI BIỂN & CÔNG TÁC LẶN · VIETSOVPETRO",
+       "Kiểm tra tình trạng tàu"],
+  c3: ["BIÊN BẢN ĐÁNH GIÁ KIỂM TRA CẤP III",
+       "XN VTB&CTL · Mẫu VTB07-02-04A",
+       "Mẫu VTB07-02-04A"]
+};
+/* Bản đang xem: bc = báo cáo tình trạng tàu, c3 = biên bản cấp III */
+var docMode = "bc";
+
+/* --- Tiện ích dùng chung cho cả bản in lẫn file Word --- */
+function dmY(iso) {
+  var p = String(iso || "").split("-");
+  if (p.length !== 3 || !p[0]) return "…… tháng …… năm ……";
+  return (+p[2]) + " tháng " + (+p[1]) + " năm " + p[0];
+}
+function kinhGuiLines() {
+  var out = [];
+  String(bb.kinhgui || "").split("\n").forEach(function (x) {
+    if (x.replace(/\s/g, "")) out.push(x.replace(/^\s+|\s+$/g, ""));
+  });
+  if (!out.length) out.push("- Giám đốc XN VTB&CTL.");
+  return out;
+}
+function doanLines() {
+  var out = [];
+  bb.doan.forEach(function (p) {
+    var a = [];
+    if ((p.ten || "").trim()) a.push(p.ten.trim());
+    if ((p.chuc || "").trim()) a.push(p.chuc.trim());
+    if ((p.donvi || "").trim()) a.push(p.donvi.trim());
+    if (a.length) out.push(a.join(" — "));
+  });
+  return out;
+}
+function loaiKTText() {
+  return bb.giaidoan === "duthau" ? "theo yêu cầu cấp trên / PSC"
+       : bb.giaidoan === "thuchien" ? "đột xuất" : "định kỳ";
+}
+function tenTau() { return (bb.nhathau || "").trim() || "…………………"; }
+
+function vpAll()  { return bb.viPham.filter(function (r) { return (r.noidung || "").trim(); }); }
+function vpMain() { return vpAll().filter(function (r) { return r.pl !== "kn"; }); }
+function vpKN()   { return vpAll().filter(function (r) { return r.pl === "kn"; }); }
+function kcAll()  {
+  return bb.khuyenCao.filter(function (r) { return (r.noidung || "").trim() || (r.dexuat || "").trim(); });
+}
+/* Chỉ dòng đã tích mới sang biên bản cấp III */
+function c3Main() { return vpMain().filter(function (r) { return r.c3; }); }
+function c3KN()   { return vpKN().filter(function (r) { return r.c3; }); }
+
+/* Cột "Khắc phục / thời hạn" của báo cáo */
+function khacPhucText(r) {
+  var a = [];
+  if (r.muc) a.push(MUC_SHORT[r.muc]);
+  if ((r.thoihan || "").trim()) a.push(r.thoihan.trim());
+  if (!a.length) a.push("Ngay lập tức");
+  return a.join("\n");
+}
+/* Cột "Ý kiến của tàu" */
+function yKienText(r) {
+  var a = [];
+  if ((r.ykien || "").trim()) a.push(r.ykien.trim());
+  if ((r.trachnhiem || "").trim()) a.push("Phụ trách: " + r.trachnhiem.trim());
+  return a.join("\n");
+}
+/* Nội dung một phát hiện: nhãn LSR + căn cứ đi kèm */
+function ndText(r) {
+  var s = (r.lsr ? "[" + r.lsr + "] " : "") + String(r.noidung || "");
+  if ((r.cc || "").trim() && s.indexOf(r.cc.trim()) < 0) s += "\n(Căn cứ: " + r.cc.trim() + ")";
+  return s;
 }
 
 /* Tổng hợp kết quả kiểm tra — theo mẫu PHIẾU ĐI TUYẾN KIỂM TRA TÀU */
@@ -2236,152 +2489,179 @@ function tongHopHTML() {
 }
 
 function buildDocHTML(withPhotos) {
-  var doanRows = bb.doan.filter(function (p) { return (p.ten || "").trim() || (p.chuc || "").trim(); });
-  var vpRows   = bb.viPham.filter(function (r) { return (r.noidung || "").trim(); });
-  var kcRows   = bb.khuyenCao.filter(function (r) { return (r.noidung || "").trim() || (r.dexuat || "").trim(); });
-  var GD = bb.giaidoan;
-  function box(k) { return '<span class="bx">' + (GD === k ? "&#9746;" : "&#9744;") + '</span>'; }
+  return docMode === "c3" ? buildC3HTML() : buildBaoCaoHTML(withPhotos);
+}
 
-  var h = "";
+/* ---------- BẢN 1: BÁO CÁO KẾT QUẢ KIỂM TRA TÌNH TRẠNG TÀU (công văn) ---------- */
+function buildBaoCaoHTML(withPhotos) {
+  var ten = tenTau();
+  var vp = vpMain(), kn = vpKN(), kc = kcAll();
+  var h = '<div class="page">';
+  h += f002Header(DOC_TITLES.bc[0], DOC_TITLES.bc[1]);
 
-  /* ---------- TRANG 1 ---------- */
-  h += '<div class="page">';
-  h += f002Header();
-  h += '<div class="apx">Tổng hợp theo checklist НОРМ-09-05-GE-01<br>và các nguồn liên quan</div>';
-  h += '<div class="t1">BIÊN BẢN KIỂM TRA AN TOÀN TÀU<br>' +
-       'АКТ ПРОВЕРКИ БЕЗОПАСНОСТИ СУДНА</div>';
-  h += '<div class="t2">Số BB / №: ' + fld(bb.so, 18) + '</div>';
+  h += '<table class="gd" style="width:100%"><tr>' +
+       '<td style="width:52%">Số: ' + fld(bb.so, 10) + '/BC-VTB&amp;CTL</td>' +
+       '<td style="width:48%;text-align:right"><i>Vũng Tàu, ngày ' +
+       esc(dmY(bb.denNgay || bb.tuNgay)) + '</i></td></tr></table>';
 
-  h += '<p>Tên tàu/ Наименование судна: ' + fld(bb.nhathau, 40) + '</p>';
+  h += '<div class="t1" style="margin-top:6pt">BÁO CÁO<br>ДОКЛАД</div>';
+  h += '<p style="text-align:center;font-style:italic">V/v: “Kết quả kiểm tra tình trạng kỹ thuật ' +
+       'và đánh giá nội bộ tàu ' + esc(ten) + '”</p>';
 
-  h += '<p>Thời gian kiểm tra: Từ ngày ' + fmtDate(bb.tuNgay) +
-       ' &nbsp;&nbsp;&nbsp;&nbsp; Đến ngày ' + fmtDate(bb.denNgay) + '</p>';
-  h += '<p>Время проверки: с &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; до</p>';
+  h += '<p style="margin-top:6pt"><b>Kính gửi:</b></p>';
+  kinhGuiLines().forEach(function (x) {
+    h += '<p style="padding-left:8mm">' + esc(x) + '</p>';
+  });
 
-  h += '<table class="gd"><tr>' +
-       '<td class="lbl">Loại kiểm tra:<br>Тип проверки:</td><td>' +
-       box("chuanbi")  + ' Định kỳ/ Периодическая<br>' +
-       box("thuchien") + ' Đột xuất/ Внеочередная<br>' +
-       box("duthau")   + ' Theo yêu cầu cấp trên/ PSC/ По требованию руководства/ PSC' +
-       '</td></tr></table>';
+  h += '<p class="j" style="margin-top:6pt">Thực hiện kế hoạch kiểm tra an toàn tàu (' +
+       esc(loaiKTText()) + '), từ ngày ' + fmtDate(bb.tuNgay) + ' đến ngày ' + fmtDate(bb.denNgay) +
+       ' đoàn kiểm tra đã tiến hành kiểm tra tình trạng kỹ thuật và đánh giá nội bộ tàu ' + esc(ten) +
+       ((bb.diadiem || "").trim() ? ' tại ' + esc(bb.diadiem.trim()) : '') + '.</p>';
 
-  h += '<p>Địa điểm/ vị trí tàu khi kiểm tra: ' + fld(bb.diadiem, 30) + '</p>';
-  h += '<p>Место проверки:</p>';
-  h += '<p>Đơn vị quản lý tàu: ' + fld(bb.donvi, 30) + '</p>';
-  h += '<p>Подразделение, отвечающиее за судно:</p>';
+  h += '<p style="margin-top:3pt">Thành viên đoàn kiểm tra:</p>';
+  var dl = doanLines();
+  if (!dl.length) h += '<p style="padding-left:8mm">- ' + dots(46) + '</p>';
+  else dl.forEach(function (x) { h += '<p style="padding-left:8mm">- ' + esc(x) + '</p>'; });
 
-  h += '<p style="margin-top:4pt">1. Thành phần đoàn kiểm tra gồm/ Состав комиссии по проверке судна:</p>';
+  if ((bb.coso || "").trim())
+    h += '<p class="j" style="margin-top:3pt">Cơ sở kiểm tra: ' + nl(bb.coso) + '</p>';
+
+  h += '<p class="j" style="margin-top:4pt">Đoàn kiểm tra ghi nhận một số điểm như sau:</p>';
+
   h += '<table class="g"><tr>' +
-       '<th style="width:8%">STT<br>П.п.</th><th style="width:30%">Họ và tên<br>Ф.И.О.</th>' +
-       '<th style="width:40%">Chức vụ<br>Должность</th><th style="width:22%">Đơn vị<br>Подразделение</th></tr>';
-  var nD = Math.max(doanRows.length, 6);
-  for (var a = 0; a < nD; a++) {
-    var p1 = doanRows[a] || {};
-    h += '<tr><td class="c h">' + (a + 1) + '</td><td>' + esc(p1.ten || "") + '</td><td>' +
-         esc(p1.chuc || "") + '</td><td>' + esc(p1.donvi || "") + '</td></tr>';
-  }
-  h += '</table>';
-
-  h += '<p class="j">2. Cơ sở để tiến hành kiểm tra: (Theo quyết định, chỉ thị, kiểm tra định kỳ, đột xuất...)/ ' +
-       'Основание для проверки: (Согласно приказу, распоряжению, периодическим и внеочередным проверкам...) ' +
-       ((bb.coso || "").trim() ? nl(bb.coso) : dots(58)) + '</p>';
-  if (!(bb.coso || "").trim()) h += '<p>' + dots(92) + '</p>';
-
-  h += '<p class="j" style="margin-top:2pt">- Căn cứ vào các tài liệu quy phạm, quy trình, hướng dẫn, tiêu chuẩn và ' +
-       'các tài liệu khác về ATSKMT đang có hiệu lực tại LD Việt-Nga Vietsovpetro / На основании нормативных ' +
-       'документов, процедур, инструкций, стандартов и других действующих документов в области БЗиООС ' +
-       'СП «Вьетсовпетро»;</p>';
-  h += '<p class="j">- Căn cứ vào các vi phạm/ sự không phù hợp đã được phát hiện tại thời điểm kiểm tra / ' +
-       'На основании нарушений / несоответствий, которые были обнаружены во время проверки.</p>';
-
-  h += '<p class="j" style="margin-top:2pt">3. Đoàn kiểm tra yêu cầu Thuyền trưởng khắc phục các vi phạm/ ' +
-       'sự không phù hợp dưới đây (2) và gửi kết quả khắc phục bằng văn bản ' +
-       'theo đúng thời hạn hoàn thành (3) về địa chỉ:</p>';
-  h += '<p>+ Trưởng đoàn kiểm tra: Ông (bà) ' + fld(bb.truongdoan, 30) + '</p>';
-  h += '<p class="j">+ Phòng ATSKMT LD Việt-Nga Vietsovpetro. Địa chỉ 105 Lê Lợi phường Thắng Nhì, Tp Vũng Tàu.</p>';
-  h += f002Footer(1);
-  h += '</div>';
-
-  /* ---------- TRANG 2 ---------- */
-  h += '<div class="page pgbrk">';
-  h += f002Header();
-  h += '<p class="j">- Комиссия потребовала капитана судна устранить нарушения/несоответствия, ' +
-       'указанные ниже (2), и направить результаты в письменном виде ' +
-       'в указанные сроки (3) по адресу:</p>';
-  h += '<p>+Руководитель комиссии: г-н (г-жа) ' + fld(bb.truongdoan, 30) + '</p>';
-  h += '<p>+ОБЗиОС СП «Вьетсовпетро». Адрес: 105 ул. Лелой, район Тхангни, г.Вунгтау.</p>';
-
-  h += '<table class="g" style="margin-top:8pt"><tr>' +
-       '<th style="width:6%">№</th>' +
-       '<th style="width:44%">Các vi phạm / điểm chưa phù hợp cần khắc phục – Tài liệu liên quan<br>' +
-       'Нарушения/ несоответствия - соответствующие документы</th>' +
-       '<th style="width:15%">Mức độ<br>Уровень</th>' +
-       '<th style="width:17%">Thời hạn hoàn thành<br>Срок исполнения</th>' +
-       '<th style="width:18%">Trách nhiệm thực hiện<br>Ответственный за выполнение</th></tr>' +
-       '<tr><td class="c">(1)</td><td class="c">(2)</td><td class="c">(3)</td>' +
-       '<td class="c">(4)</td><td class="c">(5)</td></tr>';
-  var nV = Math.max(vpRows.length, 3);
-  for (var b1 = 0; b1 < nV; b1++) {
-    var r1 = vpRows[b1];
-    var photoHtml = (withPhotos && r1 && r1.photos && r1.photos.length)
-      ? '<div class="f002-photo">' +
-          r1.photos.map(function (ph) { return '<img src="' + ph + '">'; }).join("") +
-          '<div class="cap">Ảnh bằng chứng (' + r1.photos.length + ')</div></div>'
-      : "";
-    var nd = r1 ? ((r1.lsr ? "<b>[" + esc(r1.lsr) + "]</b> " : "") + nl(r1.noidung) + photoHtml) : (b1 === 0 && !vpRows.length ? "Không phát hiện / Не обнаружено" : "");
-    var mv = r1 && r1.muc ? nl(MUC_SONG[r1.muc]) : "";
-    h += '<tr><td class="c h">' + (b1 + 1) + '</td><td>' + nd + '</td>' +
-         '<td class="c' + (r1 && (r1.muc === "1" || r1.muc === "2") ? " h" : "") + '">' + mv + '</td>' +
-         '<td class="c">' + esc(r1 ? r1.thoihan : "") + '</td>' +
-         '<td class="c">' + esc(r1 ? r1.trachnhiem : "") + '</td></tr>';
+       '<th style="width:6%">TT</th>' +
+       '<th style="width:50%">Những công việc phải làm</th>' +
+       '<th style="width:20%">Khắc phục / thời hạn</th>' +
+       '<th style="width:24%">Ý kiến của tàu</th></tr>';
+  if (!vp.length) {
+    h += '<tr><td class="c h">1</td><td>Không phát hiện</td><td></td><td></td></tr>';
+  } else {
+    vp.forEach(function (r, i) {
+      var ph = (withPhotos && r.photos && r.photos.length)
+        ? '<div class="f002-photo">' +
+            r.photos.map(function (p) { return '<img src="' + p + '">'; }).join("") +
+            '<div class="cap">Ảnh bằng chứng (' + r.photos.length + ')</div></div>'
+        : "";
+      h += '<tr><td class="c h">' + (i + 1) + '</td>' +
+           '<td>' + nl(ndText(r)) + ph + '</td>' +
+           '<td class="c' + (r.muc === "1" || r.muc === "2" ? " h" : "") + '">' + nl(khacPhucText(r)) + '</td>' +
+           '<td>' + nl(yKienText(r)) + '</td></tr>';
+    });
   }
   h += '</table>';
 
   h += tongHopHTML();
 
-  h += '<table class="g"><tr><th style="width:7%">№</th>' +
-       '<th style="width:46%">Các khuyến cáo (nếu có)<br>Рекомендации (при наличии)</th>' +
-       '<th style="width:47%">Đề xuất – kiến nghị- Предложения</th></tr>';
-  var nK = Math.max(kcRows.length, 3);
-  for (var c1 = 0; c1 < nK; c1++) {
-    var r2 = kcRows[c1] || {};
-    h += '<tr><td class="c h">' + (c1 + 1) + '</td><td>' + nl(r2.noidung || "") + '</td><td>' +
-         nl(r2.dexuat || "") + '</td></tr>';
+  h += '<p style="margin-top:5pt"><b>Kiến nghị đề xuất:</b></p>';
+  if (!kn.length && !kc.length) {
+    h += '<p style="padding-left:8mm">- Không</p>';
+  } else {
+    kn.forEach(function (r) { h += '<p class="j" style="padding-left:8mm">- ' + nl(ndText(r)) + '</p>'; });
+    kc.forEach(function (r) {
+      var s = (r.noidung || "").trim();
+      if ((r.dexuat || "").trim()) s += (s ? " — " : "") + r.dexuat.trim();
+      h += '<p class="j" style="padding-left:8mm">- ' + nl(s) + '</p>';
+    });
   }
+
+  h += '<p style="margin-top:6pt"><b>Kính báo cáo.</b></p>';
+
+  h += '<table class="gd" style="width:100%;margin-top:10pt"><tr>' +
+       '<td style="width:50%;text-align:center"><b>THÀNH VIÊN ĐOÀN KIỂM TRA</b><br><br><br>' +
+       esc((bb.truongdoan || "").trim()) + '</td>' +
+       '<td style="width:50%;text-align:center"><b>THUYỀN TRƯỞNG TÀU ' + esc(ten.toUpperCase()) +
+       '</b><br><br><br>' + esc((bb.thuyentruong || "").trim()) + '</td></tr></table>';
+
+  h += '<div class="recv"><div class="h">Nơi nhận:</div><div class="li">' +
+       '<div>- Như trên;</div>' +
+       '<div>- Phòng ATSKMT LD Việt-Nga Vietsovpetro;</div>' +
+       '<div>- Tàu ' + esc(ten) + ' — lưu trên tàu;</div>' +
+       '<div>- Lưu: XN VTB&amp;CTL.</div></div></div>';
+
+  h += f002Footer(DOC_TITLES.bc[2]);
+  h += '</div>';
+  return h;
+}
+
+/* ---------- BẢN 2: BIÊN BẢN ĐÁNH GIÁ KIỂM TRA CẤP III (VTB07-02-04A) ---------- */
+function buildC3HTML() {
+  var ten = tenTau();
+  var main = c3Main(), kn = c3KN(), kc = kcAll();
+  var h = '<div class="page">';
+  h += f002Header(DOC_TITLES.c3[0], DOC_TITLES.c3[1]);
+
+  h += '<div class="t1" style="margin-top:4pt">DANH MỤC SỰ GHI NHẬN VÀ SỰ KHÔNG PHÙ HỢP</div>';
+  h += '<div class="t2">LIST OF OBSERVATIONS AND NON-CONFORMITIES</div>';
+
+  h += '<p>Số kiểm soát / Control No.: ' + fld(bb.soc3 || bb.so, 16) +
+       ' &nbsp;&nbsp;&nbsp; Ngày đánh giá / Date of audit: ' + fmtDate(bb.denNgay || bb.tuNgay) + '</p>';
+  h += '<p>Đơn vị được đánh giá / Auditee: tàu ' + esc(ten) +
+       ' — ' + fld(bb.donvi, 16) + '</p>';
+  h += '<p>Loại đánh giá: kiểm tra an toàn cấp III (' + esc(loaiKTText()) + ')' +
+       ((bb.diadiem || "").trim() ? ' — tại ' + esc(bb.diadiem.trim()) : '') + '</p>';
+
+  h += '<table class="g"><tr>' +
+       '<th style="width:7%">TT</th>' +
+       '<th style="width:37%">Nội dung bằng chứng khách quan<br><i>Description of objective evidence</i></th>' +
+       '<th style="width:10%">Phân loại<br><i>Grading</i></th>' +
+       '<th style="width:16%">Căn cứ ISM / VSP</th>' +
+       '<th style="width:14%">Thời hạn khắc phục<br><i>Deadline</i></th>' +
+       '<th style="width:16%">Tình trạng khắc phục / Lưu ý</th></tr>';
+
+  h += '<tr><td colspan="6"><b>I. Các sự ghi nhận (Obs) và sự không phù hợp (NC)</b><br>' +
+       '<i>Observations and Non-conformities</i></td></tr>';
+
+  var nsec = 0;
+  BP_ORDER.forEach(function (bp) {
+    var grp = main.filter(function (r) { return (r.bp || "khac") === bp; });
+    if (!grp.length) return;
+    nsec++;
+    h += '<tr><td colspan="6"><b>' + nsec + '. Bộ phận ' + esc(BP_NAME[bp]) + '</b></td></tr>';
+    grp.forEach(function (r, i) {
+      h += '<tr><td class="c h">' + nsec + "." + (i + 1) + '</td>' +
+           '<td>' + nl((r.lsr ? "[" + r.lsr + "] " : "") + (r.noidung || "")) + '</td>' +
+           '<td class="c">' + (r.pl === "obs" ? "Obs" : "NC") + '</td>' +
+           '<td class="c">' + esc(r.cc || "") + '</td>' +
+           '<td class="c">' + nl(khacPhucText(r)) + '</td>' +
+           '<td>' + nl(yKienText(r)) + '</td></tr>';
+    });
+  });
+  if (!nsec) h += '<tr><td class="c h">1</td><td>Không phát hiện / None</td>' +
+                  '<td></td><td></td><td></td><td></td></tr>';
+
+  h += '<tr><td colspan="6"><b>II. Những khuyến nghị và đề xuất để nâng cao tình trạng ' +
+       'an toàn cho tàu</b><br><i>Recommendations and suggestions to improve the safety ' +
+       'situation for ships</i></td></tr>';
+  var k = 0;
+  kn.forEach(function (r) {
+    k++;
+    h += '<tr><td class="c h">' + k + '</td><td>' + nl(r.noidung || "") + '</td><td></td>' +
+         '<td class="c">' + esc(r.cc || "") + '</td>' +
+         '<td class="c">' + nl(khacPhucText(r)) + '</td><td>' + nl(yKienText(r)) + '</td></tr>';
+  });
+  kc.forEach(function (r) {
+    k++;
+    var s = (r.noidung || "").trim();
+    if ((r.dexuat || "").trim()) s += (s ? "\n" : "") + r.dexuat.trim();
+    h += '<tr><td class="c h">' + k + '</td><td>' + nl(s) + '</td>' +
+         '<td></td><td></td><td></td><td></td></tr>';
+  });
+  if (!k) h += '<tr><td class="c h">1</td><td>Không</td><td></td><td></td><td></td><td></td></tr>';
   h += '</table>';
-  h += f002Footer(2);
+
+  h += '<div class="note">* NC: sự không phù hợp / Non-conformity. &nbsp; Obs: sự ghi nhận / Observation.<br>' +
+       'Thời hạn khắc phục theo Phiếu đi tuyến kiểm tra tàu: ① dừng ngay · ② trước khi rời bến · ' +
+       '③ có thời hạn (tối đa 30 ngày) · ④ ghi nhận cải tiến.</div>';
+
+  h += '<table class="gd" style="width:100%;margin-top:12pt"><tr>' +
+       '<td style="width:34%;text-align:center"><b>DPA / LÃNH ĐẠO XÍ NGHIỆP</b><br><i>DPA / Management</i><br><br><br></td>' +
+       '<td style="width:33%;text-align:center"><b>ĐÁNH GIÁ VIÊN</b><br><i>Auditor</i><br><br><br>' +
+       esc((bb.truongdoan || "").trim()) + '</td>' +
+       '<td style="width:33%;text-align:center"><b>ĐẠI DIỆN TÀU ĐƯỢC ĐÁNH GIÁ</b><br><i>Auditee</i><br><br><br>' +
+       esc((bb.thuyentruong || "").trim()) + '</td></tr></table>';
+
+  h += f002Footer(DOC_TITLES.c3[2]);
   h += '</div>';
-
-  /* ---------- TRANG 3 ---------- */
-  h += '<div class="page pgbrk">';
-  h += f002Header();
-
-  h += '<div class="note">' +
-       '<div>*Lưu ý: -Nếu không phát hiện vi phạm, cần ghi rõ: “Không phát hiện”</div>' +
-       '<div style="padding-left:14mm">- Các báo cáo khắc phục, dẫn chứng đã khắc phục vi phạm…cần được ' +
-       'đính kèm BB này và lưu tại công trình.</div>' +
-       '<div style="margin-top:3pt">* Примечание:</div>' +
-       '<div>- Если нарушений не обнаружено, нужно указать: "Не обнаружено".</div>' +
-       '<div>- Отчет об устранении нарушений, доказательства устранения нарушений ... должны быть ' +
-       'прикреплены к настоящему Акту и храниться на объекте.</div></div>';
-
-  var line = '________________,  _________';
-  h += '<div class="sig">' +
-       '<p><b>Người kiểm tra/ Проверяющий</b></p>' +
-       '<p><i>(chữ ký, ghi rõ họ tên /Подпись и Ф.И.О.)</i> &nbsp;&nbsp;&nbsp;&nbsp; ' + line + '</p>' +
-       '<p style="margin-top:8pt"><b>Thuyền trưởng/ Капитан судна</b></p>' +
-       '<p><i>(chữ ký, ghi rõ họ tên /Подпись и Ф.И.О.)</i> &nbsp;&nbsp;&nbsp;&nbsp; ' + line + '</p>' +
-       '</div>';
-
-  h += '<div class="recv"><div class="h">Nơi nhận/ Рассылка:</div>' +
-       '<div class="li">' +
-       '<div>1. Phòng ATSKMT Vietsovpetro / ОБЗиОС СП «Вьетсовпетро».</div>' +
-       '<div>2. Tàu — lưu trên tàu / Судно — хранить на борту.</div>' +
-       '<div>3. Đơn vị quản lý tàu (XN VTB&amp;CTL) / Подразделение, отвечающиее за судно.</div>' +
-       '</div></div>';
-  h += f002Footer(3);
-  h += '</div>';
-
   return h;
 }
 
@@ -2429,15 +2709,18 @@ function f002Css() {
 function f002Standalone() {
   return '<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8">' +
     '<meta name="viewport" content="width=device-width,initial-scale=1">' +
-    '<title>Bien-ban-kiem-tra-an-toan-tau</title><style>' + f002Css() + '</style></head>' +
+    '<title>' + esc(DOC_TITLES[docMode][0]) + '</title><style>' + f002Css() + '</style></head>' +
     '<body><div class="f002">' + buildDocHTML(false) + '</div></body></html>';
 }
 
 function f002FileName(ext) {
   var nt = (bb.nhathau || "Tau").replace(/[\\\/:*?"<>|]/g, "").trim().replace(/\s+/g, "-");
-  var ng = (bb.tuNgay || "").replace(/-/g, "") || "ngay";
-  var so = bb.so ? bb.so.replace(/[^\w\-]+/g, "_") : "chuaso";
-  return "BB-kiem-tra-an-toan-tau_" + nt + "_" + so + "_" + ng + ext;
+  var ng = (bb.denNgay || bb.tuNgay || "").replace(/-/g, "") || "ngay";
+  var c3 = docMode === "c3";
+  var so = (c3 ? (bb.soc3 || bb.so) : bb.so);
+  so = so ? String(so).replace(/[^\w\-]+/g, "_") : "chuaso";
+  var pre = c3 ? "Bien-ban-danh-gia-kiem-tra-cap-III" : "Bao-cao-ket-qua-kiem-tra-tinh-trang-tau";
+  return pre + "_" + nt + "_" + so + "_" + ng + ext;
 }
 
 function f002SaveBlob(blob, filename, mime) {
@@ -2621,9 +2904,31 @@ function dxFld(v, n) {
   v = (v == null ? "" : String(v)).trim();
   return v ? v : dots(n);
 }
+/* Ô tiêu đề bảng — hai dòng Việt / ngoại ngữ */
+function thTop(t1, t2, w) {
+  return dxCell(w, dxPara(dxRun(t1, { b: true, sz: 23 }) +
+    (t2 ? dxBr() + dxRun(t2, { b: true, i: true, sz: 21 }) : ""),
+    { align: "center", after: 0 }), { vAlign: "center" });
+}
+/* Ô nội dung — tự tách theo dấu xuống dòng */
+function tdC(w, txt, o) {
+  o = o || {};
+  var lines = String(txt == null ? "" : txt).split("\n"), s = "";
+  for (var i = 0; i < lines.length; i++) {
+    s += dxPara(dxRun(lines[i], { sz: o.sz || 23, b: o.b }), { align: o.align, after: 0 });
+  }
+  return dxCell(w, s || "<w:p/>");
+}
+/* Dòng gộp cả bảng — dùng cho tiêu đề mục I / II và tên bộ phận */
+function secRow(width, span, txt, txt2) {
+  return dxRow(dxCell(width, dxPara(dxRun(txt, { b: true, sz: 23 }), { after: 0 }) +
+    (txt2 ? dxPara(dxRun(txt2, { b: true, i: true, sz: 21 }), { after: 0 }) : ""), { span: span }));
+}
 
-function buildDocxBytes(withPhotos) {
-  var media = [];                 /* c\u00e1c ph\u1ea7n \u1ea3nh d\u00f9ng chung trong ZIP */
+/* Đóng gói .docx: nhận hàm dựng thân bài, trả về mảng byte của file ZIP.
+   makeBody(ctx) — ctx.img(dataUrl, rongCm, caoCm) trả sẵn đoạn ảnh đã canh cỡ. */
+function docxPackage(makeBody, hdr1, hdr2, ftrLeft) {
+  var media = [];                 /* các phần ảnh dùng chung trong ZIP */
   var docRels = [], docRid = 4;   /* rId1 styles, rId2 header, rId3 footer */
   var imgId = 100;
   function addDocImage(dataUrl) {
@@ -2641,201 +2946,16 @@ function buildDocxBytes(withPhotos) {
     var k = Math.min(maxCmW * EMU_CM / cx, maxCmH * EMU_CM / cy, 1);
     return { cx: Math.max(1, Math.round(cx * k)), cy: Math.max(1, Math.round(cy * k)) };
   }
-
-  var doanRows = bb.doan.filter(function (p) { return (p.ten || "").trim() || (p.chuc || "").trim(); });
-  var vpRows = bb.viPham.filter(function (r) { return (r.noidung || "").trim(); });
-  var kcRows = bb.khuyenCao.filter(function (r) { return (r.noidung || "").trim() || (r.dexuat || "").trim(); });
-  var GD = bb.giaidoan;
-  function box(k) { return GD === k ? "\u2612" : "\u2610"; }
-
-  var b = "";
-
-  /* ---------- TRANG 1 ---------- */
-  b += dxPara(dxRun("T\u1ed5ng h\u1ee3p theo checklist \u041d\u041e\u0420\u041c-09-05-GE-01", { i: true, sz: 23 }) + dxBr() +
-    dxRun("v\u00e0 c\u00e1c ngu\u1ed3n li\u00ean quan", { i: true, sz: 23 }), { align: "right", after: 60 });
-  b += dxPara(dxRun("BI\u00caN B\u1ea2N KI\u1ec2M TRA AN TO\u00c0N T\u00c0U", { b: true }) + dxBr() +
-    dxRun("\u0410\u041a\u0422 \u041f\u0420\u041e\u0412\u0415\u0420\u041a\u0418 \u0411\u0415\u0417\u041e\u041f\u0410\u0421\u041d\u041e\u0421\u0422\u0418 \u0421\u0423\u0414\u041d\u0410", { b: true }),
-    { align: "center", after: 20 });
-  b += dxPara(dxRun("S\u1ed1 BB / \u2116: " + dxFld(bb.so, 18), { b: true }), { align: "center", after: 100 });
-  b += dxPara(dxRun("T\u00ean t\u00e0u/ \u041d\u0430\u0438\u043c\u0435\u043d\u043e\u0432\u0430\u043d\u0438\u0435 \u0441\u0443\u0434\u043d\u0430: " + dxFld(bb.nhathau, 40)));
-  b += dxPara(dxRun("Th\u1eddi gian ki\u1ec3m tra: T\u1eeb ng\u00e0y " + fmtDate(bb.tuNgay) +
-    "          \u0110\u1ebfn ng\u00e0y " + fmtDate(bb.denNgay)));
-  b += dxPara(dxRun("\u0412\u0440\u0435\u043c\u044f \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438: \u0441                    \u0434\u043e"));
-  b += dxTable([1500, 8705], dxRow(
-    dxCell(1500, dxPara(dxRun("Lo\u1ea1i ki\u1ec3m tra:"), { after: 0 }) + dxPara(dxRun("\u0422\u0438\u043f \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438:"), { after: 0 })) +
-    dxCell(8705,
-      dxPara(dxRun(box("chuanbi") + " \u0110\u1ecbnh k\u1ef3/ \u041f\u0435\u0440\u0438\u043e\u0434\u0438\u0447\u0435\u0441\u043a\u0430\u044f"), { after: 0 }) +
-      dxPara(dxRun(box("thuchien") + " \u0110\u1ed9t xu\u1ea5t/ \u0412\u043d\u0435\u043e\u0447\u0435\u0440\u0435\u0434\u043d\u0430\u044f"), { after: 0 }) +
-      dxPara(dxRun(box("duthau") + " Theo y\u00eau c\u1ea7u c\u1ea5p tr\u00ean/ PSC/ \u041f\u043e \u0442\u0440\u0435\u0431\u043e\u0432\u0430\u043d\u0438\u044e \u0440\u0443\u043a\u043e\u0432\u043e\u0434\u0441\u0442\u0432\u0430/ PSC"), { after: 0 }))
-  ), "none");
-  b += dxPara(dxRun("\u0110\u1ecba \u0111i\u1ec3m/ v\u1ecb tr\u00ed t\u00e0u khi ki\u1ec3m tra: " + dxFld(bb.diadiem, 30)), { before: 60 });
-  b += dxPara(dxRun("\u041c\u0435\u0441\u0442\u043e \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438:"));
-  b += dxPara(dxRun("\u0110\u01a1n v\u1ecb qu\u1ea3n l\u00fd t\u00e0u: " + dxFld(bb.donvi, 30)));
-  b += dxPara(dxRun("\u041f\u043e\u0434\u0440\u0430\u0437\u0434\u0435\u043b\u0435\u043d\u0438\u0435, \u043e\u0442\u0432\u0435\u0447\u0430\u044e\u0449\u0438\u0435\u0435 \u0437\u0430 \u0441\u0443\u0434\u043d\u043e:"));
-  b += dxPara(dxRun("1. Th\u00e0nh ph\u1ea7n \u0111o\u00e0n ki\u1ec3m tra g\u1ed3m/ \u0421\u043e\u0441\u0442\u0430\u0432 \u043a\u043e\u043c\u0438\u0441\u0441\u0438\u0438 \u043f\u043e \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0435 \u0441\u0443\u0434\u043d\u0430:"),
-    { before: 60, after: 60 });
-
-  var G1 = [816, 3062, 4082, 2245];
-  function th(txt1, txt2, w) {
-    return dxCell(w, dxPara(dxRun(txt1, { b: true, sz: 24 }) + dxBr() + dxRun(txt2, { b: true, sz: 24 }),
-      { align: "center", after: 0 }), { vAlign: "center" });
-  }
-  var rowsD = dxRow(th("STT", "\u041f.\u043f.", G1[0]) + th("H\u1ecd v\u00e0 t\u00ean", "\u0424.\u0418.\u041e.", G1[1]) +
-    th("Ch\u1ee9c v\u1ee5", "\u0414\u043e\u043b\u0436\u043d\u043e\u0441\u0442\u044c", G1[2]) + th("\u0110\u01a1n v\u1ecb", "\u041f\u043e\u0434\u0440\u0430\u0437\u0434\u0435\u043b\u0435\u043d\u0438\u0435", G1[3]));
-  var nD = Math.max(doanRows.length, 6);
-  for (var a1 = 0; a1 < nD; a1++) {
-    var p1 = doanRows[a1] || {};
-    rowsD += dxRow(
-      dxCell(G1[0], dxPara(dxRun(String(a1 + 1), { sz: 24 }), { align: "center", after: 0 })) +
-      dxCell(G1[1], dxPara(dxRun(p1.ten || "", { sz: 24 }), { after: 0 })) +
-      dxCell(G1[2], dxPara(dxRun(p1.chuc || "", { sz: 24 }), { after: 0 })) +
-      dxCell(G1[3], dxPara(dxRun(p1.donvi || "", { sz: 24 }), { after: 0 })), 300);
-  }
-  b += dxTable(G1, rowsD) + dxPara("", { after: 60 });
-
-  b += dxPara(dxRun("2. C\u01a1 s\u1edf \u0111\u1ec3 ti\u1ebfn h\u00e0nh ki\u1ec3m tra: (Theo quy\u1ebft \u0111\u1ecbnh, ch\u1ec9 th\u1ecb, ki\u1ec3m tra \u0111\u1ecbnh k\u1ef3, " +
-    "\u0111\u1ed9t xu\u1ea5t...)/ \u041e\u0441\u043d\u043e\u0432\u0430\u043d\u0438\u0435 \u0434\u043b\u044f \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438: (\u0421\u043e\u0433\u043b\u0430\u0441\u043d\u043e \u043f\u0440\u0438\u043a\u0430\u0437\u0443, \u0440\u0430\u0441\u043f\u043e\u0440\u044f\u0436\u0435\u043d\u0438\u044e, \u043f\u0435\u0440\u0438\u043e\u0434\u0438\u0447\u0435\u0441\u043a\u0438\u043c \u0438 " +
-    "\u0432\u043d\u0435\u043e\u0447\u0435\u0440\u0435\u0434\u043d\u044b\u043c \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0430\u043c...) " + ((bb.coso || "").trim() ? bb.coso.replace(/\n/g, " ") : dots(58))),
-    { align: "both" });
-  if (!(bb.coso || "").trim()) b += dxPara(dxRun(dots(92)));
-  b += dxPara(dxRun("- C\u0103n c\u1ee9 v\u00e0o c\u00e1c t\u00e0i li\u1ec7u quy ph\u1ea1m, quy tr\u00ecnh, h\u01b0\u1edbng d\u1eabn, ti\u00eau chu\u1ea9n v\u00e0 c\u00e1c t\u00e0i li\u1ec7u " +
-    "kh\u00e1c v\u1ec1 ATSKMT \u0111ang c\u00f3 hi\u1ec7u l\u1ef1c t\u1ea1i LD Vi\u1ec7t-Nga Vietsovpetro / \u041d\u0430 \u043e\u0441\u043d\u043e\u0432\u0430\u043d\u0438\u0438 \u043d\u043e\u0440\u043c\u0430\u0442\u0438\u0432\u043d\u044b\u0445 " +
-    "\u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u043e\u0432, \u043f\u0440\u043e\u0446\u0435\u0434\u0443\u0440, \u0438\u043d\u0441\u0442\u0440\u0443\u043a\u0446\u0438\u0439, \u0441\u0442\u0430\u043d\u0434\u0430\u0440\u0442\u043e\u0432 \u0438 \u0434\u0440\u0443\u0433\u0438\u0445 \u0434\u0435\u0439\u0441\u0442\u0432\u0443\u044e\u0449\u0438\u0445 \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u043e\u0432 \u0432 \u043e\u0431\u043b\u0430\u0441\u0442\u0438 \u0411\u0417\u0438\u041e\u041e\u0421 " +
-    "\u0421\u041f \u00ab\u0412\u044c\u0435\u0442\u0441\u043e\u0432\u043f\u0435\u0442\u0440\u043e\u00bb;"),
-    { align: "both" });
-  b += dxPara(dxRun("- C\u0103n c\u1ee9 v\u00e0o c\u00e1c vi ph\u1ea1m/ s\u1ef1 kh\u00f4ng ph\u00f9 h\u1ee3p \u0111\u00e3 \u0111\u01b0\u1ee3c ph\u00e1t hi\u1ec7n t\u1ea1i th\u1eddi \u0111i\u1ec3m ki\u1ec3m tra / " +
-    "\u041d\u0430 \u043e\u0441\u043d\u043e\u0432\u0430\u043d\u0438\u0438 \u043d\u0430\u0440\u0443\u0448\u0435\u043d\u0438\u0439 / \u043d\u0435\u0441\u043e\u043e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0438\u0439, \u043a\u043e\u0442\u043e\u0440\u044b\u0435 \u0431\u044b\u043b\u0438 \u043e\u0431\u043d\u0430\u0440\u0443\u0436\u0435\u043d\u044b \u0432\u043e \u0432\u0440\u0435\u043c\u044f \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438."), { align: "both" });
-  b += dxPara(dxRun("3. \u0110o\u00e0n ki\u1ec3m tra y\u00eau c\u1ea7u Thuy\u1ec1n tr\u01b0\u1edfng kh\u1eafc ph\u1ee5c " +
-    "c\u00e1c vi ph\u1ea1m/ s\u1ef1 kh\u00f4ng ph\u00f9 h\u1ee3p d\u01b0\u1edbi \u0111\u00e2y (2) v\u00e0 g\u1eedi k\u1ebft qu\u1ea3 kh\u1eafc ph\u1ee5c b\u1eb1ng v\u0103n b\u1ea3n theo \u0111\u00fang th\u1eddi h\u1ea1n " +
-    "ho\u00e0n th\u00e0nh (3) v\u1ec1 \u0111\u1ecba ch\u1ec9:"), { align: "both" });
-  b += dxPara(dxRun("+ Tr\u01b0\u1edfng \u0111o\u00e0n ki\u1ec3m tra: \u00d4ng (b\u00e0) " + dxFld(bb.truongdoan, 30)));
-  b += dxPara(dxRun("+ Ph\u00f2ng ATSKMT LD Vi\u1ec7t-Nga Vietsovpetro. \u0110\u1ecba ch\u1ec9 105 L\u00ea L\u1ee3i ph\u01b0\u1eddng Th\u1eafng Nh\u00ec, " +
-    "Tp V\u0169ng T\u00e0u."), { align: "both" });
-
-  /* ---------- TRANG 2 ---------- */
-  b += dxPara(dxRun("- \u041a\u043e\u043c\u0438\u0441\u0441\u0438\u044f \u043f\u043e\u0442\u0440\u0435\u0431\u043e\u0432\u0430\u043b\u0430 \u043a\u0430\u043f\u0438\u0442\u0430\u043d\u0430 \u0441\u0443\u0434\u043d\u0430 " +
-    "\u0443\u0441\u0442\u0440\u0430\u043d\u0438\u0442\u044c \u043d\u0430\u0440\u0443\u0448\u0435\u043d\u0438\u044f/\u043d\u0435\u0441\u043e\u043e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0438\u044f, \u0443\u043a\u0430\u0437\u0430\u043d\u043d\u044b\u0435 \u043d\u0438\u0436\u0435 (2), \u0438 \u043d\u0430\u043f\u0440\u0430\u0432\u0438\u0442\u044c \u0440\u0435\u0437\u0443\u043b\u044c\u0442\u0430\u0442\u044b \u0432 \u043f\u0438\u0441\u044c\u043c\u0435\u043d\u043d\u043e\u043c \u0432\u0438\u0434\u0435 " +
-    "\u0432 \u0443\u043a\u0430\u0437\u0430\u043d\u043d\u044b\u0435 \u0441\u0440\u043e\u043a\u0438 (3) \u043f\u043e \u0430\u0434\u0440\u0435\u0441\u0443:"), { brk: true, align: "both" });
-  b += dxPara(dxRun("+\u041f\u0440\u043e\u0432\u0435\u0440\u044f\u044e\u0449\u0438\u0439: \u0433-\u043d (\u0433-\u0436\u0430) " + dxFld(bb.truongdoan, 30)));
-  b += dxPara(dxRun("+\u041e\u0411\u0417\u0438\u041e\u0421 \u0421\u041f \u00ab\u0412\u044c\u0435\u0442\u0441\u043e\u0432\u043f\u0435\u0442\u0440\u043e\u00bb. \u0410\u0434\u0440\u0435\u0441: 105 \u0443\u043b. \u041b\u0435\u043b\u043e\u0439, \u0440\u0430\u0439\u043e\u043d \u0422\u0445\u0430\u043d\u0433\u043d\u0438, \u0433.\u0412\u0443\u043d\u0433\u0442\u0430\u0443."),
-    { after: 80 });
-
-  var G2 = [652, 4200, 1400, 1976, 1977];
-  var rowsV = dxRow(
-    dxCell(G2[0], dxPara(dxRun("\u2116", { b: true, sz: 24 }), { align: "center", after: 0 }), { vAlign: "center" }) +
-    dxCell(G2[1], dxPara(dxRun("C\u00e1c vi ph\u1ea1m / \u0111i\u1ec3m ch\u01b0a ph\u00f9 h\u1ee3p c\u1ea7n kh\u1eafc ph\u1ee5c \u2013 T\u00e0i li\u1ec7u li\u00ean quan",
-      { b: true, sz: 24 }) + dxBr() + dxRun("\u041d\u0430\u0440\u0443\u0448\u0435\u043d\u0438\u044f/ \u043d\u0435\u0441\u043e\u043e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0438\u044f - \u0441\u043e\u043e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044e\u0449\u0438\u0435 \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b",
-      { b: true, sz: 24 }), { align: "center", after: 0 }), { vAlign: "center" }) +
-    dxCell(G2[2], dxPara(dxRun("M\u1ee9c \u0111\u1ed9", { b: true, sz: 24 }) + dxBr() +
-      dxRun("\u0423\u0440\u043e\u0432\u0435\u043d\u044c", { b: true, sz: 24 }), { align: "center", after: 0 }), { vAlign: "center" }) +
-    dxCell(G2[3], dxPara(dxRun("Th\u1eddi h\u1ea1n ho\u00e0n th\u00e0nh", { b: true, sz: 24 }) + dxBr() +
-      dxRun("\u0421\u0440\u043e\u043a \u0438\u0441\u043f\u043e\u043b\u043d\u0435\u043d\u0438\u044f", { b: true, sz: 24 }), { align: "center", after: 0 }), { vAlign: "center" }) +
-    dxCell(G2[4], dxPara(dxRun("Tr\u00e1ch nhi\u1ec7m th\u1ef1c hi\u1ec7n", { b: true, sz: 24 }) + dxBr() +
-      dxRun("\u041e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0435\u043d\u043d\u044b\u0439 \u0437\u0430 \u0432\u044b\u043f\u043e\u043b\u043d\u0435\u043d\u0438\u0435", { b: true, sz: 24 }), { align: "center", after: 0 }), { vAlign: "center" })
-  );
-  rowsV += dxRow(["(1)", "(2)", "(3)", "(4)", "(5)"].map(function (t, i) {
-    return dxCell(G2[i], dxPara(dxRun(t, { sz: 24 }), { align: "center", after: 0 }));
-  }).join(""));
-  var nV = Math.max(vpRows.length, 3);
-  for (var b2 = 0; b2 < nV; b2++) {
-    var r1 = vpRows[b2];
-    var cellC = "";
-    if (r1) {
-      var lines = String(r1.noidung || "").split("\n");
-      lines.forEach(function (ln, li) {
-        var runs = (li === 0 && r1.lsr ? dxRun("[" + r1.lsr + "] ", { b: true, sz: 24 }) : "") +
-          dxRun(ln, { sz: 24 });
-        cellC += dxPara(runs, { after: 0 });
-      });
-      if (withPhotos && r1.photos && r1.photos.length) {
-        /* X\u1ebfp \u1ea3nh c\u00f9ng m\u1ed9t \u0111o\u1ea1n \u0111\u1ec3 Word t\u1ef1 d\u00e0n c\u1ea1nh nhau, kho\u1ea3ng 2 \u1ea3nh m\u1ed7i h\u00e0ng */
-        var imgRuns = r1.photos.map(function (ph) {
-          var im = addDocImage(ph), fit = fitEmu(im.size, 4.4, 3.0);
-          return dxImage(im.id, fit.cx, fit.cy, imgId++) + dxRun(" ", { sz: 24 });
-        }).join("");
-        cellC += dxPara(imgRuns, { align: "center", before: 40, after: 0 });
-        cellC += dxPara(dxRun("\u1ea2nh b\u1eb1ng ch\u1ee9ng (" + r1.photos.length + ")", { i: true, sz: 18 }),
-          { align: "center", after: 0 });
-      }
-    } else if (b2 === 0 && !vpRows.length) {
-      cellC = dxPara(dxRun("Kh\u00f4ng ph\u00e1t hi\u1ec7n / \u041d\u0435 \u043e\u0431\u043d\u0430\u0440\u0443\u0436\u0435\u043d\u043e", { sz: 24 }), { after: 0 });
+  var ctx = {
+    img: function (dataUrl, cmW, cmH) {
+      var im = addDocImage(dataUrl), fit = fitEmu(im.size, cmW, cmH);
+      return dxImage(im.id, fit.cx, fit.cy, imgId++);
     }
-    var cellM = "";
-    if (r1 && r1.muc) {
-      var mLines = MUC_SONG[r1.muc].split("\n"), nang = (r1.muc === "1" || r1.muc === "2");
-      mLines.forEach(function (ln) {
-        cellM += dxPara(dxRun(ln, { sz: 24, b: nang }), { align: "center", after: 0 });
-      });
-    }
-    rowsV += dxRow(
-      dxCell(G2[0], dxPara(dxRun(String(b2 + 1), { sz: 24 }), { align: "center", after: 0 })) +
-      dxCell(G2[1], cellC) +
-      dxCell(G2[2], cellM) +
-      dxCell(G2[3], dxPara(dxRun(r1 ? (r1.thoihan || "") : "", { sz: 24 }), { align: "center", after: 0 })) +
-      dxCell(G2[4], dxPara(dxRun(r1 ? (r1.trachnhiem || "") : "", { sz: 24 }), { align: "center", after: 0 })), 560);
-  }
-  b += dxTable(G2, rowsV) + dxPara("", { after: 80 });
+  };
 
-  /* Bảng tổng hợp kết quả theo Phiếu đi tuyến */
-  var S = tongHopData();
-  var G4 = [2551, 2551, 2551, 2552];
-  function cellTH(txt, val, bold) {
-    return dxCell(2551, dxPara(dxRun(txt + ": ", { sz: 24 }) +
-      dxRun(String(val), { sz: 24, b: true }), { after: 0 }));
-  }
-  var rowsT = dxRow(dxCell(10205, dxPara(dxRun("TỔNG HỢP KẾT QUẢ / ИТОГИ ПРОВЕРКИ",
-    { b: true, sz: 24 }), { align: "center", after: 0 }), { span: 4 }));
-  rowsT += dxRow(cellTH("Tổng số hạng mục", S.tong) + cellTH("Đạt", S.ok) +
-    cellTH("Không đạt", S.ng) + cellTH("N/A", S.na));
-  rowsT += dxRow(cellTH("① Dừng ngay", S.m1) + cellTH("② Trước khi rời bến", S.m2) +
-    cellTH("③ Có thời hạn", S.m3) + cellTH("④ Ghi nhận cải tiến", S.m4));
-  b += dxTable(G4, rowsT) + dxPara("", { after: 80 });
+  var b = makeBody(ctx);
 
-  var G3 = [714, 4694, 4797];
-  var rowsK = dxRow(
-    dxCell(G3[0], dxPara(dxRun("\u2116", { b: true, sz: 24 }), { align: "center", after: 0 }), { vAlign: "center" }) +
-    dxCell(G3[1], dxPara(dxRun("C\u00e1c khuy\u1ebfn c\u00e1o (n\u1ebfu c\u00f3)", { b: true, sz: 24 }) + dxBr() +
-      dxRun("\u0420\u0435\u043a\u043e\u043c\u0435\u043d\u0434\u0430\u0446\u0438\u0438 (\u043f\u0440\u0438 \u043d\u0430\u043b\u0438\u0447\u0438\u0438)", { b: true, sz: 24 }), { align: "center", after: 0 }), { vAlign: "center" }) +
-    dxCell(G3[2], dxPara(dxRun("\u0110\u1ec1 xu\u1ea5t \u2013 ki\u1ebfn ngh\u1ecb- \u041f\u0440\u0435\u0434\u043b\u043e\u0436\u0435\u043d\u0438\u044f", { b: true, sz: 24 }),
-      { align: "center", after: 0 }), { vAlign: "center" })
-  );
-  var nK = Math.max(kcRows.length, 3);
-  for (var c2 = 0; c2 < nK; c2++) {
-    var r2 = kcRows[c2] || {};
-    rowsK += dxRow(
-      dxCell(G3[0], dxPara(dxRun(String(c2 + 1), { sz: 24 }), { align: "center", after: 0 })) +
-      dxCell(G3[1], dxPara(dxRun((r2.noidung || "").replace(/\n/g, " "), { sz: 24 }), { after: 0 })) +
-      dxCell(G3[2], dxPara(dxRun((r2.dexuat || "").replace(/\n/g, " "), { sz: 24 }), { after: 0 })), 560);
-  }
-  b += dxTable(G3, rowsK);
-
-  /* ---------- TRANG 3 ---------- */
-  b += dxPara(dxRun("*L\u01b0u \u00fd: -N\u1ebfu kh\u00f4ng ph\u00e1t hi\u1ec7n vi ph\u1ea1m, c\u1ea7n ghi r\u00f5: \u201cKh\u00f4ng ph\u00e1t hi\u1ec7n\u201d",
-    { i: true, sz: 24 }), { brk: true, after: 0 });
-  b += dxPara(dxRun("- C\u00e1c b\u00e1o c\u00e1o kh\u1eafc ph\u1ee5c, d\u1eabn ch\u1ee9ng \u0111\u00e3 kh\u1eafc ph\u1ee5c vi ph\u1ea1m\u2026c\u1ea7n \u0111\u01b0\u1ee3c \u0111\u00ednh k\u00e8m BB n\u00e0y " +
-    "v\u00e0 l\u01b0u t\u1ea1i c\u00f4ng tr\u00ecnh.", { i: true, sz: 24 }), { ind: 800, after: 60 });
-  b += dxPara(dxRun("* \u041f\u0440\u0438\u043c\u0435\u0447\u0430\u043d\u0438\u0435:", { i: true, sz: 24 }), { after: 0 });
-  b += dxPara(dxRun("- \u0415\u0441\u043b\u0438 \u043d\u0430\u0440\u0443\u0448\u0435\u043d\u0438\u0439 \u043d\u0435 \u043e\u0431\u043d\u0430\u0440\u0443\u0436\u0435\u043d\u043e, \u043d\u0443\u0436\u043d\u043e \u0443\u043a\u0430\u0437\u0430\u0442\u044c: \"\u041d\u0435 \u043e\u0431\u043d\u0430\u0440\u0443\u0436\u0435\u043d\u043e\".",
-    { i: true, sz: 24 }), { after: 0 });
-  b += dxPara(dxRun("- \u041e\u0442\u0447\u0435\u0442 \u043e\u0431 \u0443\u0441\u0442\u0440\u0430\u043d\u0435\u043d\u0438\u0438 \u043d\u0430\u0440\u0443\u0448\u0435\u043d\u0438\u0439, \u0434\u043e\u043a\u0430\u0437\u0430\u0442\u0435\u043b\u044c\u0441\u0442\u0432\u0430 \u0443\u0441\u0442\u0440\u0430\u043d\u0435\u043d\u0438\u044f \u043d\u0430\u0440\u0443\u0448\u0435\u043d\u0438\u0439 ... \u0434\u043e\u043b\u0436\u043d\u044b \u0431\u044b\u0442\u044c " +
-    "\u043f\u0440\u0438\u043a\u0440\u0435\u043f\u043b\u0435\u043d\u044b \u043a \u043d\u0430\u0441\u0442\u043e\u044f\u0449\u0435\u043c\u0443 \u0410\u043a\u0442\u0443 \u0438 \u0445\u0440\u0430\u043d\u0438\u0442\u044c\u0441\u044f \u043d\u0430 \u043e\u0431\u044a\u0435\u043a\u0442\u0435.", { i: true, sz: 24 }), { after: 160 });
-
-  var sigLine = "________________,  _________";
-  b += dxPara(dxRun("Ng\u01b0\u1eddi ki\u1ec3m tra/ \u041f\u0440\u043e\u0432\u0435\u0440\u044f\u044e\u0449\u0438\u0439", { b: true }), { after: 20 });
-  b += dxPara(dxRun("(ch\u1eef k\u00fd, ghi r\u00f5 h\u1ecd t\u00ean /\u041f\u043e\u0434\u043f\u0438\u0441\u044c \u0438 \u0424.\u0418.\u041e.)", { i: true }) +
-    dxRun("        " + sigLine), { after: 160 });
-  b += dxPara(dxRun("Thuy\u1ec1n tr\u01b0\u1edfng/ \u041a\u0430\u043f\u0438\u0442\u0430\u043d \u0441\u0443\u0434\u043d\u0430", { b: true }), { after: 20 });
-  b += dxPara(dxRun("(ch\u1eef k\u00fd, ghi r\u00f5 h\u1ecd t\u00ean /\u041f\u043e\u0434\u043f\u0438\u0441\u044c \u0438 \u0424.\u0418.\u041e.)", { i: true }) +
-    dxRun("        " + sigLine), { after: 200 });
-
-  b += dxPara(dxRun("N\u01a1i nh\u1eadn/ \u0420\u0430\u0441\u0441\u044b\u043b\u043a\u0430:", { i: true, u: true, sz: 23 }), { after: 0 });
-  [
-    "1. Ph\u00f2ng ATSKMT Vietsovpetro / \u041e\u0411\u0417\u0438\u041e\u0421 \u0421\u041f \u00ab\u0412\u044c\u0435\u0442\u0441\u043e\u0432\u043f\u0435\u0442\u0440\u043e\u00bb.",
-    "2. T\u00e0u \u2014 l\u01b0u tr\u00ean t\u00e0u / \u0421\u0443\u0434\u043d\u043e \u2014 \u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043d\u0430 \u0431\u043e\u0440\u0442\u0443.",
-    "3. \u0110\u01a1n v\u1ecb qu\u1ea3n l\u00fd t\u00e0u (XN VTB&CTL) / \u041f\u043e\u0434\u0440\u0430\u0437\u0434\u0435\u043b\u0435\u043d\u0438\u0435, \u043e\u0442\u0432\u0435\u0447\u0430\u044e\u0449\u0438\u0435\u0435 \u0437\u0430 \u0441\u0443\u0434\u043d\u043e."
-  ].forEach(function (t) { b += dxPara(dxRun(t, { sz: 23 }), { ind: 340, after: 0 }); });
-
-  /* ---------- \u0110\u1ea7u trang / ch\u00e2n trang l\u1eb7p l\u1ea1i m\u1ecdi trang ---------- */
+  /* ---------- Đầu trang / chân trang lặp lại mọi trang ---------- */
   var hdrRels = [], logoPara;
   if (F002_LOGO) {
     var lb = _dataUrlBytes(F002_LOGO), ls = _imgSize(lb);
@@ -2850,15 +2970,14 @@ function buildDocxBytes(withPhotos) {
   var headerXml = DX_XMLDECL + "<w:hdr" + DX_NS + ">" +
     dxTable([2653, 7552], dxRow(
       dxCell(2653, logoPara, { vAlign: "center" }) +
-      dxCell(7552, dxPara(dxRun("DANH M\u1ee4C KI\u1ec2M TRA AN TO\u00c0N T\u00c0U \u2014 XN VTB&CTL", { b: true, sz: 21 }) + dxBr() +
-        dxRun("\u041a\u041e\u041d\u0422\u0420\u041e\u041b\u042c\u041d\u042b\u0419 \u041b\u0418\u0421\u0422 \u041f\u0420\u041e\u0412\u0415\u0420\u041a\u0418 \u0411\u0415\u0417\u041e\u041f\u0410\u0421\u041d\u041e\u0421\u0422\u0418 \u0421\u0423\u0414\u041d\u0410", { b: true, sz: 21 }),
-        { align: "center", after: 0 }), { vAlign: "center" })
+      dxCell(7552, dxPara(dxRun(hdr1, { b: true, sz: 21 }) + dxBr() +
+        dxRun(hdr2, { b: true, sz: 21 }), { align: "center", after: 0 }), { vAlign: "center" })
     )) +
     '<w:p><w:pPr><w:spacing w:after="0" w:line="60" w:lineRule="exact"/></w:pPr></w:p></w:hdr>';
 
   var footerXml = DX_XMLDECL + "<w:ftr" + DX_NS + ">" +
     dxTable([3402, 3401, 3402], dxRow(
-      dxCell(3402, dxPara(dxRun("T\u1ed5ng h\u1ee3p theo \u041d\u041e\u0420\u041c-09-05-GE-01", { i: true, sz: 23 }), { after: 0 })) +
+      dxCell(3402, dxPara(dxRun(ftrLeft, { i: true, sz: 23 }), { after: 0 })) +
       dxCell(3401, dxPara(dxRun("XN VTB&CTL", { i: true, sz: 23 }), { align: "center", after: 0 })) +
       dxCell(3402, dxPara(dxRun("Trang ", { i: true, sz: 23 }) + dxField("PAGE", { i: true, sz: 23 }) +
         dxRun(" / ", { i: true, sz: 23 }) + dxField("NUMPAGES", { i: true, sz: 23 }),
@@ -2931,6 +3050,231 @@ function buildDocxBytes(withPhotos) {
   return _zipStore(files);
 }
 
+/* ---------- Thân bài 1: BÁO CÁO KẾT QUẢ KIỂM TRA TÌNH TRẠNG TÀU ---------- */
+function bodyBaoCao(ctx, withPhotos) {
+  var ten = tenTau();
+  var vp = vpMain(), kn = vpKN(), kc = kcAll();
+  var b = "", i;
+
+  b += dxTable([5102, 5103], dxRow(
+    dxCell(5102, dxPara(dxRun("Số: " + dxFld(bb.so, 10) + "/BC-VTB&CTL"), { after: 0 })) +
+    dxCell(5103, dxPara(dxRun("Vũng Tàu, ngày " + dmY(bb.denNgay || bb.tuNgay), { i: true }),
+      { align: "right", after: 0 }))
+  ), "none");
+
+  b += dxPara(dxRun("BÁO CÁO", { b: true, sz: 30 }), { align: "center", before: 120, after: 20 });
+  b += dxPara(dxRun("ДОКЛАД", { b: true, sz: 24 }), { align: "center", after: 40 });
+  b += dxPara(dxRun("V/v: “Kết quả kiểm tra tình trạng kỹ thuật và đánh giá nội bộ tàu " + ten + "”",
+    { i: true }), { align: "center", after: 140 });
+
+  b += dxPara(dxRun("Kính gửi:", { b: true }));
+  kinhGuiLines().forEach(function (x) { b += dxPara(dxRun(x), { ind: 460 }); });
+
+  b += dxPara(dxRun("Thực hiện kế hoạch kiểm tra an toàn tàu (" + loaiKTText() + "), từ ngày " +
+    fmtDate(bb.tuNgay) + " đến ngày " + fmtDate(bb.denNgay) + " đoàn kiểm tra đã tiến hành kiểm tra " +
+    "tình trạng kỹ thuật và đánh giá nội bộ tàu " + ten +
+    ((bb.diadiem || "").trim() ? " tại " + bb.diadiem.trim() : "") + "."),
+    { align: "both", before: 120, after: 40 });
+
+  b += dxPara(dxRun("Thành viên đoàn kiểm tra:"));
+  var dl = doanLines();
+  if (!dl.length) b += dxPara(dxRun("- " + dots(46)), { ind: 460 });
+  else dl.forEach(function (x) { b += dxPara(dxRun("- " + x), { ind: 460 }); });
+
+  if ((bb.coso || "").trim())
+    b += dxPara(dxRun("Cơ sở kiểm tra: " + bb.coso.replace(/\n/g, " ")), { align: "both", before: 40 });
+
+  b += dxPara(dxRun("Đoàn kiểm tra ghi nhận một số điểm như sau:"), { before: 80, after: 60 });
+
+  var G = [652, 5100, 2000, 2453];
+  var rows = dxRow(thTop("TT", "No.", G[0]) + thTop("Những công việc phải làm", "", G[1]) +
+    thTop("Khắc phục / thời hạn", "", G[2]) + thTop("Ý kiến của tàu", "", G[3]));
+  if (!vp.length) {
+    rows += dxRow(tdC(G[0], "1", { align: "center" }) + tdC(G[1], "Không phát hiện") +
+      tdC(G[2], "") + tdC(G[3], ""));
+  } else {
+    for (i = 0; i < vp.length; i++) {
+      var r = vp[i];
+      var cellND = "";
+      String(ndText(r)).split("\n").forEach(function (ln) {
+        cellND += dxPara(dxRun(ln, { sz: 23 }), { after: 0 });
+      });
+      if (withPhotos && r.photos && r.photos.length) {
+        var imgRuns = r.photos.map(function (ph) {
+          return ctx.img(ph, 4.4, 3.0) + dxRun(" ", { sz: 23 });
+        }).join("");
+        cellND += dxPara(imgRuns, { align: "center", before: 40, after: 0 });
+        cellND += dxPara(dxRun("Ảnh bằng chứng (" + r.photos.length + ")", { i: true, sz: 18 }),
+          { align: "center", after: 0 });
+      }
+      rows += dxRow(
+        tdC(G[0], String(i + 1), { align: "center" }) +
+        dxCell(G[1], cellND) +
+        tdC(G[2], khacPhucText(r), { align: "center", b: (r.muc === "1" || r.muc === "2") }) +
+        tdC(G[3], yKienText(r)), 400);
+    }
+  }
+  b += dxTable(G, rows) + dxPara("", { after: 80 });
+
+  /* Bảng tổng hợp kết quả theo Phiếu đi tuyến */
+  var S = tongHopData();
+  var G4 = [2551, 2551, 2551, 2552];
+  function cellTH(txt, val) {
+    return dxCell(2551, dxPara(dxRun(txt + ": ", { sz: 23 }) +
+      dxRun(String(val), { sz: 23, b: true }), { after: 0 }));
+  }
+  var rowsT = dxRow(dxCell(10205, dxPara(dxRun("TỔNG HỢP KẾT QUẢ / ИТОГИ ПРОВЕРКИ",
+    { b: true, sz: 23 }), { align: "center", after: 0 }), { span: 4 }));
+  rowsT += dxRow(cellTH("Tổng số hạng mục", S.tong) + cellTH("Đạt", S.ok) +
+    cellTH("Không đạt", S.ng) + cellTH("N/A", S.na));
+  rowsT += dxRow(cellTH("① Dừng ngay", S.m1) + cellTH("② Trước khi rời bến", S.m2) +
+    cellTH("③ Có thời hạn", S.m3) + cellTH("④ Ghi nhận cải tiến", S.m4));
+  b += dxTable(G4, rowsT) + dxPara("", { after: 100 });
+
+  b += dxPara(dxRun("Kiến nghị đề xuất:", { b: true }), { after: 40 });
+  if (!kn.length && !kc.length) {
+    b += dxPara(dxRun("- Không"), { ind: 460 });
+  } else {
+    for (i = 0; i < kn.length; i++)
+      b += dxPara(dxRun("- " + String(ndText(kn[i])).replace(/\n/g, " ")), { ind: 460, align: "both" });
+    for (i = 0; i < kc.length; i++) {
+      var s = (kc[i].noidung || "").trim();
+      if ((kc[i].dexuat || "").trim()) s += (s ? " — " : "") + kc[i].dexuat.trim();
+      b += dxPara(dxRun("- " + s.replace(/\n/g, " ")), { ind: 460, align: "both" });
+    }
+  }
+
+  b += dxPara(dxRun("Kính báo cáo.", { b: true }), { before: 140, after: 240 });
+
+  var GS = [5102, 5103];
+  b += dxTable(GS, dxRow(
+    dxCell(GS[0], dxPara(dxRun("THÀNH VIÊN ĐOÀN KIỂM TRA", { b: true, sz: 23 }),
+      { align: "center", after: 560 }) +
+      dxPara(dxRun((bb.truongdoan || "").trim(), { sz: 23 }), { align: "center", after: 0 })) +
+    dxCell(GS[1], dxPara(dxRun("THUYỀN TRƯỞNG TÀU " + ten.toUpperCase(), { b: true, sz: 23 }),
+      { align: "center", after: 560 }) +
+      dxPara(dxRun((bb.thuyentruong || "").trim(), { sz: 23 }), { align: "center", after: 0 }))
+  ), "none");
+
+  b += dxPara(dxRun("Nơi nhận:", { i: true, u: true, sz: 22 }), { before: 160, after: 0 });
+  [
+    "- Như trên;",
+    "- Phòng ATSKMT LD Việt-Nga Vietsovpetro;",
+    "- Tàu " + ten + " — lưu trên tàu;",
+    "- Lưu: XN VTB&CTL."
+  ].forEach(function (t) { b += dxPara(dxRun(t, { sz: 22 }), { ind: 340, after: 0 }); });
+
+  return b;
+}
+
+/* ---------- Thân bài 2: BIÊN BẢN ĐÁNH GIÁ KIỂM TRA CẤP III (VTB07-02-04A) ---------- */
+function bodyC3(ctx) {
+  var ten = tenTau();
+  var main = c3Main(), kn = c3KN(), kc = kcAll();
+  var b = "", i;
+
+  b += dxPara(dxRun("DANH MỤC SỰ GHI NHẬN VÀ SỰ KHÔNG PHÙ HỢP", { b: true, sz: 28 }),
+    { align: "center", after: 20 });
+  b += dxPara(dxRun("LIST OF OBSERVATIONS AND NON-CONFORMITIES", { b: true, i: true, sz: 22 }),
+    { align: "center", after: 40 });
+  b += dxPara(dxRun("Biên bản đánh giá kiểm tra cấp III — mẫu VTB07-02-04A", { i: true, sz: 22 }),
+    { align: "center", after: 140 });
+
+  b += dxPara(dxRun("Số kiểm soát / Control No.: " + dxFld(bb.soc3 || bb.so, 16) +
+    "          Ngày đánh giá / Date of audit: " + fmtDate(bb.denNgay || bb.tuNgay)));
+  b += dxPara(dxRun("Đơn vị được đánh giá / Auditee: tàu " + ten + " — " + dxFld(bb.donvi, 16)));
+  b += dxPara(dxRun("Loại đánh giá: kiểm tra an toàn cấp III (" + loaiKTText() + ")" +
+    ((bb.diadiem || "").trim() ? " — tại " + bb.diadiem.trim() : "")), { after: 100 });
+
+  var G = [700, 3755, 900, 1650, 1500, 1700];
+  var rows = dxRow(
+    thTop("TT", "No.", G[0]) +
+    thTop("Nội dung bằng chứng khách quan", "Description of objective evidence", G[1]) +
+    thTop("Phân loại", "Grading", G[2]) +
+    thTop("Căn cứ ISM / VSP", "Reference", G[3]) +
+    thTop("Thời hạn khắc phục", "Deadline", G[4]) +
+    thTop("Tình trạng khắc phục / Lưu ý", "Follow-up", G[5]));
+
+  rows += secRow(10205, 6, "I. Các sự ghi nhận (Obs) và sự không phù hợp (NC)",
+    "Observations and Non-conformities");
+
+  var nsec = 0;
+  for (var o = 0; o < BP_ORDER.length; o++) {
+    var bp = BP_ORDER[o], grp = [];
+    for (i = 0; i < main.length; i++) if ((main[i].bp || "khac") === bp) grp.push(main[i]);
+    if (!grp.length) continue;
+    nsec++;
+    rows += secRow(10205, 6, nsec + ". Bộ phận " + BP_NAME[bp], "");
+    for (i = 0; i < grp.length; i++) {
+      var f = grp[i];
+      rows += dxRow(
+        tdC(G[0], nsec + "." + (i + 1), { align: "center" }) +
+        tdC(G[1], (f.lsr ? "[" + f.lsr + "] " : "") + (f.noidung || "")) +
+        tdC(G[2], f.pl === "obs" ? "Obs" : "NC", { align: "center", b: f.pl !== "obs" }) +
+        tdC(G[3], f.cc || "", { align: "center" }) +
+        tdC(G[4], khacPhucText(f), { align: "center" }) +
+        tdC(G[5], yKienText(f)), 400);
+    }
+  }
+  if (!nsec) {
+    rows += dxRow(tdC(G[0], "1", { align: "center" }) + tdC(G[1], "Không phát hiện / None") +
+      tdC(G[2], "") + tdC(G[3], "") + tdC(G[4], "") + tdC(G[5], ""));
+  }
+
+  rows += secRow(10205, 6,
+    "II. Những khuyến nghị và đề xuất để nâng cao tình trạng an toàn cho tàu",
+    "Recommendations and suggestions to improve the safety situation for ships");
+  var k = 0;
+  for (i = 0; i < kn.length; i++) {
+    k++;
+    rows += dxRow(tdC(G[0], String(k), { align: "center" }) + tdC(G[1], kn[i].noidung || "") +
+      tdC(G[2], "") + tdC(G[3], kn[i].cc || "", { align: "center" }) +
+      tdC(G[4], khacPhucText(kn[i]), { align: "center" }) + tdC(G[5], yKienText(kn[i])), 400);
+  }
+  for (i = 0; i < kc.length; i++) {
+    k++;
+    var s2 = (kc[i].noidung || "").trim();
+    if ((kc[i].dexuat || "").trim()) s2 += (s2 ? "\n" : "") + kc[i].dexuat.trim();
+    rows += dxRow(tdC(G[0], String(k), { align: "center" }) + tdC(G[1], s2) +
+      tdC(G[2], "") + tdC(G[3], "") + tdC(G[4], "") + tdC(G[5], ""), 400);
+  }
+  if (!k) {
+    rows += dxRow(tdC(G[0], "1", { align: "center" }) + tdC(G[1], "Không") +
+      tdC(G[2], "") + tdC(G[3], "") + tdC(G[4], "") + tdC(G[5], ""));
+  }
+
+  b += dxTable(G, rows) + dxPara("", { after: 100 });
+
+  b += dxPara(dxRun("* NC: sự không phù hợp / Non-conformity.   Obs: sự ghi nhận / Observation.",
+    { i: true, sz: 21 }), { after: 0 });
+  b += dxPara(dxRun("* Thời hạn khắc phục theo Phiếu đi tuyến kiểm tra tàu: ① dừng ngay · " +
+    "② trước khi rời bến · ③ có thời hạn (tối đa 30 ngày) · ④ ghi nhận cải tiến.",
+    { i: true, sz: 21 }), { align: "both", after: 300 });
+
+  var GS = [3401, 3402, 3402];
+  b += dxTable(GS, dxRow(
+    dxCell(GS[0], dxPara(dxRun("DPA / LÃNH ĐẠO XÍ NGHIỆP", { b: true, sz: 22 }), { align: "center", after: 0 }) +
+      dxPara(dxRun("DPA / Management", { i: true, sz: 20 }), { align: "center", after: 560 })) +
+    dxCell(GS[1], dxPara(dxRun("ĐÁNH GIÁ VIÊN", { b: true, sz: 22 }), { align: "center", after: 0 }) +
+      dxPara(dxRun("Auditor", { i: true, sz: 20 }), { align: "center", after: 560 }) +
+      dxPara(dxRun((bb.truongdoan || "").trim(), { sz: 22 }), { align: "center", after: 0 })) +
+    dxCell(GS[2], dxPara(dxRun("ĐẠI DIỆN TÀU ĐƯỢC ĐÁNH GIÁ", { b: true, sz: 22 }), { align: "center", after: 0 }) +
+      dxPara(dxRun("Auditee", { i: true, sz: 20 }), { align: "center", after: 560 }) +
+      dxPara(dxRun((bb.thuyentruong || "").trim(), { sz: 22 }), { align: "center", after: 0 }))
+  ), "none");
+
+  return b;
+}
+
+function buildDocxBytes(withPhotos) {
+  return docxPackage(function (ctx) { return bodyBaoCao(ctx, withPhotos); },
+    DOC_TITLES.bc[0], DOC_TITLES.bc[1], DOC_TITLES.bc[2]);
+}
+function buildC3Bytes() {
+  return docxPackage(function (ctx) { return bodyC3(ctx); },
+    DOC_TITLES.c3[0], DOC_TITLES.c3[1], DOC_TITLES.c3[2]);
+}
+
 /* ===================== SỰ KIỆN BIÊN BẢN ===================== */
 document.getElementById("btn-bb").onclick = openBB;
 document.getElementById("bb-close").onclick = function () { document.getElementById("sheetBB").hidden = true; syncModalLock(); };
@@ -2939,8 +3283,22 @@ function closeDoc() {
   document.body.classList.remove("doc-open");
   syncModalLock();
 }
-document.getElementById("bb-preview").onclick = function () {
+function drawDoc() {
+  document.getElementById("doc-tab-bc").className = docMode === "bc" ? "on" : "";
+  document.getElementById("doc-tab-c3").className = docMode === "c3" ? "on" : "";
   document.getElementById("docOut").innerHTML = '<div class="f002">' + buildDocHTML(true) + '</div>';
+  document.getElementById("docOut").scrollTop = 0;
+}
+document.getElementById("doc-tab-bc").onclick = function () { docMode = "bc"; drawDoc(); };
+document.getElementById("doc-tab-c3").onclick = function () {
+  docMode = "c3";
+  if (!c3Main().length && !c3KN().length && !kcAll().length)
+    alert("Chưa tích chọn mục nào để đưa vào biên bản cấp III.\n" +
+          "Quay lại phần lập biên bản, tích ô ở cuối từng mục cần đưa vào.");
+  drawDoc();
+};
+document.getElementById("bb-preview").onclick = function () {
+  drawDoc();
   document.getElementById("sheetBB").hidden = true;
   document.getElementById("sheetDoc").hidden = false;
   document.body.classList.add("doc-open");
@@ -2973,13 +3331,13 @@ document.getElementById("doc-print").onclick = function () {
 /* Tải Word (.docx) — file Word thật, mở được bằng Word trên iPhone/iPad/máy tính */
 document.getElementById("doc-download").onclick = function () {
   try {
-    var bytes = buildDocxBytes(true);
+    var bytes = docMode === "c3" ? buildC3Bytes() : buildDocxBytes(true);
     f002SaveBlob(new Blob([bytes], { type: DOCX_MIME }), f002FileName(".docx"), DOCX_MIME);
   } catch (e) {
     /* Trình duyệt quá cũ (không có TextEncoder/Blob nhị phân) — quay về bản .doc dạng HTML */
     var html = '<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" ' +
       'xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">' +
-      '<head><meta charset="utf-8"><title>Bien-ban-kiem-tra-an-toan-tau</title>' +
+      '<head><meta charset="utf-8"><title>' + esc(DOC_TITLES[docMode][0]) + '</title>' +
       '<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom>' +
       '<w:DoNotOptimizeForBrowser/></w:WordDocument></xml><![endif]-->' +
       '<style>@page WordSection1{size:21cm 29.7cm;mso-page-orientation:portrait;' +

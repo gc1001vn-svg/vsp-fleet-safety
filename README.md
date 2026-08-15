@@ -104,10 +104,22 @@ trên điện thoại (Add to Home Screen). Dùng khi đi kiểm tra thực đ�
 - Mỗi mục "Không đạt" chọn được **mức độ khắc phục** theo Phiếu đi tuyến:
   ① dừng ngay · ② trước khi rời bến · ③ có thời hạn (≤30 ngày) · ④ ghi nhận
   cải tiến.
-- Lập **Biên bản kiểm tra an toàn tàu**, nạp tự động các mục "Không đạt" và
-  **xếp theo mức độ** (dừng ngay lên đầu), in mức độ thành cột song ngữ Việt–Nga
-  kèm **bảng tổng hợp kết quả**; xuất file **.docx thật** (tự sinh, không cần
-  thư viện ngoài) hoặc in trực tiếp.
+- Bấm "Lập biên bản" để nạp tự động các mục "Không đạt" và **xếp theo mức độ**
+  (dừng ngay lên đầu). Mỗi dòng ghi thêm: **bộ phận phụ trách** (máy tự đoán từ
+  tên nhóm và tên mục, sửa lại được), **phân loại NC / Obs / khuyến nghị**,
+  **căn cứ** (tự lấy điều khoản của chính mục đó), **ý kiến của tàu**, và một ô
+  tích **"đưa mục này vào Biên bản cấp III"**.
+- Từ đó xuất **hai file .docx thật** (tự sinh, không cần thư viện ngoài), chuyển
+  qua lại bằng hai nút ở đầu màn hình xem trước:
+  1. **Báo cáo kết quả kiểm tra tình trạng tàu** — bản chính, đúng dạng công văn
+     gửi Giám đốc Xí nghiệp: số/ngày, "Kính gửi" sửa được, thành phần đoàn, bảng
+     *TT · Những công việc phải làm · Khắc phục–thời hạn · Ý kiến của tàu* (in kèm
+     ảnh bằng chứng), bảng tổng hợp kết quả, kiến nghị đề xuất, ký thuyền trưởng.
+  2. **Biên bản đánh giá kiểm tra cấp III** — mẫu VTB07-02-04A "Danh mục sự ghi
+     nhận và sự không phù hợp", **chỉ gồm những dòng đã tích chọn**, chia theo bộ
+     phận, cột phân loại NC/Obs, mục I sự ghi nhận – không phù hợp và mục II
+     khuyến nghị, ba ô ký DPA / đánh giá viên / đại diện tàu.
+- Vẫn in trực tiếp ra giấy hoặc lưu PDF cho bản đang xem.
 - Dữ liệu lưu trong `localStorage` của trình duyệt (không có backend) — phù
   hợp dùng ngay tại hiện trường; sau này Giai đoạn 3 sẽ đồng bộ kết quả vào
   kho dữ liệu chính (`app/`) để không phải nhập tay 2 lần.
