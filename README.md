@@ -65,18 +65,21 @@ trên máy/server chạy ứng dụng.
   cậy) — nếu triển khai trên server nhiều người truy cập, cân nhắc thêm
   xác thực trước khi dùng dữ liệu thật.
 
-## checklist/ — Kiểm tra an toàn tàu (Giai đoạn 2, công cụ độc lập)
+## checklist/ — App An toàn tàu (Giai đoạn 2, công cụ độc lập)
 
 `checklist/index.html` là một ứng dụng web PWA **độc lập, 1 file duy nhất**,
 không cần server/backend — mở trực tiếp trong trình duyệt hoặc cài như app
-trên điện thoại (Add to Home Screen). Dùng khi đi kiểm tra thực địa trên tàu.
+trên điện thoại (Add to Home Screen). Đây là **app dùng chung**, gồm hai chế
+độ chuyển qua lại bằng hai nút ở đầu màn hình:
+
+### 🚢 Đi kiểm tra — dùng tại tàu
 
 - **570 mục checklist**, chia 5 tab, xếp theo đúng **Phiếu đi tuyến kiểm tra
   tàu** của Phòng An toàn & Môi trường (tổng ≈ 7 giờ làm việc):
   - **Hồ sơ** (144 mục / 14 nhóm) — Bước 0 chuẩn bị tại phòng, Bước 1 họp mở
-    đầu, rồi **ngồi tại cabin** kiểm tra hồ sơ gộp theo loại: đăng kiểm, cứu sinh, cứu hỏa, môi trường,
-    thông tin liên lạc, nhân sự, SMS/ISM, ISPS, kỹ thuật, quyết định nội bộ,
-    sổ tay – kế hoạch – sơ đồ được duyệt.
+    đầu, rồi **ngồi tại cabin** kiểm tra hồ sơ gộp theo loại: đăng kiểm, cứu sinh,
+    cứu hỏa, môi trường, thông tin liên lạc, nhân sự, SMS/ISM, ISPS, kỹ thuật,
+    quyết định nội bộ, sổ tay – kế hoạch – sơ đồ được duyệt.
   - **Thực địa** (243 mục / 12 nhóm) — 12 chặng đi tuyến một chiều theo đúng
     bố trí thật của tàu, mỗi chặng ghi rõ thời lượng và người đi kèm: buồng
     lái → nóc cabin → khu nhà ở (xuống dần) → khu cứu sinh quanh khu nhà ở →
@@ -84,8 +87,7 @@ trên điện thoại (Add to Home Screen). Dùng khi đi kiểm tra thực đ�
     nơi đặt cẩu** và thiết bị nâng, trạm hàn, kho, boong sau → bếp → buồng máy
     → an toàn điện → thử tính năng & báo động.
   - **Tổng quan** (39 mục / 5 nhóm) — mục xuyên suốt toàn tàu, phỏng vấn
-    thuyền viên, diễn tập bất ngờ, họp kết thúc (kèm bảng phân loại phát hiện
-    4 mức) và công việc sau kiểm tra.
+    thuyền viên, diễn tập bất ngờ, họp kết thúc và công việc sau kiểm tra.
   - **Mới & PSC** (76 mục / 11 nhóm) — quy định có hiệu lực SAU 2016 mà bộ tài
     liệu nội bộ (soạn 2014–2016) chưa có: CIC 2026 chằng buộc hàng hóa, BWM,
     MARPOL Annex VI/lưu huỳnh 0,50%, EEXI/CII/SEEMP III, máy đo khí 5 khí theo
@@ -96,41 +98,57 @@ trên điện thoại (Add to Home Screen). Dùng khi đi kiểm tra thực đ�
     và tàu kéo–thả neo, kiểm tra của đăng kiểm/P&I/chủ hàng.
 - Mỗi mục trích dẫn điều khoản cụ thể (SOLAS, LSA Code, MARPOL, ISM, ISPS,
   MSC Circ., TCVN, VSP-000-ATMT…) để đối chiếu khi tranh luận với đoàn kiểm tra.
-- Tiêu đề mục ngắn gọn (chỉ nêu đối tượng cần kiểm tra, trung bình 41 ký tự);
-  bấm vào mục để mở **hướng dẫn kiểm tra thực tế**: các bước làm, chỗ cần soi
-  đèn, con số cần đọc trên thiết bị, cách đối chiếu chéo giữa các hồ sơ và lỗi
-  hay gặp. **Cả 570 mục đều đã có hướng dẫn** (trung bình ~300 ký tự/mục).
+- Tiêu đề mục ngắn gọn; bấm vào mục để mở **hướng dẫn kiểm tra thực tế**: các
+  bước làm, chỗ cần soi đèn, con số cần đọc trên thiết bị, cách đối chiếu chéo
+  giữa các hồ sơ và lỗi hay gặp. **Cả 570 mục đều đã có hướng dẫn**
+  (trung bình ~300 ký tự/mục).
 - **Từ điển chú thích 206 mục** cho người chưa học hàng hải: mọi từ viết tắt và
   thuật ngữ có trong từ điển đều được **gạch chân chấm** ngay trong tiêu đề, dòng
   căn cứ và phần hướng dẫn — chạm vào là hiện tên đầy đủ kèm giải thích bằng lời
   thường (SOLAS, MARPOL, ISM, HRU, EEBD, SWL, LEL, DP, mạn khô, la canh, tu chỉnh
   hải đồ, cửa kín thời tiết, đại phó, thủy thủ trưởng…). Có nút **📖 Tra từ viết
-  tắt & thuật ngữ** ở đầu danh sách để tra trực tiếp, tìm được cả khi gõ không dấu.
+  tắt & thuật ngữ** ở đầu danh sách, tìm được cả khi gõ không dấu.
 - Đánh dấu Đạt/Không đạt/N/A từng mục, ghi chú, chụp/đính kèm ảnh minh chứng.
 - Mỗi mục "Không đạt" chọn được **mức độ khắc phục** theo Phiếu đi tuyến:
   ① dừng ngay · ② trước khi rời bến · ③ có thời hạn (≤30 ngày) · ④ ghi nhận
   cải tiến.
-- Bấm "Lập biên bản" để nạp tự động các mục "Không đạt" và **xếp theo mức độ**
-  (dừng ngay lên đầu). Mỗi dòng ghi thêm: **bộ phận phụ trách** (máy tự đoán từ
-  tên nhóm và tên mục, sửa lại được), **phân loại NC / Obs / khuyến nghị**,
-  **căn cứ** (tự lấy điều khoản của chính mục đó), **ý kiến của tàu**, và một ô
-  tích **"đưa mục này vào Biên bản cấp III"**.
-- Từ đó xuất **hai file .docx thật** (tự sinh, không cần thư viện ngoài), chuyển
-  qua lại bằng hai nút ở đầu màn hình xem trước:
-  1. **Báo cáo kết quả kiểm tra tình trạng tàu** — bản chính, đúng dạng công văn
-     gửi Giám đốc Xí nghiệp: số/ngày, "Kính gửi" sửa được, thành phần đoàn, bảng
-     *TT · Những công việc phải làm · Khắc phục–thời hạn · Ý kiến của tàu* (in kèm
-     ảnh bằng chứng), bảng tổng hợp kết quả, kiến nghị đề xuất, ký thuyền trưởng.
-  2. **Biên bản đánh giá kiểm tra cấp III** — mẫu VTB07-02-04A "Danh mục sự ghi
-     nhận và sự không phù hợp", **chỉ gồm những dòng đã tích chọn**, chia theo bộ
-     phận, cột phân loại NC/Obs, mục I sự ghi nhận – không phù hợp và mục II
-     khuyến nghị, ba ô ký DPA / đánh giá viên / đại diện tàu.
-- Vẫn in trực tiếp ra giấy hoặc lưu PDF cho bản đang xem.
+- Bấm "Lập biên bản" để nạp tự động các mục "Không đạt" và **xếp theo mức độ**.
+  Mỗi dòng ghi thêm: **bộ phận phụ trách** (máy tự đoán, sửa lại được), **phân
+  loại NC / Obs / khuyến nghị**, **căn cứ** (tự lấy điều khoản của chính mục đó),
+  **ý kiến của tàu**, và một ô tích **"đưa mục này vào Biên bản cấp III"**.
+- Từ đó xuất **hai file .docx thật** (tự sinh, không cần thư viện ngoài):
+  1. **Báo cáo kết quả kiểm tra tình trạng tàu** — bản chính, dạng công văn gửi
+     Giám đốc Xí nghiệp, in kèm ảnh bằng chứng và bảng tổng hợp kết quả.
+  2. **Biên bản đánh giá kiểm tra cấp III** — mẫu VTB07-02-04A, **chỉ gồm những
+     dòng đã tích chọn**, chia theo bộ phận, cột phân loại NC/Obs.
+
+### 📊 Tổng hợp & phân tích — dùng tại phòng
+
+- **Nút "Đưa vào kho phân tích"** trong màn hình lập biên bản đẩy thẳng kết quả
+  vừa kiểm tra thành một kỳ kiểm tra trong kho — **không phải nhập tay hai lần**.
+  Bấm lại thì cập nhật đúng kỳ đó chứ không tạo bản trùng.
+- Ngoài ra vẫn **đưa hồ sơ các kỳ cũ vào** bằng 3 cách: nạp thẳng file Word
+  (.docx, tự giải nén và bóc bảng phát hiện), dán bảng từ Word, hoặc nhập tay.
+  Biên bản bản scan (ảnh, PDF scan) máy không đọc chữ được.
+- Mỗi phát hiện gắn: mảng (boong, máy, điện, cứu sinh, cứu hỏa, hồ sơ, bếp,
+  thiết bị nâng, môi trường, an ninh, con người), mức độ (NC / vi phạm / ghi
+  nhận / khuyến nghị), căn cứ, thời hạn, trách nhiệm, trạng thái khắc phục.
+- **Phân tích tự động**: tỷ lệ khắc phục, số quá hạn, phân bố theo mảng và
+  theo loại kiểm tra, và quan trọng nhất là **lỗi lặp lại qua nhiều kỳ** —
+  so khớp nội dung sau khi bỏ dấu tiếng Việt, đây là dấu hiệu hệ thống quản
+  lý chưa xử lý tận gốc.
+- **Kết luận điểm mạnh – điểm yếu** sinh tự động từ số liệu.
+- **Xuất file Word thật** theo 4 mẫu: báo cáo điểm mạnh – điểm yếu; biên bản
+  kiểm tra cấp IV (VSP-000-ATMT-452/F-001); danh mục sự ghi nhận và sự không
+  phù hợp (VTB07-02-04A); báo cáo kết quả kiểm tra tình trạng tàu.
+
+### Chung
+
 - Dữ liệu lưu trong `localStorage` của trình duyệt (không có backend) — phù
   hợp dùng ngay tại hiện trường; sau này Giai đoạn 3 sẽ đồng bộ kết quả vào
-  kho dữ liệu chính (`app/`) để không phải nhập tay 2 lần.
+  kho dữ liệu chính (`app/`).
 - Cùng phong cách/kiến trúc với công cụ "Kiểm soát ATSKMT nhà thầu" đã có
-  của XN VTB&CTL.
+  của XN VTB&CTL. ES5 thuần để chạy được cả trên Safari iOS đời cũ.
 
 Muốn dùng ngay: mở file `checklist/index.html` bằng trình duyệt, hoặc host
 tĩnh qua GitHub Pages nếu bật cho repo này.
@@ -140,34 +158,13 @@ tĩnh qua GitHub Pages nếu bật cho repo này.
 đang giữ bản cũ trong bộ nhớ đệm — tải lại trang, hoặc với app đã cài ra màn
 hình chính thì xóa app rồi thêm lại.
 
-## phantich/ — Phân tích hồ sơ kiểm tra tàu (công cụ độc lập)
+## phantich/ — đã gộp vào app chung
 
-`phantich/index.html` cũng là ứng dụng web **1 file duy nhất, chạy offline**,
-dùng ở phòng chứ không phải trên tàu: gom kết quả các kỳ đã kiểm tra của từng
-tàu rồi phân tích.
-
-- **Đưa tài liệu vào** bằng 3 cách:
-  - **Nạp thẳng file Word (.docx)** — tự giải nén và bóc bảng phát hiện, đọc
-    đúng cột theo loại biên bản đã chọn.
-  - **Dán bảng từ Word** — copy bảng trong biên bản rồi dán, máy tự tách dòng.
-  - **Nhập từng dòng** bằng tay.
-  - Biên bản bản scan (ảnh, PDF scan) máy không đọc chữ được — dùng cách dán
-    hoặc nhập tay.
-- Mỗi phát hiện gắn: mảng (boong, máy, điện, cứu sinh, cứu hỏa, hồ sơ, bếp,
-  thiết bị nâng, môi trường, an ninh, con người), mức độ (NC / vi phạm / ghi
-  nhận / khuyến nghị), căn cứ, thời hạn, trách nhiệm, trạng thái khắc phục.
-- **Phân tích tự động**: tỷ lệ khắc phục, số quá hạn, phân bố theo mảng và
-  theo loại kiểm tra, và quan trọng nhất là **lỗi lặp lại qua nhiều kỳ** —
-  so khớp nội dung sau khi bỏ dấu tiếng Việt, đây là dấu hiệu hệ thống quản
-  lý chưa xử lý tận gốc.
-- **Kết luận điểm mạnh – điểm yếu** được sinh tự động từ số liệu.
-- **Xuất file Word thật** theo 4 mẫu:
-  - Báo cáo phân tích điểm mạnh – điểm yếu (tổng hợp nhiều kỳ)
-  - Biên bản kiểm tra cấp IV — mẫu VSP-000-ATMT-452/F-001, đủ 7 mục I–VII
-  - Danh mục sự ghi nhận và sự không phù hợp — mẫu VTB07-02-04A, chia theo
-    bộ phận, cột phân loại NC/Obs
-  - Báo cáo kết quả kiểm tra tình trạng tàu — công văn gửi Giám đốc Xí nghiệp
-- Dữ liệu lưu trong `localStorage`, không gửi đi đâu.
+Trước đây là công cụ riêng. Từ bản 2026-08-15/5 nó đã được gộp vào
+`checklist/index.html` thành chế độ **📊 Tổng hợp & phân tích**, để kết quả đi
+kiểm tra tại tàu chảy thẳng sang phần tổng hợp. `phantich/index.html` nay chỉ
+còn là trang chuyển hướng giữ cho các link cũ không hỏng; dữ liệu đã nhập
+không mất vì `localStorage` gắn với tên miền chứ không gắn với đường dẫn.
 
 ## Lộ trình tiếp theo
 
