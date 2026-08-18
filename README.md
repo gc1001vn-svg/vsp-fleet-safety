@@ -96,8 +96,16 @@ trên điện thoại (Add to Home Screen). Đây là **app dùng chung**, gồm
   - **Ngoài khơi** (68 mục / 9 nhóm) — chuẩn kiểm tra của khách hàng và tổ
     chức bên ngoài: eCMID (IMCA M149), OVID (OVIQ4), tàu DP, tàu lặn, tàu cẩu
     và tàu kéo–thả neo, kiểm tra của đăng kiểm/P&I/chủ hàng.
+- Giao diện làm cho **điện thoại**: đầu trang tự thu gọn khi cuộn (còn ~83 px),
+  tab một hàng cuộn ngang, ba nút **Đạt / Không đạt / Không áp dụng** ghi rõ chữ
+  và chiếm hết bề ngang; thanh lọc **Tất cả · Chưa xét · Không đạt · Đạt** kèm số
+  đếm, và ô ☰ nhảy thẳng tới nhóm cần đến.
 - Mỗi mục trích dẫn điều khoản cụ thể (SOLAS, LSA Code, MARPOL, ISM, ISPS,
   MSC Circ., TCVN, VSP-000-ATMT…) để đối chiếu khi tranh luận với đoàn kiểm tra.
+- Thiết bị hàng hải và ấn phẩm được viết thành **quy trình từng bước** (BƯỚC 1,
+  BƯỚC 2…): hải đồ và cách tu chỉnh, ấn phẩm hàng hải, radar, GPS, EPIRB, SART,
+  AIS, VHF/MF/HF DSC, ECDIS, NAVTEX, đo sâu, VDR, la bàn từ, la bàn con quay,
+  BNWAS, máy lái tự động, đèn hành hải, còi, đo gió, thử máy lái 12 giờ.
 - Tiêu đề mục ngắn gọn; bấm vào mục để mở **hướng dẫn kiểm tra thực tế**: các
   bước làm, chỗ cần soi đèn, con số cần đọc trên thiết bị, cách đối chiếu chéo
   giữa các hồ sơ và lỗi hay gặp. **Cả 570 mục đều đã có hướng dẫn**
@@ -127,9 +135,11 @@ trên điện thoại (Add to Home Screen). Đây là **app dùng chung**, gồm
 - **Nút "Đưa vào kho phân tích"** trong màn hình lập biên bản đẩy thẳng kết quả
   vừa kiểm tra thành một kỳ kiểm tra trong kho — **không phải nhập tay hai lần**.
   Bấm lại thì cập nhật đúng kỳ đó chứ không tạo bản trùng.
-- Ngoài ra vẫn **đưa hồ sơ các kỳ cũ vào** bằng 3 cách: nạp thẳng file Word
-  (.docx, tự giải nén và bóc bảng phát hiện), dán bảng từ Word, hoặc nhập tay.
-  Biên bản bản scan (ảnh, PDF scan) máy không đọc chữ được.
+- **Nạp hồ sơ các năm trước hàng loạt**: chọn một lúc nhiều file .docx, máy tự
+  đoán loại kiểm tra (cấp III / cấp IV / tình trạng tàu / PSC / đăng kiểm / chủ
+  hàng), ngày và số biên bản từ nội dung hoặc tên file, rồi tách bảng phát hiện
+  thành từng dòng. Vẫn có cách dán bảng từ Word và nhập tay cho từng kỳ.
+  Biên bản bản scan (ảnh, PDF chụp) máy không đọc chữ được.
 - Mỗi phát hiện gắn: mảng (boong, máy, điện, cứu sinh, cứu hỏa, hồ sơ, bếp,
   thiết bị nâng, môi trường, an ninh, con người), mức độ (NC / vi phạm / ghi
   nhận / khuyến nghị), căn cứ, thời hạn, trách nhiệm, trạng thái khắc phục.

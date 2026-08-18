@@ -21,33 +21,64 @@ body{
   --warn:#B8860B;
   min-height:100vh;background:var(--paper);color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  padding-bottom:92px;-webkit-font-smoothing:antialiased;
+  padding-bottom:84px;-webkit-font-smoothing:antialiased;
 }
-.top{position:sticky;top:0;z-index:20;background:var(--ink);color:#fff}
-.top-in{padding:12px 14px 0;max-width:760px;margin:0 auto}
-.brand{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-.brand b{font-size:15px;letter-spacing:.02em}
-.brand span{font-size:10px;letter-spacing:.16em;text-transform:uppercase;opacity:.6}
-.brand i{font-style:normal;font-size:10px;opacity:.55;margin-left:auto;white-space:nowrap}
-.tabs{display:flex;margin-top:10px;gap:2px;flex-wrap:wrap}
-.tabs[hidden],.bar[hidden],.mode[hidden]{display:none!important}
+.top{position:sticky;top:0;z-index:20;background:var(--ink);color:#fff;
+  padding-top:env(safe-area-inset-top)}
+.top-in{padding:8px 12px 0;max-width:760px;margin:0 auto}
+.brand{display:flex;align-items:baseline;gap:7px;overflow:hidden;
+  height:19px;opacity:1;transition:height .16s ease,opacity .16s ease,margin .16s ease}
+.brand b{font-size:14px;letter-spacing:.02em;white-space:nowrap}
+.brand span{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;opacity:.55;white-space:nowrap}
+.brand i{font-style:normal;font-size:9.5px;opacity:.5;margin-left:auto;white-space:nowrap}
+/* Cuộn xuống thì giấu dòng tên app và phần chữ nhỏ, lấy chỗ cho danh sách */
+body.sc .brand{height:0;opacity:0;margin:0}
+body.sc .mode{display:none}
+body.sc .top-in{padding-top:0}
+body.sc .tab i{display:none}
+body.sc .tab{min-height:34px;padding:9px 12px 7px}
+body.sc .tabs{margin-top:0}
+body.sc .sub{padding:5px 12px}
+body.sc .chip{min-height:30px;padding:6px 10px}
+
+/* Tab một hàng, cuộn ngang — không xuống dòng làm cao đầu trang */
+.tabs{display:flex;margin-top:8px;gap:2px;flex-wrap:nowrap;overflow-x:auto;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs[hidden],.bar[hidden],.mode[hidden],.sub[hidden]{display:none!important}
 .tab{
-  flex:1;min-width:76px;min-height:44px;background:transparent;border:0;border-bottom:3px solid transparent;
-  color:rgba(255,255,255,.6);padding:11px 4px 10px;font-family:inherit;
+  flex:0 0 auto;min-height:42px;background:transparent;border:0;border-bottom:3px solid transparent;
+  color:rgba(255,255,255,.6);padding:9px 12px 8px;font-family:inherit;white-space:nowrap;
   font-size:11.5px;font-weight:700;letter-spacing:.03em;cursor:pointer;
 }
 .tab.on{color:#fff;border-bottom-color:var(--acc)}
-.tab i{display:block;font-style:normal;font-size:10.5px;font-weight:600;opacity:.8;margin-top:2px}
-.rail{display:flex;height:5px;background:#C6D0D8}
+.tab i{display:block;font-style:normal;font-size:10px;font-weight:600;opacity:.75;margin-top:1px}
+.rail{display:flex;height:4px;background:#C6D0D8}
 .rail>div{height:100%;transition:width .2s}
 
-.wrap{max-width:760px;margin:0 auto;padding:14px 12px}
-.stat{display:flex;gap:14px;align-items:baseline;padding:2px 2px 12px;font-size:12px;color:var(--ink2);flex-wrap:wrap}
-.stat b{font-size:22px;color:var(--ink);font-variant-numeric:tabular-nums}
-.gl-open{width:100%;text-align:left;margin-bottom:12px;padding:11px 13px;border-radius:8px;
+/* Thanh lọc + nhảy nhóm, dính ngay dưới tab */
+.sub{display:flex;gap:7px;align-items:center;background:#fff;border-bottom:1px solid var(--line);
+  padding:7px 12px;max-width:760px;margin:0 auto;width:100%}
+.chips{display:flex;gap:5px;flex:1;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1px solid var(--line);background:#F7F9FA;color:var(--ink2);border-radius:20px;
+  padding:7px 11px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;
+  min-height:34px}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.chip.on.f-ng{background:var(--ng);border-color:var(--ng)}
+.chip.on.f-ok{background:var(--ok);border-color:var(--ok)}
+.chip b{font-weight:800;margin-left:3px}
+.jump{flex:0 0 auto;width:40px;height:34px;border:1px solid var(--line);border-radius:8px;background:#F7F9FA;
+  color:var(--ink2);font-family:inherit;font-size:12px;font-weight:700;-webkit-appearance:none;appearance:none;
+  text-align:center;text-indent:-2px;cursor:pointer}
+
+.wrap{max-width:760px;margin:0 auto;padding:11px 12px}
+.stat{display:flex;gap:11px;align-items:baseline;padding:0 2px 10px;font-size:11.5px;color:var(--ink2);flex-wrap:wrap}
+.stat b{font-size:18px;color:var(--ink);font-variant-numeric:tabular-nums}
+.gl-open{width:100%;text-align:left;margin-bottom:11px;padding:9px 12px;border-radius:8px;
   border:1px solid var(--acc);background:#FFF6F4;color:var(--acc);font-family:inherit;
-  font-size:13.5px;font-weight:700;cursor:pointer;line-height:1.35}
-.gl-open span{display:block;margin-top:3px;font-size:11.5px;font-weight:500;color:var(--ink2)}
+  font-size:13px;font-weight:700;cursor:pointer;line-height:1.35}
+.gl-open span{display:block;margin-top:2px;font-size:11px;font-weight:500;color:var(--ink2)}
 b.gl{font-weight:inherit;border-bottom:1px dotted var(--acc);cursor:help;
   -webkit-tap-highlight-color:rgba(224,90,0,.18)}
 .det b.gl{color:var(--ink)}
@@ -65,7 +96,7 @@ b.gl{font-weight:inherit;border-bottom:1px dotted var(--acc);cursor:help;
 .gl-f{font-size:12px;font-style:italic;color:var(--acc);margin-top:2px;line-height:1.35}
 .gl-v{font-size:13px;line-height:1.55;color:var(--ink2);margin-top:5px}
 
-.grp{margin:18px 0 8px;display:flex;align-items:center;gap:9px}
+.grp{margin:15px 0 7px;display:flex;align-items:center;gap:9px}
 .grp span{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2)}
 .grp:after{content:"";flex:1;height:1px;background:var(--line)}
 
@@ -76,15 +107,19 @@ b.gl{font-weight:inherit;border-bottom:1px dotted var(--acc);cursor:help;
 .item.ref{border-left:6px solid var(--ink2);background:#F4F7F9;border-style:dashed}
 .item.ref h4{font-size:13.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:var(--ink2)}
 .item.ref .det{font-size:13.5px;line-height:1.65}
-.row{display:flex;align-items:flex-start;gap:10px;padding:12px 12px 11px}
-.ttl{flex:1;text-align:left;background:none;border:0;padding:0;font-family:inherit;cursor:pointer;color:inherit}
-.ttl h4{margin:0;font-size:15.5px;font-weight:650;line-height:1.4}
+.row{display:block;padding:11px 12px 0}
+.ttl{display:block;width:100%;text-align:left;background:none;border:0;padding:0;font-family:inherit;
+  cursor:pointer;color:inherit}
+.ttl h4{margin:0;font-size:15.5px;font-weight:650;line-height:1.38}
 .ttl small{display:inline-block;margin-top:4px;font-size:11px;letter-spacing:.05em;color:var(--acc);font-weight:700}
 .ttl em{font-style:normal;color:var(--ink2);font-size:11px;margin-left:6px}
-.btns{display:flex;gap:5px;flex-shrink:0}
-.b{width:46px;height:46px;border-radius:8px;border:1.5px solid var(--line);background:#F7F9FA;
-  font-family:inherit;font-size:18px;font-weight:800;color:var(--ink2);cursor:pointer;line-height:1}
-.b.na{font-size:12px}
+/* Ba nút đánh giá nằm nguyên một hàng dưới tiêu đề — bấm bằng ngón cái dễ hơn */
+.btns{display:flex;gap:6px;padding:8px 12px 10px}
+.b{flex:1;height:42px;border-radius:8px;border:1.5px solid var(--line);background:#F7F9FA;
+  font-family:inherit;font-size:12.5px;font-weight:700;color:var(--ink2);cursor:pointer;line-height:1.15;
+  white-space:nowrap;overflow:hidden}
+.b u{text-decoration:none;font-size:14px;font-weight:800;margin-right:3px}
+.b.na{flex:1.3;font-size:11.5px;letter-spacing:-.01em;padding:0 2px}
 .b.s-ok{background:var(--ok);border-color:var(--ok);color:#fff}
 .b.s-ng{background:var(--ng);border-color:var(--ng);color:#fff}
 .b.s-na{background:var(--na);border-color:var(--na);color:#fff}
@@ -113,8 +148,8 @@ b.gl{font-weight:inherit;border-bottom:1px dotted var(--acc);cursor:help;
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:#fff;border-top:1px solid var(--line);
   padding:10px 12px calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px}
 .bar-in{display:flex;gap:8px;max-width:760px;margin:0 auto;width:100%}
-.bar button{flex:1;padding:14px 6px;border-radius:8px;font-family:inherit;font-size:13.5px;font-weight:700;
-  cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--ink);min-height:48px}
+.bar button{flex:1;padding:11px 4px;border-radius:8px;font-family:inherit;font-size:12.5px;font-weight:700;
+  cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--ink);min-height:46px}
 .bar button.p{background:var(--ink);border-color:var(--ink);color:#fff}
 .save{font-size:11px;color:var(--ink2);text-align:center;padding:10px 0 0}
 
@@ -330,7 +365,20 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
 #pt .sheet .box .in{max-width:820px;margin:0 auto}
 #pt .sheet h2{margin:0 0 12px;font-size:16px}
 #pt-save{font-size:11px;color:var(--ink2);text-align:center;padding:4px 0 0}
+@media (max-width:340px){
+  .b{font-size:10.5px;padding:0 2px}
+  .b u{display:none}
+  .b.na{font-size:10px}
+}
+@media (max-width:400px){
+  .brand span{display:none}
+  .chip{font-size:11.5px;padding:7px 9px}
+  .ttl h4{font-size:15px}
+  .b{font-size:11px}
+  .b.na{font-size:10.5px}
+}
 @media (max-width:430px){
+  #pt .row2{grid-template-columns:1fr}
   #pt .stat{grid-template-columns:repeat(2,1fr)}
   #pt .row3{grid-template-columns:1fr}
   #pt .fi .r3{grid-template-columns:1fr 1fr}
@@ -364,6 +412,10 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
     <nav class="tabs" id="pt-tabs" hidden></nav>
   </div>
   <div class="rail" id="rail"><div id="r-ok"></div><div id="r-ng"></div><div id="r-na"></div></div>
+  <div class="sub" id="sub">
+    <div class="chips" id="chips"></div>
+    <select class="jump" id="jump" title="Nhảy tới nhóm"></select>
+  </div>
 </header>
 
 <main class="wrap" id="viewKT">
@@ -649,9 +701,9 @@ const DATA = [
     { id:"h-e2", t:"GCN và bảo dưỡng EPIRB, SART, AIS, SSAS", ref:"Tự tổng hợp · Survey VTB",
       d:"• EPIRB: Báo cáo kiểm tra HÀNG NĂM (Annual Survey Report) và BẢO DƯỠNG TẠI BỜ chu kỳ 5 NĂM (Shore-Based Maintenance) — mục 5 năm hay bị bỏ sót\n• Giấy ĐĂNG KÝ EPIRB: đối chiếu Hex ID với số dán trên máy, tên tàu và MMSI phải khớp\n• SART: hạn pin\n• AIS: biên bản thử hàng năm (thiếu là lỗi PSC mã 10113)\n• SSAS: biên bản thử theo kế hoạch\n\nTàu đổi tên/đổi cờ mà chưa đăng ký lại EPIRB là lỗi hay gặp." },
     { id:"h-e3", t:"Hải đồ hàng hải — tu chỉnh và cập nhật", ref:"SOLAS V/19, V/27 · PSC.CL VR",
-      d:"Kiểm tra ngay tại buồng lái trong lúc ngồi làm hồ sơ.\n\nCÁCH ĐỐI CHIẾU TU CHỈNH — làm đúng 4 bước:\n\n1) Lấy hải đồ đang dùng cho chuyến này. Nhìn GÓC DƯỚI BÊN TRÁI, ngay dưới khung viền: đó là chỗ ghi số tu chỉnh, viết bằng mực TÍM, dạng «năm–số thông báo», ví dụ 2026–1234. Số cuối cùng ở đây chính là lần tu chỉnh mới nhất đã làm lên tờ hải đồ đó.\n\n2) Lấy tập Thông báo hàng hải hàng tuần (Weekly Notices to Mariners) mới nhất tàu nhận được. So số tuần/số thông báo cuối cùng với số ghi trên hải đồ. Lệch nhau nghĩa là tàu chưa tu chỉnh kịp.\n\n3) Mở SỔ THEO DÕI TU CHỈNH — bản Admiralty là NP133A (Chart Correction Log and Folio Index). Mỗi tờ hải đồ một dòng, ghi lần lượt các số thông báo đã áp vào. Đối chiếu dòng của tờ hải đồ vừa xem với con số ở góc hải đồ: phải khớp.\n\n4) Thông báo tạm thời (T) và dự thảo (P) ghi bằng BÚT CHÌ, có chữ (T) hoặc (P) kèm theo, và phải có danh sách T&P còn hiệu lực riêng. Kiểm tra danh sách này đã được rà theo bản mới nhất chưa.\n\nKiểm tra thêm: có đủ hải đồ TỶ LỆ LỚN cho cảng sắp vào; có cảnh báo hàng hải khu vực ven bờ đang hoạt động.\n\nLỖI HAY GẶP: hải đồ còn hạn nhưng số tu chỉnh dừng lại từ mấy tháng trước; tu chỉnh bằng bút bi hoặc bút xóa; NP133A ghi khống trong khi trên tờ hải đồ không có nét vẽ nào mới.\n\n⚠ Đây là nhóm khiếm khuyết PSC hàng đầu." },
+      d:"Đây là mục hay bị bắt lỗi nhất khi kiểm tra. Làm theo đúng thứ tự.\n\nBƯỚC 1 — Lấy danh mục hải đồ của tàu\n• Mở NP131 (Catalogue of Admiralty Charts) hoặc danh mục hải đồ trong Sổ tay hàng hải của tàu.\n• Đối chiếu: tuyến tàu đang chạy cần những tờ hải đồ nào — có đủ trên tàu không.\n• Hải đồ phải phủ kín từ cảng đi đến cảng đến, kể cả hải đồ tỷ lệ lớn để vào cảng.\n\nBƯỚC 2 — Xem sổ ghi tu chỉnh\n• Sổ tên là NP133A “Chart Correction Log and Folio Index”.\n• Mở ra: mỗi tờ hải đồ có một dòng, ghi số thông báo hàng hải đã sửa vào tờ đó.\n• Nhìn dòng cuối cùng: đã ghi tới tuần nào của năm nào (ví dụ 32/2026).\n• So với tuần hiện tại. Chênh quá 4 tuần là CHƯA CẬP NHẬT — ghi khiếm khuyết.\n\nBƯỚC 3 — Rút ngẫu nhiên 2–3 tờ hải đồ ra kiểm tận mắt\n• Chọn tờ của vùng tàu đang chạy, đừng để thuyền viên tự chọn tờ đưa cho mình.\n• GÓC DƯỚI BÊN TRÁI mặt hải đồ là nơi ghi các lần tu chỉnh: dãy số kiểu “2026-1245”, nghĩa là thông báo số 1245 năm 2026.\n• Số cuối cùng ở góc đó phải khớp với dòng ghi trong sổ NP133A.\n\nBƯỚC 4 — Xem cách sửa có đúng quy định không\n• Sửa VĨNH VIỄN phải dùng MỰC TÍM (violet ink), nét mảnh, đúng ký hiệu.\n• Sửa TẠM THỜI và SƠ BỘ (Temporary & Preliminary — T&P) phải dùng BÚT CHÌ, để còn xóa được khi thông báo hết hiệu lực.\n• Tàu phải giữ danh sách T&P đang còn hiệu lực. Không có danh sách này là khiếm khuyết.\n• Không được sửa bằng bút bi, bút dạ, không được dán đè giấy.\n\nBƯỚC 5 — Kiểm tra hải đồ có bị hết hiệu lực không\n• Hải đồ bị thay bằng ấn bản mới (New Edition) thì phải bỏ, không được dùng tiếp dù đã tu chỉnh.\n• Thông báo hàng hải hằng tuần có mục liệt kê hải đồ ra ấn bản mới — đối chiếu.\n\nBƯỚC 6 — Xem cách sắp xếp và bảo quản\n• Hải đồ để trong ngăn kéo phẳng, không gấp, không cuộn.\n• Có bảng ghi rõ tờ nào ở ngăn nào.\n\nĐẠT khi: đủ tờ cho tuyến, sổ NP133A ghi tới tuần gần nhất, hải đồ rút ra kiểm khớp với sổ, sửa đúng mực tím / bút chì.\n\nLỖI HAY GẶP: sổ ghi đầy đủ nhưng hải đồ thật chưa sửa (ghi cho có); dùng hải đồ đã ra ấn bản mới; không có danh sách T&P.\n\nHỎI PHÓ HAI: “Tuần thông báo hàng hải mới nhất anh nhận được là tuần mấy? Cho tôi xem tờ hải đồ vùng mình đang chạy và chỗ ghi trong sổ.”" },
     { id:"h-e7", t:"Ấn phẩm hàng hải đủ bộ và cập nhật", ref:"SOLAS V/21, V/27 · Survey VTB",
-      d:"Kiểm tra ngay tại buồng lái. Bộ Admiralty thường dùng, nhớ theo mã NP:\n• NP131 — Danh mục hải đồ và ấn phẩm (Catalogue)\n• NP133A — Sổ theo dõi tu chỉnh hải đồ\n• NP234 — Danh mục lũy kế Thông báo hàng hải (ra tháng 1 và tháng 7)\n• NP247 — Tổng hợp Thông báo hàng hải thường niên\n• NP5011 — Ký hiệu và chữ viết tắt trên hải đồ\n• Danh mục đèn biển và tín hiệu sương mù (List of Lights)\n• Danh mục tín hiệu vô tuyến ALRS — chú ý Tập 5 tìm cứu và Tập 6 dịch vụ cảng\n• Bảng thủy triều năm HIỆN HÀNH (Admiralty Tide Tables)\n• Hướng dẫn hành hải (Sailing Directions / Pilot) cho vùng đang chạy\n• Mã hiệu quốc tế, IAMSAR Tập III (đủ phụ chương)\n• Bản SOLAS, MARPOL trên tàu\n\nCÁCH KIỂM TRA: mở trang bìa hoặc trang đầu xem NĂM XUẤT BẢN; bảng thủy triều năm cũ là khiếm khuyết ngay. Với ấn phẩm cập nhật bằng thông báo hàng tuần, xem trang ghi tu chỉnh phía trong bìa. Ấn phẩm điện tử (e-NP) thì mở phần mềm xem ngày cập nhật gần nhất và hạn giấy phép." },
+      d:"“Ấn phẩm hàng hải” là bộ sách bắt buộc phải có trên buồng lái để dẫn tàu. Kiểm theo 6 bước.\n\nBƯỚC 1 — Lấy danh mục ấn phẩm bắt buộc của CHÍNH TÀU NÀY\n• Nằm trong Sổ tay quản lý an toàn hoặc phụ lục Giấy chứng nhận An toàn trang thiết bị.\n• Không dùng danh mục chung của tàu khác — mỗi tuyến chạy đòi hỏi khác nhau.\n\nBƯỚC 2 — Đếm đủ bộ tối thiểu, cầm từng quyển lên\n• NP131 — Mục lục hải đồ (Catalogue of Admiralty Charts).\n• ALRS — Danh mục tín hiệu vô tuyến, các tập cần cho tuyến (thường Vol. 1, 3, 5).\n• NP247 — Danh mục hải đăng và tín hiệu sương mù (List of Lights).\n• Sailing Directions (Pilot Book) cho vùng biển đang chạy.\n• Bảng thủy triều (Tide Tables) và Tidal Stream Atlas.\n• NP5011 — Ký hiệu và chữ viết tắt dùng trên hải đồ.\n• NP100 — Mariner’s Handbook.\n• Nautical Almanac (lịch thiên văn hàng hải).\n• IAMSAR Tập III — sổ tay tìm kiếm cứu nạn.\n• Bộ luật/công ước bản in: COLREG (quy tắc tránh va), SOLAS, MARPOL, ISM, ISPS.\n• International Code of Signals — danh mục tín hiệu quốc tế.\n\nBƯỚC 3 — Kiểm NĂM XUẤT BẢN (lỗi hay gặp nhất)\n• Bảng thủy triều và Nautical Almanac hết hiệu lực ngày 31/12 hằng năm — sang tháng 1 mà còn quyển năm cũ là khiếm khuyết ngay.\n• Danh mục hải đăng ra ấn bản mới hằng năm.\n• Mở bìa xem năm in, đừng nhìn gáy sách.\n\nBƯỚC 4 — Kiểm TU CHỈNH của từng ấn phẩm\n• Ấn phẩm Admiralty được cập nhật qua “Section IV” của Thông báo hàng hải hằng tuần.\n• Tàu phải có sổ ghi tu chỉnh ấn phẩm (thường là NP234 hoặc sổ tự lập).\n• Mở sổ: dòng cuối ghi tới tuần nào. Chênh quá 4 tuần so với hiện tại là chưa cập nhật.\n• Mở chính quyển sách ra: TRANG ĐẦU hoặc trang chèn phía sau bìa có bảng ghi “Corrected to Weekly NM …/…” kèm chữ ký người sửa. Phải khớp với sổ.\n\nBƯỚC 5 — Nếu tàu dùng bản điện tử (e-NP / ADP)\n• Xem giấy phép còn hạn không, hết hạn là sách khóa lại không mở được.\n• Xem ngày cập nhật gần nhất trên phần mềm.\n• Phải có máy tính thứ hai hoặc bản in dự phòng — một máy hỏng là mất hết sách.\n\nBƯỚC 6 — Kiểm nơi để\n• Để ngay trên buồng lái, lấy được trong lúc trực ca, không cất trong phòng khóa.\n\nĐẠT khi: đủ đầu sách theo danh mục, sách theo năm đúng năm hiện hành, sổ tu chỉnh ghi tới tuần gần nhất và khớp với ghi chép trong sách.\n\nHỎI PHÓ HAI: “Tuần Thông báo hàng hải mới nhất là tuần mấy? Cho tôi xem chỗ anh ghi tu chỉnh trong quyển Danh mục hải đăng.”" },
     { id:"h-e5", t:"Biên bản thử VDR (APT) và AIS hàng năm", ref:"SOLAS V/18.8",
       d:"• VDR/S-VDR: Annual Performance Test còn hiệu lực, do đơn vị được nhà sản xuất ủy quyền thực hiện\n• AIS: biên bản thử hàng năm\n\nKiểm tra ngày thử và ngày đến hạn tiếp theo. Đây là hai mục PSC hay hỏi." },
     { id:"h-e6", t:"Hồ sơ thử GMDSS và SSAS", ref:"SOLAS IV/15 · SOLAS XI-2/6",
@@ -689,7 +741,7 @@ const DATA = [
     { id:"h-g4", t:"Nhật ký hàng hải, vô tuyến, điều động và sổ trực ca", ref:"SOLAS V/18, III/19-20, IV/17 · STCW A-VIII/1",
       d:"Xem ngay tại buồng lái, mở từng sổ đọc 1 tháng gần nhất.\n\nNHẬT KÝ HÀNG HẢI — phải ghi đủ: thuyền viên nhập/rời tàu, tai nạn, hồi hương, THỬ MÁY LÁI trong 12 giờ trước khi rời bến, kiểm tra LSA hàng tháng, huấn luyện trên tàu, và bản ghi các cuộc THỰC TẬP:\n• Cứu hỏa và bỏ tàu — mỗi tháng một lần\n• Hạ xuồng cứu sinh xuống nước và điều động — 3 tháng một lần\n• Lái sự cố — 3 tháng một lần\n• Cứu nạn không gian kín — 2 tháng một lần\n• Bè hạ bằng davit (nếu có) — không quá 4 tháng\n\nBản ghi thực tập phải có: ngày giờ, kịch bản, ai tham gia, thiết bị nào được dùng, nhận xét rút kinh nghiệm. Chỉ ghi «đã tiến hành thực tập cứu hỏa» là ghi hình thức.\n\nNHẬT KÝ VÔ TUYẾN GMDSS: ghi đủ ngày, có kết quả thử hàng ngày/tuần/tháng, có bản ghi thử DSC với trạm bờ.\n\nNHẬT KÝ ĐIỀU ĐỘNG; BẢNG PHÂN CÔNG TRỰC CA đủ ba ca, tên người thật đang trên tàu; LỊCH TRỰC CA và quy trình bàn giao ca in ra TREO tại buồng lái.\n\nSỔ LỆNH BAN ĐÊM: thuyền trưởng phải VIẾT TAY lệnh cho từng đêm, sỹ quan trực ký nhận. Xem 5–7 đêm gần nhất — nội dung có khác nhau theo tình hình thực tế không, hay chép lại một câu giống hệt mọi đêm.\n\nMẸO ĐỐI CHIẾU: chọn một ngày thực tập rồi tra xem hôm đó tàu ở đâu, có bao nhiêu người trên tàu. Thực tập ghi vào ngày tàu đang chạy trong luồng hẹp hoặc ngày gần hết người là dấu hiệu ghi khống. Người có tên trực ca đêm mà bảng giờ nghỉ ghi đang nghỉ là mâu thuẫn — PSC rất hay bắt lỗi này." },
     { id:"h-g25", t:"Danh mục thử máy lái 12 giờ trước rời bến", ref:"SOLAS V/26.2",
-      d:"Sổ này để ở buồng lái, xem luôn khi làm hồ sơ.\n\nMở danh mục của các chuyến gần nhất. Phải có chữ ký và ghi GIỜ thực hiện, và giờ đó phải NẰM TRONG 12 GIỜ trước giờ rời bến ghi trong nhật ký hàng hải.\n\nNội dung phải thử: máy lái chính, máy lái phụ, hệ thống điều khiển từ xa, nguồn cấp từ bảng điện chính và bảng điện sự cố, chỉ báo góc bánh lái, báo động mất nguồn, quy trình chuyển đổi lái sự cố, liên lạc buồng lái – buồng máy lái.\n\nMẸO: đối chiếu giờ ký với giờ rời bến. Ký sẵn cả tháng một lượt là ghi khống." },
+      d:"SOLAS bắt buộc thử máy lái trong vòng 12 GIỜ trước khi tàu rời bến. Kiểm cả hồ sơ lẫn cách làm.\n\nBƯỚC 1 — Mở nhật ký hàng hải, tìm lần ghi thử máy lái gần nhất. Đối chiếu giờ ghi với giờ tàu rời bến — phải trong 12 giờ.\n\nBƯỚC 2 — Kiểm nội dung phải thử đủ, ghi rõ từng mục:\n• Máy lái chính.\n• Máy lái phụ.\n• Hệ thống điều khiển từ xa từ buồng lái.\n• Vị trí lái ở buồng lái.\n• Nguồn điện sự cố cho máy lái.\n• Chỉ báo góc bánh lái so với góc bánh lái THẬT.\n• Báo động mất nguồn điều khiển từ xa.\n• Báo động của bộ khởi động động cơ máy lái.\n• Thiết bị chuyển đổi tự động (nếu có).\n\nBƯỚC 3 — Kiểm dải bẻ lái: bánh lái phải bẻ được hết từ 35 độ mạn này sang 35 độ mạn kia, và từ 35 độ mạn này sang 30 độ mạn kia trong không quá 28 giây.\n\nBƯỚC 4 — Kiểm liên lạc buồng lái – buồng máy lái, thử gọi hai chiều.\n\nBƯỚC 5 — Kiểm bảng hướng dẫn chuyển đổi máy lái dán tại buồng lái VÀ tại buồng máy lái, có sơ đồ.\n\nBƯỚC 6 — Kiểm diễn tập lái sự cố: SOLAS yêu cầu 3 tháng một lần. Tìm ghi chép trong nhật ký.\n\nBƯỚC 7 — Nếu tàu đang neo hoặc buộc cầu và không thử được: xem lần thử gần nhất và biên bản, hỏi kế hoạch thử trước khi rời bến.\n\nLỖI HAY GẶP: ghi chép mang tính hình thức, cùng một dòng chữ chép lại mọi chuyến, không ghi giờ." },
     { id:"h-g5", t:"Kế hoạch hành trình berth-to-berth", ref:"Tự tổng hợp · VTB-07-02-05B",
       d:"• Được THUYỀN TRƯỞNG PHÊ DUYỆT bằng chữ ký\n• Vẽ đầy đủ trên hải đồ TỪ CẦU BẾN ĐẾN CẦU BẾN, kể cả đoạn trong luồng và khu vực hoa tiêu\n• Có điểm chuyển hướng, khoảng cách an toàn, độ sâu tối thiểu, vùng cấm\n• Danh mục kiểm tra rời bến và đến cảng có ký xác nhận\n\nMẸO: so kế hoạch trên giấy với đường vẽ trên hải đồ — nhiều tàu có kế hoạch nhưng không vẽ." },
     { id:"h-g6", t:"Bản sao DOC của công ty trên tàu", ref:"SMC audit · VTB-07-02-05B",
@@ -855,34 +907,38 @@ const DATA = [
   { g: "1. Buồng lái & buồng vô tuyến · 30 phút · sỹ quan trực ca", items: [
     { id:"t2-1", t:"Thiết bị định vị & vô tuyến — bảo trì tốt", ref:"SMC audit · ISM 10",
       d:"Không hỏi miệng — yêu cầu sỹ quan trực ca BẬT và THAO TÁC từng thiết bị trước mặt mình.\nMở nhật ký bảo dưỡng của bộ phận boong, chọn ngẫu nhiên 2–3 thiết bị và đối chiếu: lần bảo dưỡng gần nhất, ai làm, có khớp chu kỳ trong PMS không.\nNhìn mặt sau/bên hông máy: thiết bị nào có tem dịch vụ của hãng thì đọc ngày kiểm định gần nhất." },
+    { id:"t2-40", t:"Radar — thử vận hành từng bước", ref:"SOLAS V/19.2.3 · V/19.2.5 · PSC.CL VR",
+      d:"\nAn toàn trước: ăng ten radar phát vi ba, quay nhanh. TRƯỚC KHI BẬT phải chắc chắn không có ai đang làm việc trên nóc cabin gần ăng ten. Báo cho sĩ quan trực ca.\n\nBƯỚC 1 — Bật nguồn, để ở chế độ STANDBY\n• Máy đếm ngược khoảng 3 phút để sấy đèn phát (magnetron). Chờ hết đếm ngược.\n\nBƯỚC 2 — Chuyển sang TRANSMIT (phát)\n• Nghe tiếng ăng ten quay. Nhìn ra ngoài xác nhận ăng ten thật sự đang quay.\n\nBƯỚC 3 — Chỉnh độ nhạy cho đúng\n• Vặn GAIN (độ khuếch đại) lên tới khi màn hình lấm tấm nhiễu nhẹ, rồi hạ xuống một chút — đó là mức đúng. Gain quá thấp sẽ mất mục tiêu nhỏ.\n• A/C SEA khử nhiễu sóng biển, A/C RAIN khử nhiễu mưa — đặt vừa đủ, đừng vặn hết vì sẽ xóa luôn mục tiêu thật.\n\nBƯỚC 4 — Thử từng thang tầm xa\n• Lần lượt 0,5 – 1,5 – 3 – 6 – 12 – 24 hải lý.\n• Mỗi thang phải hiện vòng cự ly và thấy được bờ, phao, tàu xung quanh.\n\nBƯỚC 5 — Thử EBL và VRM\n• EBL là đường phương vị điện tử, VRM là vòng cự ly di động.\n• Rê EBL và VRM vào một mục tiêu cố định đã biết (đầu cầu cảng, phao).\n• Đọc phương vị và cự ly, so với hải đồ hoặc đo bằng mắt. Sai lệch lớn là máy có vấn đề.\n\nBƯỚC 6 — Thử ARPA (bám mục tiêu tự động)\n• Bắt một mục tiêu đang chạy, chờ khoảng 3 phút cho vector ổn định.\n• Máy phải hiện CPA (khoảng cách tiếp cận gần nhất) và TCPA (thời gian tới điểm đó).\n• Đặt ngưỡng báo động CPA thật lớn — chuông phải kêu. Xong nhớ đặt lại như cũ.\n\nBƯỚC 7 — Thử Performance Monitor (nếu có)\n• Trên màn hình hiện hình nan quạt hoặc dải sáng. Chiều dài của nó phải bằng mức ghi trong sổ tay lúc tàu mới.\n• Ngắn hơn nhiều = đèn phát yếu, radar sắp hỏng dù vẫn hiện hình.\n\nBƯỚC 8 — Làm lại toàn bộ với radar thứ hai\n• Tàu ≥ 3000 GT phải có 2 radar: một băng X (3 cm) và một băng S (10 cm), hoạt động độc lập.\n• Radar “để dành” không ai bật mới là cái hay hỏng.\n\nBƯỚC 9 — Xem sơ đồ vùng mù (blind sector)\n• Cần cẩu, cột, ống khói che ăng ten sẽ tạo vùng radar không thấy gì.\n• SOLAS bắt buộc dán sơ đồ vùng mù ở buồng lái. Không có là khiếm khuyết.\n\nBƯỚC 10 — Xem nhật ký hàng hải có ghi kết quả thử radar trước mỗi chuyến không.\n\nHỎI SĨ QUAN TRỰC: “Vùng mù radar của tàu mình ở hướng nào? Cho tôi xem sơ đồ.” và “Anh chỉ tôi cách bắt mục tiêu ARPA.”\n" },
+    { id:"t2-41", t:"GPS — thử định vị từng bước", ref:"SOLAS V/19.2.1.6 · IMO Res. A.1046(27)",
+      d:"\nBƯỚC 1 — Đọc tọa độ trên máy GPS chính, ghi ra giấy.\n\nBƯỚC 2 — So với vị trí thật\n• Tàu đang cập cầu: chấm tọa độ đó lên hải đồ, phải rơi đúng vào vị trí cầu. Lệch vài chục mét là bình thường, lệch hàng hải lý là sai.\n\nBƯỚC 3 — So GPS 1 với GPS 2\n• Tàu phải có ít nhất hai nguồn định vị độc lập.\n• Hai máy chênh nhau quá 100 mét là có máy sai.\n\nBƯỚC 4 — Kiểm HỆ TỌA ĐỘ (datum) — bước quan trọng nhất\n• Vào menu, xem datum đang đặt: phải là WGS-84.\n• Datum này phải TRÙNG với datum ghi trên hải đồ đang dùng (ghi ở phần chú giải hải đồ).\n• Đặt sai datum làm vị trí lệch tới hàng trăm mét — đây là nguyên nhân của nhiều vụ mắc cạn.\n\nBƯỚC 5 — Xem chất lượng tín hiệu\n• Màn hình trạng thái hiện số vệ tinh bắt được: thường phải từ 5 vệ tinh trở lên.\n• Chỉ số HDOP dưới 2 là tốt; trên 4 là vị trí kém tin cậy.\n\nBƯỚC 6 — Thử báo động\n• Đặt báo động neo trôi (anchor watch) hoặc báo động lệch tuyến (XTE) với ngưỡng thật nhỏ — chuông phải kêu.\n• Thử xong đặt lại như cũ.\n\nBƯỚC 7 — Kiểm đường ra của tín hiệu\n• GPS cấp tọa độ cho AIS, ECDIS, VDR và máy vô tuyến DSC.\n• Đọc tọa độ hiện trên AIS và trên máy VHF DSC — phải trùng với GPS.\n• Nếu máy DSC hiện tọa độ nhập tay từ lâu, khi phát tín hiệu cấp cứu sẽ báo SAI VỊ TRÍ. Đây là lỗi nghiêm trọng.\n\nBƯỚC 8 — Thử nguồn dự phòng\n• Ngắt nguồn chính, GPS phải chuyển sang nguồn sự cố và không mất tọa độ.\n\nLỖI HAY GẶP: datum đặt sai; GPS thứ hai hỏng lâu ngày không ai báo; tọa độ trên máy DSC là số cũ nhập tay.\n" },
     { id:"t2-6", t:"Phao tròn MOB tại hai cánh gà buồng lái", ref:"PMTVR 09-05 · SOLAS III-7",
       d:"Phao dùng cho người rơi xuống nước đặt ở HAI CÁNH GÀ, phải nhả nhanh được từ vị trí trực ca.\n\nKIỂM TRA TẠI CHỖ: cầm thử cơ cấu nhả — không được buộc dây, không sơn dính, không kẹt rỉ. Phao này phải có đèn tự sáng VÀ tín hiệu khói gắn kèm (loại tự hoạt khi chạm nước).\nĐọc hạn trên vỏ hộp khói và trên đèn: khói thường 3 năm, pin đèn 5 năm hoặc theo nhà sản xuất.\nKiểm tra băng phản quang còn phản xạ, tên tàu và cảng đăng ký còn đọc được.\n\nLỖI HAY GẶP: phao bị buộc chặt vào lan can cho khỏi rơi — mất tác dụng nhả nhanh, là khiếm khuyết." },
     { id:"t2-7", t:"EPIRB — vị trí lắp, hạn và đăng ký", ref:"PSC.CL VR · PMTVR 09-05",
-      d:"EPIRB phải lắp ở nơi NHẢ TỰ DO ĐƯỢC khi tàu chìm: không buộc dây, không che chắn, không có vật cản phía trên, dễ với tay lấy ra dùng bằng tay.\n\nĐỌC BA MỐC HẠN trên thân máy:\n• Hạn ắc quy (battery expiry) — in trên nhãn\n• Hạn bộ nhả thủy tĩnh HRU — thường 2 năm, in dập trên thân HRU\n• Ngày kiểm tra hàng năm gần nhất — có biên bản Annual Survey Report kèm theo\n\nĐĂNG KÝ: đọc số hiệu (Hex ID / UIN) dán trên thân rồi đối chiếu giấy đăng ký EPIRB — tên tàu, hô hiệu, số MMSI phải khớp. Tàu đổi tên, đổi cờ hoặc đổi chủ mà không đăng ký lại là lỗi hay gặp: khi có nạn, trung tâm cứu nạn sẽ gọi nhầm chủ cũ.\n\nDây giữ (lanyard) buộc vào THÂN EPIRB chứ KHÔNG buộc vào giá đỡ hay kết cấu tàu — buộc sai thì tàu chìm sẽ kéo EPIRB xuống theo.\nNgoài ra 5 năm phải có bảo dưỡng tại bờ (Shore-Based Maintenance)." },
+      d:"EPIRB là phao vô tuyến báo nạn: tàu chìm thì nó tự nổi lên và phát tín hiệu cấp cứu kèm tọa độ qua vệ tinh.\n\nBƯỚC 1 — Nhìn VỊ TRÍ LẮP\n• Phải ở ngoài trời, gần buồng lái, chỗ tàu chìm thì nó nổi tự do lên được.\n• Nhìn thẳng lên trên: không được có mái che, dây, lưới, cần cẩu chặn.\n• Không được buộc chặt dây EPIRB vào lan can — buộc thế là nó chìm theo tàu.\n\nBƯỚC 2 — Đọc HẠN PIN ghi trên thân máy.\n\nBƯỚC 3 — Đọc HẠN BỘ NHẢ THỦY TĨNH (HRU) gắn ở giá đỡ\n• HRU là chốt nhựa, khi tàu chìm tới khoảng 4 m thì áp lực nước cắt cho EPIRB nổi lên.\n• HRU có hạn RIÊNG, thường 2 năm, ghi trên thân chốt.\n• ĐÂY LÀ LỖI BỊ BẮT NHIỀU NHẤT — hạn pin còn nhưng HRU đã quá hạn.\n\nBƯỚC 4 — Kiểm ĐĂNG KÝ\n• Số nhận dạng (hex ID) hoặc MMSI dán trên thân máy phải TRÙNG với giấy đăng ký EPIRB và trùng MMSI của tàu.\n• Tàu đổi tên, đổi chủ, đổi cờ mà không đăng ký lại thì tín hiệu cấp cứu sẽ báo về sai tàu, sai người liên lạc.\n\nBƯỚC 5 — Thử TỰ KIỂM\n• Bấm nút TEST — TUYỆT ĐỐI không bấm nút phát thật, sẽ báo động giả cho trung tâm cứu nạn.\n• Đèn nháy và/hoặc kêu bíp theo đúng sổ tay là đạt.\n• Chỉ thử theo hướng dẫn nhà sản xuất, thường tối đa 1 lần/tháng vì mỗi lần thử đều tốn pin.\n\nBƯỚC 6 — Mở nhật ký vô tuyến xem có ghi kết quả thử hằng tháng không.\n\nBƯỚC 7 — Kiểm biên bản kiểm định hằng năm (Annual Performance Test) do đơn vị được ủy quyền làm, còn hạn.\n\nBƯỚC 8 — Hỏi một thuyền viên bất kỳ, không hỏi sĩ quan\n• “Khi bỏ tàu, anh làm gì với cái này?” — trả lời đúng: mang theo xuống xuồng nếu kịp, không kịp thì để nó tự nổi, không được buộc lại." },
     { id:"t2-8", t:"SART — vị trí, hạn pin và đăng ký", ref:"SOLAS IV/7",
-      d:"SART lắp ở nơi lấy được nhanh khi bỏ tàu, thường trong buồng lái gần cửa ra hoặc trong xuồng.\nĐọc hạn pin in trên thân máy. Giá đỡ chắc chắn, có hướng dẫn sử dụng dán kèm.\nVới AIS-SART: kiểm tra số MMSI khai trong máy khớp với MMSI của tàu.\n\nYêu cầu sỹ quan trực ca chỉ ra vị trí SART và nói cách kích hoạt — không cho xem sổ tay.\n\nTàu từ 500 GT trở lên phải có ít nhất 2 SART hoặc AIS-SART; tàu 300–500 GT ít nhất 1. Đối chiếu số lượng thực tế với Record of Equipment." },
+      d:"SART là thiết bị phản xạ radar cứu nạn: mang theo xuống xuồng, khi radar tàu cứu hộ quét trúng thì nó phát lại tín hiệu, hiện thành dãy chấm trên màn hình chỉ đúng chỗ mình.\n\nBƯỚC 1 — Đếm số lượng\n• Tàu từ 500 GT trở lên: ít nhất 2 chiếc, đặt mỗi bên mạn một chiếc.\n• Tàu 300–500 GT: ít nhất 1 chiếc.\n\nBƯỚC 2 — Kiểm vị trí để\n• Phải để chỗ lấy nhanh được để MANG THEO XUỐNG XUỒNG khi bỏ tàu.\n• Cất trong tủ khóa, để trong kho là khiếm khuyết.\n\nBƯỚC 3 — Đọc hạn pin ghi trên thân.\n\nBƯỚC 4 — Thử bằng radar\n• Bật SART ở chế độ thử, cầm cách ăng ten radar vài mét.\n• Radar phải đang phát ở BĂNG X (3 cm).\n• Trên màn hình radar hiện dãy 12 chấm chạy từ vị trí SART hướng ra ngoài — đó là đạt.\n• Tắt ngay sau vài giây để không gây báo động giả và không tốn pin.\n\nBƯỚC 5 — Điều dễ nhầm\n• SART CHỈ phản ứng với radar băng X (3 cm). Thử bằng radar băng S (10 cm) sẽ không thấy gì.\n• Nhiều người thử nhầm bằng radar S rồi kết luận SART hỏng.\n\nBƯỚC 6 — Ghi kết quả thử vào nhật ký vô tuyến.\n\nBƯỚC 7 — Kiểm giá đỡ, dây đeo và hướng dẫn sử dụng dán kèm.\n\nHỎI THUYỀN VIÊN: “Khi xuống xuồng, ai là người cầm cái này?” — trong bảng phân công nhiệm vụ phải ghi rõ tên vị trí đó." },
     { id:"t2-9", t:"AIS — dữ liệu hiển thị đúng, có biên bản thử", ref:"PSC.CL VR",
-      d:"Bấm vào màn hình AIS xem phần thông tin tàu mình (own ship static data) và ĐỐI CHIẾU THỰC TẾ:\n• Số IMO, hô hiệu, tên tàu — so với giấy đăng ký\n• Loại tàu, kích thước, vị trí ăng-ten\n• MỚN NƯỚC — phải là mớn hiện tại, không phải số nhập từ chuyến trước\n• Trạng thái hành trình (navigational status): đang neo / đang chạy / đang buộc bến — phải khớp tình trạng thật\n• Cảng đến và ETA\n\nKiểm tra biên bản thử AIS hàng năm còn hiệu lực (thiếu là lỗi PSC mã 10113).\n\nLỖI HAY GẶP: tàu đang neo mà AIS vẫn để «under way»; mớn nước để 0.0; cảng đến của chuyến trước." },
+      d:"AIS tự phát tên tàu, tọa độ, hướng đi, tốc độ cho tàu khác và trạm bờ nhìn thấy.\n\nBƯỚC 1 — Mở màn hình AIS, vào phần THÔNG TIN TĨNH (static data), đọc và đối chiếu từng dòng:\n• Tên tàu — đúng tên hiện tại.\n• Hô hiệu (call sign) — khớp giấy phép đài tàu.\n• Số MMSI — 9 chữ số, khớp với giấy phép và với máy VHF DSC.\n• Số IMO.\n• Loại tàu — chọn đúng mã.\n• Kích thước và VỊ TRÍ ĐẶT ĂNG TEN: bốn số A, B, C, D tính từ ăng ten tới mũi, lái, mạn trái, mạn phải. Nhiều tàu để số của tàu mẫu, không sửa.\n\nBƯỚC 2 — Vào phần THÔNG TIN CHUYẾN ĐI (voyage data):\n• Mớn nước hiện tại — phải cập nhật theo thực tế, không để số cũ.\n• Cảng đến, giờ dự kiến đến (ETA).\n• Số người trên tàu.\n• Trạng thái hàng hải (navigational status): đang chạy máy, đang neo, đang buộc cầu… phải đúng với thực tế lúc đó.\n\nBƯỚC 3 — Kiểm tọa độ trên AIS có trùng với GPS không.\n\nBƯỚC 4 — Nhìn danh sách tàu xung quanh mà AIS bắt được — có tàu hiện lên là ăng ten thu tốt.\n\nBƯỚC 5 — Xem biên bản thử AIS hằng năm do đơn vị được ủy quyền làm, còn hạn.\n\nBƯỚC 6 — Kiểm nguồn: AIS phải được cấp cả từ nguồn sự cố.\n\nLỖI HAY GẶP: mớn nước để số từ chuyến trước; trạng thái vẫn để “đang chạy” khi tàu đã neo; kích thước A/B/C/D sai; tắt AIS khi làm việc ngoài giàn mà không ghi lý do vào nhật ký (chỉ thuyền trưởng mới được quyết định tắt, và phải ghi sổ)." },
     { id:"t2-10", t:"VHF, MF/HF — thử DSC và nguồn dự trữ", ref:"LR PSC",
-      d:"YÊU CẦU SỸ QUAN THAO TÁC, đoàn chỉ quan sát:\n1) Thử chọn gọi số DSC trên MF/HF (test call tới trạm bờ) — phải có bản in hoặc bản ghi kết quả lưu lại.\n2) Chuyển nguồn từ AC sang DC (ắc quy dự trữ) và xác nhận máy vẫn phát được.\n3) Xem đồng hồ đo dung lượng ắc quy dự trữ; kiểm tra ngày đo dung lượng gần nhất trong nhật ký vô tuyến.\n4) Thử in trực tiếp với trạm bờ nếu tàu có thiết bị NBDP.\n\nHỏi sỹ quan quy trình phát báo nạn (distress alert) mà KHÔNG cho xem sổ tay — không trả lời được là nhóm lỗi giữ tàu.\n\nẮc quy GMDSS phải nạp đầy và có nguồn dự phòng độc lập với nguồn chính (lỗi PSC mã 05114)." },
+      d:"BƯỚC 1 — Kiểm bộ thiết bị theo vùng biển tàu chạy (A1 gần bờ đến A4 vùng cực). Xem Giấy chứng nhận An toàn vô tuyến điện ghi tàu được cấp cho vùng nào, rồi đối chiếu thiết bị thực tế.\n\nBƯỚC 2 — Thử VHF\n• Bật máy, chuyển về KÊNH 16 — kênh trực canh cấp cứu, phải luôn mở.\n• Gọi thử một trạm bờ hoặc tàu bên cạnh, nghe hai chiều rõ.\n• Chuyển sang kênh làm việc rồi quay lại kênh 16.\n\nBƯỚC 3 — Thử DSC (gọi chọn số) trên VHF\n• Vào menu Test Call, gọi thử tới một đài bờ có dịch vụ này. Máy phải nhận được xác nhận.\n• TUYỆT ĐỐI không bấm nút DISTRESS (nắp đỏ) — đó là nút cấp cứu thật.\n• Kiểm tọa độ hiện trên máy DSC: phải tự lấy từ GPS. Nếu máy đang dùng tọa độ nhập tay cũ thì khi cấp cứu sẽ báo sai vị trí — ghi khiếm khuyết ngay.\n\nBƯỚC 4 — Thử MF/HF (nếu tàu có)\n• Thử DSC trên tần số 2187,5 kHz.\n• Nghe thử phát thoại, xem đồng hồ công suất phát có lên không.\n\nBƯỚC 5 — Kiểm ẮC QUY DỰ TRỮ của hệ GMDSS\n• Ắc quy phải đủ cấp 1 giờ nếu tàu có máy phát sự cố, 6 giờ nếu không có.\n• Đo điện áp và xem kết quả đo dung lượng định kỳ ghi trong nhật ký vô tuyến.\n• Nhìn cực ắc quy: sạch, không muối bám, có nắp che.\n\nBƯỚC 6 — Kiểm nhật ký vô tuyến\n• Ghi thử hằng ngày (kiểm ắc quy, thử DSC nội bộ), hằng tuần, hằng tháng.\n• Có chữ ký người thực hiện.\n\nBƯỚC 7 — Kiểm bảng dán cạnh máy: hướng dẫn phát tín hiệu cấp cứu bằng tiếng Việt và tiếng Anh, kèm số MMSI của tàu.\n\nHỎI SĨ QUAN TRỰC: “Bây giờ có người rơi xuống nước, anh làm gì trên máy này?” — phải chỉ được đúng nút và đọc đúng thứ tự." },
     { id:"t2-11", t:"Máy đo sâu, VDR/S-VDR", ref:"PSC.CL VR · LR PSC",
-      d:"Máy đo sâu: cho chạy thử tại chỗ, xem có hiển thị số hợp lý không. Nếu hỏng thì BẮT BUỘC phải có giấy miễn trừ của chính quyền cờ tàu — không có giấy là khiếm khuyết.\n\nVDR/S-VDR: nhìn màn hình xem có đèn/cảnh báo lỗi nào đang sáng không. Kiểm tra nguồn điện sự cố cấp cho VDR. Xem biên bản thử tính năng hàng năm (Annual Performance Test — APT) còn hiệu lực; APT phải do đơn vị được nhà sản xuất ủy quyền thực hiện.\n\nNếu tàu có cảm biến báo nước xâm nhập hầm hàng, thử báo động ngay tại bảng hiển thị buồng lái." },
+      d:"MÁY ĐO SÂU HỒI ÂM (echo sounder)\n\nBƯỚC 1 — Bật máy, đọc số độ sâu hiện trên màn hình.\nBƯỚC 2 — So với độ sâu ghi trên hải đồ tại vị trí tàu đang đậu, cộng thêm mức thủy triều lúc đó. Chênh lệch lớn là máy sai hoặc đặt sai mốc.\nBƯỚC 3 — Kiểm mốc đo (transducer offset): máy đo từ đáy tàu hay từ mặt nước — phải biết rõ và đặt đúng, nếu không số đọc sẽ lệch đúng bằng mớn nước.\nBƯỚC 4 — Thử báo động nước cạn: đặt ngưỡng cao hơn độ sâu hiện tại — chuông phải kêu. Thử xong đặt lại.\nBƯỚC 5 — Kiểm giấy in hoặc bộ nhớ ghi lại vệt đo.\n\nVDR (hộp đen của tàu)\n\nBƯỚC 6 — Xem đèn báo trạng thái trên bảng điều khiển: phải xanh, không có báo lỗi.\nBƯỚC 7 — Bấm thử nút LƯU SỰ KIỆN (save/event button) — máy phải xác nhận đã đánh dấu.\nBƯỚC 8 — Kiểm micro thu tiếng buồng lái: đủ số lượng theo thiết kế, không bị che, không bị dán băng dính.\nBƯỚC 9 — Kiểm biên bản thử hằng năm (Annual Performance Test — APT) do đơn vị được ủy quyền làm, còn hạn 12 tháng. Đây là giấy PSC luôn đòi.\nBƯỚC 10 — Kiểm ắc quy dự phòng của VDR còn hạn (thường 2–5 năm), và phao ghi dữ liệu nổi tự do (float-free capsule) nếu có, kèm bộ nhả thủy tĩnh còn hạn.\n\nLỖI HAY GẶP: thiếu biên bản thử VDR hằng năm; micro buồng lái bị hỏng không ai biết vì không ai nghe lại bao giờ." },
     { id:"t2-12", t:"Nguồn dự phòng độc lập cho GPS và cho GMDSS", ref:"LR PSC",
       d:"GPS phải có nguồn dự phòng (lỗi PSC mã 05117): thử bằng cách ngắt nguồn chính, máy phải tiếp tục chạy.\nGMDSS phải có nguồn dự trữ ĐỘC LẬP với nguồn chính và nguồn sự cố của tàu, đủ cấp trong 1 giờ (tàu có máy phát sự cố) hoặc 6 giờ (tàu không có).\n\nKiểm tra ắc quy: mức dung dịch, không phồng, cực không muối bám, ngày thay gần nhất, kết quả đo dung lượng định kỳ ghi trong nhật ký vô tuyến." },
     { id:"t2-13", t:"Báo cháy tại buồng lái — bảng chỉ thị và đầu báo", ref:"LR PSC · SOLAS II-2/7",
       d:"Nhìn kỹ BẢNG CHỈ THỊ: KHÔNG được có vùng nào đang ở trạng thái cô lập (isolated / disabled) hoặc tắt tiếng dài hạn. Vùng bị cô lập là dấu hiệu đầu báo hỏng mà tàu tắt đi cho đỡ kêu — khiếm khuyết nặng, phải hỏi lý do và xem có báo cáo khiếm khuyết kỹ thuật không.\n\nYêu cầu sỹ quan thử MỘT đầu báo bất kỳ (bình thử khói hoặc nút thử) rồi xem bảng chỉ thị có hiện ĐÚNG VÙNG không.\nXác nhận âm báo nghe rõ tại vị trí trực ca.\nKiểm tra đầu báo khói ngay trong buồng lái không bị che, bịt hay sơn phủ.\nXem sổ theo dõi thử hệ thống báo cháy — chu kỳ tuần/tháng/quý theo SMS." },
     { id:"t2-14", t:"ECDIS — hải đồ điện tử, phần mềm và phân quyền", ref:"PSC.CL VR",
-      d:"CÁCH KIỂM TRA ENC:\n1) Mở phần thông tin cập nhật (update status): xem TUẦN cập nhật gần nhất đã áp. So với tuần hiện tại — chậm quá 1–2 tuần là chưa cập nhật kịp.\n2) Xem hạn GIẤY PHÉP (permit/licence) của bộ ENC. Giấy phép hết hạn thì ô hải đồ vùng đó không mở được.\n3) Với ô hải đồ (cell) của vùng đang chạy: xem số phiên bản (edition) và số cập nhật (update number) đã áp.\n4) Kiểm tra tàu có bố trí DỰ PHÒNG hợp lệ: hoặc ECDIS thứ hai độc lập, hoặc bộ hải đồ giấy đầy đủ cho tuyến.\n\nPHẦN MỀM VÀ PHÂN QUYỀN:\n• Mở mục About/System Info xem số phiên bản phần mềm — phải nằm trong danh sách phiên bản được nhà sản xuất công nhận còn hỗ trợ\n• Có nhật ký cập nhật phần mềm; chỉ người được cấp quyền quản trị mới đổi được cấu hình an toàn\n• Sỹ quan có chứng chỉ ECDIS chung VÀ hồ sơ làm quen với đúng loại máy trên tàu này\n\nLỖI HAY GẶP: dùng ENC nhưng vùng ven bờ Việt Nam vẫn dùng ô tỷ lệ nhỏ; cảnh báo an toàn bị tắt để đỡ kêu." },
+      d:"ECDIS là hệ thống hải đồ điện tử được duyệt dùng thay hải đồ giấy.\n\nBƯỚC 1 — Xác nhận đây là ECDIS được duyệt, không phải phần mềm xem hải đồ thường\n• Máy phải có giấy chứng nhận kiểu (type approval) và ghi trong Giấy chứng nhận An toàn trang thiết bị.\n\nBƯỚC 2 — Kiểm hải đồ đang dùng là ENC chính thức\n• ENC là hải đồ số do cơ quan thủy đạc nhà nước phát hành, không phải bản quét ảnh.\n• Vào phần quản lý giấy phép: xem giấy phép còn hạn bao nhiêu ngày. Hết hạn là hải đồ khóa lại.\n\nBƯỚC 3 — Kiểm ngày cập nhật hải đồ\n• Vào phần Update — xem lần cập nhật gần nhất là ngày nào, tuần nào.\n• Cập nhật hằng tuần. Chậm quá 4 tuần là khiếm khuyết.\n\nBƯỚC 4 — Kiểm phiên bản phần mềm\n• So với thông báo mới nhất của nhà sản xuất về phiên bản bắt buộc. Phần mềm quá cũ có lỗi hiển thị đá ngầm — đã có tàu mắc cạn vì lý do này.\n\nBƯỚC 5 — Thử báo động\n• Đặt một tuyến chạy thử, đặt độ sâu an toàn (safety contour) theo mớn nước tàu.\n• Cho máy kiểm tra tuyến (route check): máy phải liệt kê các điểm nguy hiểm cắt qua tuyến.\n• Thử báo động chệch tuyến: chuông phải kêu.\n\nBƯỚC 6 — Kiểm HỆ THỐNG DỰ PHÒNG\n• Phải có ECDIS thứ hai độc lập, hoặc bộ hải đồ giấy đủ cho tuyến.\n• Nếu dựa vào ECDIS thứ hai thì nó phải chạy nguồn khác và có đủ ENC.\n\nBƯỚC 7 — Kiểm phân quyền tài khoản\n• Chỉ sĩ quan được phép sửa tuyến. Có tài khoản riêng, không dùng chung một mật khẩu ai cũng biết.\n\nBƯỚC 8 — Kiểm chứng chỉ người dùng\n• Sĩ quan boong phải có chứng chỉ ECDIS chung (generic) và chứng chỉ cho ĐÚNG LOẠI MÁY trên tàu này (type specific). Thiếu loại thứ hai là lỗi PSC hay gặp.\n\nHỎI PHÓ HAI: “Cho tôi xem lần cập nhật hải đồ gần nhất và chứng chỉ ECDIS của anh cho đúng máy này.”" },
     { id:"t2-16", t:"Bình chữa cháy xách tay tại buồng lái", ref:"IMO Res. A.951(23)",
       d:"Đối chiếu vị trí bình với Sơ đồ phòng chống cháy — bình phải đúng chỗ ghi trên sơ đồ, không được xê dịch đi nơi khác.\nĐọc tem dịch vụ: lần bảo dưỡng gần nhất không quá 12 tháng.\nKiểm tra kẹp chì còn nguyên, đồng hồ áp (nếu có) nằm trong vùng xanh, vòi phun không nứt, giá treo chắc, có biển chỉ dẫn." },
     { id:"t2-19", t:"Súng bắn dây (line-throwing appliance)", ref:"SOLAS III/18 · LSA Code 7.1",
       d:"Đọc hạn in trên hộp đạn và trên dây. Cả bốn quả đạn và bốn dây phải còn hạn — hết hạn dù chỉ một quả cũng phải thay.\nKiểm tra hộp không móp, không ẩm, có hướng dẫn sử dụng bằng tiếng thuyền viên hiểu dán kèm, cất nơi khô ráo dễ lấy.\n\n⚠ Lỗi PSC mã 11115 — hay bị quá hạn vì không ai để ý ngày trên hộp." },
     { id:"t2-20", t:"BNWAS (báo động cảnh giới trực ca buồng lái) hoạt động", ref:"SOLAS V/19.2.2.3",
-      d:"Yêu cầu sỹ quan bật BNWAS và đặt đúng chế độ hành trình. Quan sát chu kỳ báo động: sau khoảng thời gian cài đặt (3–12 phút) máy phải nhắc, không xác nhận thì báo lên cabin thuyền trưởng.\nKiểm tra công tắc chế độ có KHÓA hoặc chỉ thuyền trưởng chỉnh được — để ở chế độ tắt khi đang hành trình là khiếm khuyết." },
+      d:"BNWAS là thiết bị chống sĩ quan trực ca ngủ gật.\n\nBƯỚC 1 — Xem công tắc chế độ: phải để ở ON hoặc AUTO khi tàu đang chạy. Để OFF khi đang hành trình là khiếm khuyết nặng.\n\nBƯỚC 2 — Xem khóa chọn chế độ: chỉ thuyền trưởng được giữ chìa, không để chìa cắm sẵn cho ai vặn cũng được.\n\nBƯỚC 3 — Thử toàn bộ chuỗi báo động, canh đồng hồ:\n• Đặt thời gian chờ ngắn nhất (thường 3 phút). Đứng yên không chạm gì.\n• Hết thời gian: đèn nháy ở buồng lái, chưa kêu.\n• Sau 15 giây nữa: chuông kêu tại buồng lái.\n• Không tắt tiếp: sau 15 giây nữa chuông kêu ở phòng thuyền trưởng và phòng sĩ quan dự bị.\n• Không tắt tiếp: báo động lan ra khu vực chung của thuyền viên.\n\nBƯỚC 4 — Thử nút xác nhận (reset) đặt ở các vị trí trong buồng lái: bấm phải tắt được báo động và đồng hồ đếm lại từ đầu.\n\nBƯỚC 5 — Đặt lại thời gian chờ về mức tàu vẫn dùng và ghi việc thử vào nhật ký.\n\nLỖI HAY GẶP: tháo loa báo phòng thuyền trưởng cho đỡ ồn; để chế độ OFF suốt hành trình; thời gian chờ đặt tới mức tối đa 12 phút." },
     { id:"t2-21", t:"Hệ thống báo động chung và truyền thanh công cộng (PA)", ref:"SOLAS III/6.4 · LSA Code 7.2",
       d:"Phối hợp thời điểm với thuyền trưởng rồi THỬ THẬT: bấm báo động chung và phát thử hệ thống truyền thanh.\nCử người đứng nghe tại bốn nơi: buồng lái, khu nhà ở (kể cả trong cabin đóng cửa), boong hở và BUỒNG MÁY ĐANG CHẠY. Buồng máy là chỗ hay không nghe thấy nhất.\n\nBáo động chung phải là 7 tiếng ngắn + 1 tiếng dài, phát được từ buồng lái, nghe rõ ở mọi nơi có người." },
     { id:"t2-22", t:"Tốc độ kế và la bàn con quay hoạt động chính xác", ref:"SOLAS V/19.2",
-      d:"Cho chạy thử tại chỗ. La bàn con quay: so số chỉ với la bàn từ đã hiệu chỉnh, sai lệch phải nằm trong dung sai; xem sổ ghi so sánh la bàn có được ghi mỗi ca không.\nTốc độ kế: xem có hiển thị và có khớp với tốc độ GPS khi tàu chạy không.\nMáy đo sâu hỏng phải có giấy miễn trừ của chính quyền cờ tàu." },
+      d:"LA BÀN CON QUAY (gyro compass)\n\nBƯỚC 1 — Đọc hướng trên la bàn con quay ở buồng lái.\nBƯỚC 2 — Đọc hướng trên các mặt lặp (repeater) ở cánh gà trái, cánh gà phải, buồng máy lái. Tất cả phải chỉ CÙNG MỘT SỐ. Lệch quá 1 độ là phải chỉnh lại.\nBƯỚC 3 — So với la bàn từ: chênh lệch giữa hai la bàn phải giải thích được bằng độ lệch địa từ của vùng đó cộng độ tự sai ghi trong bảng.\nBƯỚC 4 — Nếu tàu đang buộc cầu theo hướng đã biết, so hướng đọc được với hướng thật của cầu.\nBƯỚC 5 — Kiểm sổ ghi sai số la bàn: mỗi ca trực phải ghi sai số la bàn một lần (SOLAS bắt buộc), không được để trống nhiều ngày.\nBƯỚC 6 — Nghe tiếng: con quay chạy êm, không rú, không rung bất thường.\n\nTỐC ĐỘ KẾ (speed log)\n\nBƯỚC 7 — Đọc tốc độ hiện trên máy. Tàu buộc cầu phải chỉ 0 hoặc rất gần 0.\nBƯỚC 8 — Khi tàu chạy: so tốc độ trên log với tốc độ trên GPS. Log đo tốc độ so với NƯỚC, GPS đo so với ĐÁY BIỂN — chênh nhau là do dòng chảy, nhưng chênh quá nhiều một cách vô lý là máy hỏng.\nBƯỚC 9 — Kiểm đầu ra: tốc độ phải được cấp cho radar/ARPA và VDR, nếu không ARPA tính CPA sẽ sai." },
     { id:"t2-23", t:"Hướng dẫn chuyển đổi máy lái được niêm yết", ref:"SOLAS V/26.3",
       d:"Bản hướng dẫn chuyển đổi chế độ lái phải DÁN Ở CẢ HAI NƠI: buồng lái và buồng máy lái. Chỉ dán một chỗ là thiếu.\nKèm sơ đồ hệ thống lái đơn giản, ngôn ngữ thuyền viên hiểu, chữ còn đọc được (không bạc màu, không bị che).\nHỏi sỹ quan trực ca chỉ vào bản hướng dẫn và nói các bước chuyển sang lái sự cố." },
     { id:"t2-25", t:"Buồng lái gọn gàng, tầm nhìn không bị che khuất", ref:"SOLAS V/22",
@@ -890,30 +946,30 @@ const DATA = [
     { id:"t2-26", t:"Liên lạc buồng lái – buồng máy – buồng máy lái", ref:"SOLAS V/19-2",
       d:"THỬ CẢ BA CHIỀU và bằng CẢ HAI hệ thống: hệ chính (điện thoại nội bộ) và hệ dự phòng (ống nói hoặc điện thoại sự cố dùng nguồn riêng).\nBố trí người ở mỗi đầu, gọi lần lượt: buồng lái ↔ buồng máy, buồng lái ↔ buồng máy lái, buồng máy ↔ buồng máy lái.\n\n⚠ Lỗi PSC mã 10132 — hệ dự phòng hay hỏng mà không ai phát hiện vì không bao giờ dùng đến." },
     { id:"t2-29", t:"Thử từng đèn hành hải kể cả đèn dự phòng", ref:"COLREG Quy tắc 20-22",
-      d:"Bật lần lượt từng đèn hành hải tại bảng điều khiển và cử người ra ngoài xác nhận đèn nào sáng: đèn cột trước, cột sau, mạn phải, mạn trái, đèn lái, đèn neo, đèn NUC/RAM nếu có.\nThử cả mạch dự phòng của từng đèn (đèn kép hoặc bóng dự phòng).\nKiểm tra kho có đủ bóng dự trữ cho mỗi loại đèn.\nBảng điều khiển phải có báo động khi một đèn hành hải bị đứt." },
+      d:"BƯỚC 1 — Tìm bảng điều khiển đèn hành hải trên buồng lái (navigation light panel).\n\nBƯỚC 2 — Bật LẦN LƯỢT TỪNG ĐÈN, không bật một lượt\n• Đèn cột trước, đèn cột sau, đèn mạn trái (đỏ), đèn mạn phải (xanh), đèn lái (trắng), đèn neo, đèn mất chủ động (hai đèn đỏ), đèn hạn chế khả năng điều động, đèn kéo (nếu tàu kéo).\n\nBƯỚC 3 — Với mỗi đèn, làm đủ hai việc\n• Nhìn đèn báo trên bảng điều khiển sáng.\n• CỬ NGƯỜI RA NGOÀI NHÌN đèn thật có sáng không. Đèn báo trên bảng sáng mà bóng ngoài cháy là chuyện thường gặp.\n\nBƯỚC 4 — Thử BÓNG DỰ PHÒNG\n• Mỗi đèn hành hải phải có bóng thứ hai, chuyển sang được ngay bằng công tắc.\n• Bật sang bóng dự phòng, kiểm tra lại từng đèn như bước 3.\n\nBƯỚC 5 — Thử BÁO ĐỘNG ĐỨT BÓNG\n• Tháo cầu chì hoặc ngắt một đèn — bảng điều khiển phải kêu chuông và hiện đèn báo lỗi.\n\nBƯỚC 6 — Thử nguồn sự cố: chuyển bảng đèn sang nguồn sự cố, các đèn vẫn sáng.\n\nBƯỚC 7 — Kiểm bóng dự trữ trong hộp: đủ số lượng, đúng công suất, còn nguyên hộp.\n\nBƯỚC 8 — Nhìn kính đèn từ ngoài: sạch, không nứt, không bị sơn phủ, góc chiếu không bị kết cấu che.\n\nLỖI HAY GẶP: không có bóng dự trữ; báo động đứt bóng đã bị vô hiệu hóa vì kêu phiền; kính đèn mờ vì muối bám." },
     { id:"t2-31", t:"Thiết bị đo gió (phong kế / anemometer)", ref:"SOLAS V/19 · IMCA M190 (tàu DP)",
-      d:"Bật màn hiển thị tại buồng lái: kim/số chạy, hướng gió và tốc độ gió hiển thị hợp lý so với thực tế ngoài trời.\nNhìn lên cảm biến trên nóc: cánh quạt quay tự do, không kẹt, không gãy cánh, không vướng dây hay ăng-ten.\nKiểm tra có hiển thị cả gió THẬT và gió TƯƠNG ĐỐI.\n\n⚠ VỚI TÀU DP đây là thiết bị TRỌNG YẾU: hệ DP dùng số liệu gió để bù trước, cảm biến hỏng có thể làm tàu trôi vị trí. Tàu DP thường phải có từ 2 bộ trở lên, đặt cách nhau, và nằm trong chương trình thử DP hàng năm.\nVới tàu cẩu: gió là căn cứ dừng công việc nâng — hỏi thuyền trưởng giới hạn gió cho phép làm hàng là bao nhiêu." },
+      d:"BƯỚC 1 — Nhìn lên cột: đầu đo gió (cánh quạt và chong chóng gió) phải quay tự do, không kẹt, không gãy cánh, không bị tổ chim.\n\nBƯỚC 2 — Đọc màn hình hiển thị ở buồng lái: có số tốc độ gió và hướng gió, số nhảy theo thời gian thực chứ không đứng yên.\n\nBƯỚC 3 — So sánh thô: nhìn mặt biển, cờ trên tàu, sóng — ước lượng theo thang Beaufort rồi so với số máy đọc. Lệch quá xa là máy hỏng.\n\nBƯỚC 4 — Kiểm máy hiển thị đúng loại gió\n• Gió TƯƠNG ĐỐI (relative) là gió cảm nhận trên tàu đang chạy.\n• Gió THẬT (true) đã trừ tốc độ tàu.\n• Người trực phải biết máy đang hiện loại nào, nếu không sẽ đọc sai khi quyết định cẩu hàng.\n\nBƯỚC 5 — Với tàu làm việc ngoài giàn hoặc tàu định vị động lực (DP): đối chiếu ngưỡng gió cho phép ghi trong hướng dẫn vận hành — đây là số liệu quyết định dừng công việc cẩu, lặn, tiếp cận giàn.\n\nBƯỚC 6 — Kiểm tàu có ít nhất hai đầu đo gió không, nếu quy định vận hành yêu cầu (tàu DP thường phải có).\n\nBƯỚC 7 — Kiểm hồ sơ hiệu chuẩn hoặc biên bản kiểm tra định kỳ của thiết bị đo gió.\n\nHỎI: “Gió bao nhiêu thì mình dừng cẩu? Con số đó ghi ở đâu?”" },
     { id:"t2-32", t:"Khí áp kế và nhiệt kế", ref:"SOLAS V/19 · Thực hành hàng hải",
       d:"Khí áp kế (barometer): còn hoạt động, có ghi số đo theo ca vào nhật ký để theo dõi xu hướng thời tiết.\nNếu là loại ghi tự động (barograph): giấy còn, bút còn mực, đồng hồ chạy.\nNhiệt kế khô–ướt (nếu có) đủ nước, đọc được.\nHỏi sỹ quan trực ca: áp suất mấy giờ trước là bao nhiêu, có xu hướng giảm không." },
     { id:"t2-33", t:"Máy thu NAVTEX", ref:"SOLAS IV/7.1.4",
-      d:"Bật máy kiểm tra: đang thu, giấy in còn (nếu loại in giấy) hoặc màn hình hiển thị bản tin.\nKiểm tra đã ĐẶT ĐÚNG TRẠM và ĐÚNG NHÓM BẢN TIN cho vùng đang chạy — đặt sai thì không nhận được cảnh báo hàng hải.\nXem vài bản tin gần nhất: có bản tin mới trong 24 giờ qua không.\nHỏi sỹ quan: bản tin loại nào KHÔNG được phép tắt (A cảnh báo hàng hải, B cảnh báo khí tượng, D thông tin tìm cứu — không tắt được)." },
+      d:"NAVTEX tự động thu và in bản tin an toàn hàng hải, cảnh báo và dự báo thời tiết.\n\nBƯỚC 1 — Xem máy có đang BẬT không. Máy tắt là mất hết cảnh báo hàng hải.\n\nBƯỚC 2 — Kiểm giấy in còn không (loại máy in giấy), hoặc bộ nhớ còn chỗ (loại màn hình).\n\nBƯỚC 3 — Đọc bản tin mới nhất trên màn hình hoặc trên cuộn giấy: giờ nhận phải là trong ngày hôm nay. Bản tin cuối từ mấy hôm trước nghĩa là máy không thu được.\n\nBƯỚC 4 — Kiểm cài đặt đài phát\n• Vào menu, xem đã chọn đúng đài của vùng biển đang chạy chưa (mỗi đài có một chữ cái nhận dạng).\n• Kiểm các loại bản tin đang bật: loại A (cảnh báo hàng hải), B (cảnh báo khí tượng) và D (thông tin cứu nạn) KHÔNG ĐƯỢC TẮT — máy không cho tắt, nếu tắt được là máy không đúng chuẩn.\n\nBƯỚC 5 — Kiểm tàu có lưu bản tin không: bản tin nhận được phải được sĩ quan đọc, ký và lưu lại, các cảnh báo liên quan tuyến chạy phải chuyển thành ghi chú trên hải đồ.\n\nBƯỚC 6 — Kiểm nguồn: NAVTEX phải được cấp cả từ nguồn sự cố.\n\nHỎI SĨ QUAN TRỰC: “Bản tin NAVTEX gần nhất nói gì? Có cái nào ảnh hưởng tuyến mình không?”" },
     { id:"t2-34", t:"Inmarsat-C / EGC (nếu trang bị)", ref:"SOLAS IV/7, IV/12",
       d:"Máy đang bật và đăng nhập (logged in) vào trạm bờ.\nKiểm tra thu được bản tin EGC / SafetyNET; đặt đúng vùng NAVAREA.\nThử gửi bản tin thử nếu quy trình cho phép; xem nhật ký bản tin gần nhất.\nKiểm tra nguồn dự phòng cấp cho thiết bị." },
     { id:"t2-35", t:"Máy lái tự động (autopilot)", ref:"SOLAS V/24 · STCW",
-      d:"Yêu cầu sỹ quan CHUYỂN từ chế độ tự động sang lái tay và ngược lại ngay trước mặt mình — phải chuyển được nhanh, có nút hoặc cần chuyển rõ ràng tại vị trí lái.\nKiểm tra báo động lệch hướng (off-course alarm) đặt đúng và kêu được.\nCó biển hướng dẫn chuyển chế độ dán tại vị trí lái.\n\nChuyển chế độ chậm khi gặp tình huống bất ngờ là nguyên nhân đâm va — SOLAS bắt buộc chuyển được ngay lập tức." },
+      d:"BƯỚC 1 — Kiểm bảng chuyển chế độ: LÁI TAY — LÁI TỰ ĐỘNG — LÁI SỰ CỐ, ký hiệu rõ ràng, không mờ.\n\nBƯỚC 2 — Thử chuyển từ tự động sang lái tay\n• Đây là thao tác cứu mạng khi gặp tàu khác bất ngờ.\n• Chuyển phải NHANH và bằng MỘT thao tác, không phải vào menu nhiều lớp.\n• Bấm giờ: quá vài giây là quá chậm.\n\nBƯỚC 3 — Kiểm báo động của máy lái tự động\n• Báo động lệch hướng (off-course): đặt ngưỡng nhỏ, quay tay lái lệch — chuông phải kêu.\n• Báo động mất tín hiệu la bàn.\n\nBƯỚC 4 — Kiểm bảng hướng dẫn chuyển đổi máy lái dán ngay tại vị trí lái, có sơ đồ đơn giản, bằng ngôn ngữ làm việc trên tàu.\n\nBƯỚC 5 — Kiểm quy định của tàu: khi nào bắt buộc chuyển sang lái tay (vào luồng hẹp, tầm nhìn hạn chế, mật độ tàu đông) — phải ghi trong sổ tay và người trực phải nói được.\n\nBƯỚC 6 — Kiểm chỉ báo góc bánh lái ở buồng lái, cánh gà và buồng máy lái đều chỉ cùng một góc.\n\nHỎI SĨ QUAN TRỰC: “Đang chạy tự động mà có tàu cắt mũi, anh làm gì đầu tiên?” — phải chỉ ngay được nút chuyển lái tay." },
     { id:"t2-36", t:"Bộ VHF hai chiều cầm tay (GMDSS)", ref:"SOLAS III/6.2.1 · LSA Code 7.2",
-      d:"Đây là thiết bị CỨU SINH, không phải bộ đàm liên lạc thường ngày.\n• Tàu từ 500 GT: ít nhất 3 bộ; tàu 300–500 GT: ít nhất 2 bộ\n• Máy phải là loại chống nước, vỏ MÀU VÀNG/CAM dễ thấy\n• Dùng PIN NGUYÊN SEAL (pin sơ cấp) — kiểm tra hạn in trên pin, seal chưa bị bóc\n• Cất ở nơi lấy nhanh khi bỏ tàu, có biển chỉ dẫn\n\nLỖI HAY GẶP: đem bộ cứu sinh ra dùng hằng ngày làm hết pin; hoặc lẫn với bộ đàm thường." },
+      d:"BƯỚC 1 — Đếm số lượng theo yêu cầu: tàu từ 500 GT trở lên phải có ít nhất 3 bộ, tàu 300–500 GT ít nhất 2 bộ.\n\nBƯỚC 2 — Nhìn màu vỏ: bộ VHF hai chiều dùng cho cứu sinh thường màu vàng hoặc cam, chống nước, nổi được. Bộ đàm liên lạc hằng ngày KHÔNG được tính thay.\n\nBƯỚC 3 — Kiểm PIN\n• Loại này có hai bộ pin: pin dùng hằng ngày (sạc lại được) và PIN NIÊM PHONG dùng cho cấp cứu.\n• Pin niêm phong phải còn nguyên seal, chưa bóc, và còn hạn ghi trên thân. Bóc ra dùng thử rồi lắp lại là sai.\n\nBƯỚC 4 — Thử liên lạc bằng pin thường: bật hai bộ, gọi nhau trên kênh 16, nghe rõ hai chiều.\n\nBƯỚC 5 — Kiểm nơi để: sẵn sàng mang xuống xuồng, ghi rõ trong bảng phân công ai cầm.\n\nBƯỚC 6 — Kiểm bộ sạc hoạt động và đèn báo sạc đúng." },
     { id:"t2-37", t:"Chỉ báo tốc độ quay trở, độ nghiêng, đồng hồ hàng hải", ref:"SOLAS V/19.2 · V/22",
       d:"• Chỉ báo tốc độ quay trở (ROT indicator) — bắt buộc với tàu từ 50.000 GT; thử hiển thị khi tàu quay\n• Thước đo độ nghiêng (clinometer) — đọc được, bọt/kim chạy tự do\n• Đồng hồ hàng hải: đúng giờ, đối chiếu với giờ GPS; dùng để ghi nhật ký và tính vị trí\n• Ống nhòm: đủ số, ống kính không mốc, không lệch trục\nĐánh dấu N/A cho mục không áp dụng với cỡ tàu này." },
     { id:"t2-38", t:"Bảng thông số điều động và thẻ hoa tiêu", ref:"SOLAS V/28.2 · IMO Res. A.601(15)",
       d:"Ba tài liệu phải NIÊM YẾT hoặc để sẵn tại buồng lái:\n• BẢNG THÔNG SỐ ĐIỀU ĐỘNG (Wheelhouse Poster) — dán nơi dễ nhìn, ghi vòng quay trở, quãng đường dừng, đặc tính lùi, ở cả trạng thái đầy tải và dằn\n• THẺ HOA TIÊU (Pilot Card) — điền sẵn thông số hiện tại của tàu để giao cho hoa tiêu\n• SỔ TAY ĐIỀU ĐỘNG (Manoeuvring Booklet)\n\nBảng ghi thông số của tàu khác hoặc chưa cập nhật sau khi hoán cải là khiếm khuyết." },
     { id:"t2-39", t:"Gương phản xạ radar và hệ thu âm ngoài", ref:"SOLAS V/19.2.1.7 · V/19.2.1.8",
-      d:"GƯƠNG PHẢN XẠ RADAR: bắt buộc với tàu dưới 150 GT — kiểm tra có lắp, đúng độ cao, không bị che.\nĐánh dấu N/A với tàu lớn hơn.\n\nHỆ THU ÂM NGOÀI (sound reception system): bắt buộc với tàu có BUỒNG LÁI KÍN HOÀN TOÀN — cho phép nghe được tín hiệu âm thanh từ ngoài và xác định hướng. Thử bật, nghe được tiếng bên ngoài.\nKèm bộ cờ hiệu quốc tế: đủ bộ, không mục rách, cất nơi khô ráo." },
+      d:"GƯƠNG PHẢN XẠ RADAR\n\nBƯỚC 1 — Nhìn lên cột: gương phản xạ radar (khối kim loại nhiều mặt vuông góc) phải còn nguyên, không móp, không rơi mất.\nBƯỚC 2 — Vị trí lắp phải cao, không bị kết cấu che, treo đúng chiều theo hướng dẫn nhà sản xuất.\nBƯỚC 3 — Áp dụng cho tàu vỏ thép cỡ nhỏ hoặc tàu có phần trên bằng vật liệu ít phản xạ; tàu lớn vỏ thép thường không bắt buộc — xem Giấy chứng nhận An toàn trang thiết bị của tàu.\n\nHỆ THU ÂM NGOÀI (sound reception system)\n\nBƯỚC 4 — Áp dụng cho tàu có buồng lái KÍN HOÀN TOÀN, người trực không nghe được tiếng bên ngoài.\nBƯỚC 5 — Kiểm micro ngoài trời: đủ số, hướng ra bốn phía, không bị bịt.\nBƯỚC 6 — Bật hệ thống, nhờ người ngoài boong gõ mạnh hoặc nói to — trong buồng lái phải nghe rõ và phân biệt được tiếng đến từ hướng nào.\nBƯỚC 7 — Kiểm núm chỉnh âm lượng có ghi rõ mức tối thiểu không được vặn xuống dưới." },
   ]},
 
   { g: "2. Nóc cabin, cột ăng ten & boong thượng · 20 phút · đại phó", items: [
     { id:"t1-1", t:"La bàn từ chuẩn — dễ đọc, hiệu chỉnh, có bảng độ lệch", ref:"LR PSC · PSC.CL VR · SOLAS V-12",
-      d:"Đọc thử số trên la bàn từ ở vị trí người lái: mặt số phải rõ, chất lỏng trong bát không có bọt khí lớn, không rò rỉ.\nTìm BẢNG ĐỘ LỆCH (deviation card) treo cạnh la bàn: phải ghi ngày hiệu chỉnh gần nhất và tên người hiệu chỉnh. Bảng quá cũ (thường quá 2 năm, hoặc sau khi tàu sửa chữa lớn/hàn nhiều) là khiếm khuyết.\nĐối chiếu: so số chỉ la bàn từ với la bàn con quay ngay tại chỗ, chênh lệch phải giải thích được bằng bảng độ lệch.\nKiểm tra sổ ghi so sánh la bàn có được ghi theo ca không." },
+      d:"La bàn từ là thiết bị dẫn đường duy nhất không cần điện — mất điện toàn tàu vẫn dùng được, nên bắt buộc phải tốt.\n\nBƯỚC 1 — Nhìn bầu la bàn\n• Chất lỏng trong bầu phải TRONG, không đục, KHÔNG CÓ BỌT KHÍ. Có bọt khí là hỏng, phải nạp lại chất lỏng.\n• Mặt số quay trơn, không kẹt. Nhẹ nhàng xoay lệch rồi buông, kim phải tự trở về ổn định.\n\nBƯỚC 2 — Kiểm đèn chiếu sáng bầu la bàn ban đêm — bật thử, phải sáng, và có nguồn sự cố.\n\nBƯỚC 3 — Nhìn quanh la bàn trong bán kính khoảng 1 mét\n• Không được để vật sắt thép, loa, điện thoại, bộ đàm, dụng cụ.\n• Đây là lỗi hay gặp: thuyền viên để cờ lê, bình nước bằng thép cạnh la bàn làm lệch hướng.\n\nBƯỚC 4 — Kiểm BẢNG ĐỘ TỰ SAI (deviation card)\n• Bảng phải dán ngay cạnh la bàn, ghi độ lệch ứng với từng hướng.\n• Xem ngày lập bảng: phải do người có chứng chỉ hiệu chỉnh la bàn lập, thường không quá 2 năm, hoặc sau khi tàu sửa chữa lớn / thay thiết bị sắt thép trên boong.\n• Giá trị tự sai lớn (quá 5 độ ở nhiều hướng) là dấu hiệu la bàn cần hiệu chỉnh lại.\n\nBƯỚC 5 — Kiểm mặt lặp quang học (nếu la bàn đặt trên nóc, có ống soi xuống buồng lái)\n• Nhìn qua ống: ảnh phải rõ, gương sạch, không mờ.\n\nBƯỚC 6 — Kiểm sổ ghi sai số la bàn theo từng ca trực.\n\nBƯỚC 7 — Kiểm quả cầu sắt hai bên và nam châm hiệu chỉnh còn nguyên vị trí, không ai tự tháo ra." },
     { id:"t1-2", t:"Ăng-ten & thiết bị vô tuyến trên nóc", ref:"PSC.CL VR",
       d:"Nhìn kỹ chân cột và mối hàn: không rỉ mục, không nứt. Dây chằng cột (stay) còn căng, tăng-đơ không rỉ kẹt.\nCáp ăng-ten: vỏ không nứt, không hở lõi, đầu nối bọc kín chống nước, không có đoạn nối tạm bằng băng dính.\nSứ cách điện không nứt, không bám muối dày.\nKiểm tra không có vật gì che chắn ăng-ten GPS và ăng-ten vệ tinh." },
     { id:"t1-3", t:"Đèn hàng hải / đèn tín hiệu ban ngày", ref:"PSC.CL VR",
@@ -921,7 +977,7 @@ const DATA = [
     { id:"t1-4", t:"Radar / AIS scanner", ref:"PSC.CL VR",
       d:"Kiểm tra bộ quét radar quay được, không vướng, giá đỡ chắc, không rỉ mục chân đế.\nĂng-ten AIS lắp đúng vị trí, không bị che bởi cột hay ống khói.\nKhông có ai đang làm việc trong vùng bức xạ khi radar chạy — kiểm tra có biển cảnh báo bức xạ và quy trình khóa radar khi có người lên nóc." },
     { id:"t1-5", t:"Còi tàu", ref:"Tự tổng hợp",
-      d:"Yêu cầu thử phát tín hiệu còi. Nghe rõ, đúng âm lượng.\nKiểm tra đường khí nén tới còi không rò, van xả nước ngưng ở đáy đường ống có xả được không (đọng nước là nguyên nhân còi kêu yếu).\nNếu tàu có chuông và cồng: kiểm tra có đủ, treo đúng vị trí mũi và lái, dây kéo còn tốt." },
+      d:"BƯỚC 1 — Xin phép sĩ quan trực trước khi thử — còi rất to, và trong cảng có quy định giờ được kéo còi.\n\nBƯỚC 2 — Kéo còi từ vị trí buồng lái, nghe tiếng phát ra thật.\n\nBƯỚC 3 — Thử từ vị trí thứ hai: cánh gà trái và cánh gà phải đều phải kéo được còi.\n\nBƯỚC 4 — Nếu tàu có còi điện và còi hơi: thử cả hai. Còi hơi phải có khí nén đủ áp.\n\nBƯỚC 5 — Thử bộ phát tín hiệu tự động (nếu có): chọn chế độ tàu chạy trong sương mù — còi phải tự kéo đúng chu kỳ (một tiếng dài mỗi 2 phút).\n\nBƯỚC 6 — Nhìn miệng còi: không bị bịt, không đọng nước, không có tổ chim.\n\nBƯỚC 7 — Kiểm bảng tín hiệu âm thanh theo COLREG dán ở buồng lái để người trực tra nhanh.\n\nBƯỚC 8 — Kiểm hệ thu âm ngoài (nếu buồng lái kín hoàn toàn): micro ngoài trời đưa tiếng còi tàu khác vào trong, phải nghe được và có núm chỉnh âm lượng." },
     { id:"t1-6", t:"Sàn bay trực thăng — hệ chữa cháy và trực (nếu có)", ref:"PMTVR 09-05 · VSP-000-ATMT-401(i) §4.1.1",
       d:"Chỉ áp dụng với tàu có sàn bay. Kiểm tra:\n• Hệ chữa cháy bọt cố định: thử được, đủ dung dịch bọt còn hạn phân tích\n• Súng phun và đường ống không rỉ tắc\n• Lưới an toàn quanh sàn còn nguyên, không rách, căng đúng\n• Ký hiệu và đèn chu vi sàn còn rõ, sáng đủ\n• Bộ trang bị cứu nạn trực thăng đủ theo danh mục\n• Đội trực cứu hỏa có quyết định thành lập, được huấn luyện, có mặt khi trực thăng cất/hạ cánh\n• Người phụ trách sàn bay (HLO) có chứng chỉ còn hạn" },
     { id:"t1-7", t:"Thang lên nóc cabin", ref:"ILO · LL 66",
@@ -1679,7 +1735,7 @@ const DATA = [
     { id:"q-b7", t:"Rà soát vùng kiểm soát phát thải mới", ref:"MARPOL VI",
       d:"Kiểm tra khi tàu MỞ RỘNG VÙNG HOẠT ĐỘNG:\n• Vùng mới có phải ECA không (Địa Trung Hải trở thành ECA lưu huỳnh từ 05/2025)\n• Yêu cầu nhiên liệu 0,10% trong ECA\n• Yêu cầu NOx Tier III với động cơ lắp mới khi chạy trong ECA NOx\n\nCập nhật danh sách ECA trong quy trình của tàu." },
     { id:"q-b8", t:"Cập nhật ấn phẩm và văn bản pháp quy 2026", ref:"SOLAS/MARPOL",
-      d:"Rà danh mục ấn phẩm trên tàu theo các sửa đổi hiệu lực năm 2026:\nSOLAS, MARPOL, LSA Code, STCW, IMDG (bản 42-24 nếu tàu chở hàng nguy hiểm).\nKiểm tra tàu dùng bản mới hay bản cũ — bản hợp nhất cũ vài năm là khiếm khuyết.\nẤn phẩm điện tử phải còn hạn giấy phép và đã cập nhật." },
+      d:"BƯỚC 1 — Lập danh sách công ước và bộ luật tàu phải có bản in: SOLAS (bản hợp nhất mới nhất), MARPOL, COLREG, ISM Code, ISPS Code, LSA Code, FSS Code, MLC 2006, STCW.\n\nBƯỚC 2 — Mở bìa từng quyển xem năm của bản hợp nhất (consolidated edition). SOLAS bản hợp nhất ra vài năm một lần; dùng bản quá cũ là thiếu các sửa đổi đang có hiệu lực.\n\nBƯỚC 3 — Đối chiếu với danh sách sửa đổi có hiệu lực trong 2 năm gần nhất: nếu tàu chỉ có bản in cũ thì phải có bản in hoặc bản điện tử của các sửa đổi bổ sung.\n\nBƯỚC 4 — Kiểm văn bản trong nước: Bộ luật Hàng hải, thông tư của Bộ Giao thông Vận tải về đăng kiểm và thuyền viên, quy chuẩn QCVN liên quan.\n\nBƯỚC 5 — Kiểm tài liệu nội bộ Vietsovpetro: các quy trình VSP-000-ATMT còn hiệu lực, đúng phiên bản mới nhất do Phòng ATSKMT ban hành.\n\nLỖI HAY GẶP: mua bộ sách một lần lúc đóng tàu rồi không cập nhật; có bản điện tử nhưng không ai mở được vì hết giấy phép." },
   ]},
   ]
 },
@@ -2608,6 +2664,69 @@ function drawTabs() {
   }).join("");
 }
 
+/* ===================== LỌC & NHẢY NHÓM =====================
+   Trên điện thoại danh sách rất dài (riêng THỰC ĐỊA đã 243 mục) nên cần
+   lọc nhanh xem còn mục nào chưa xét và nhảy thẳng tới nhóm cần đến. */
+var filt = "all";
+function passFilter(it) {
+  if (filt === "all") return true;
+  if (it.refOnly) return false;              /* bảng tra chỉ hiện khi xem tất cả */
+  var s = (state[it.id] || {}).s || "";
+  if (filt === "left") return !s;
+  if (filt === "ng") return s === "ng";
+  if (filt === "ok") return s === "ok";
+  return true;
+}
+function drawSub(cur) {
+  var its = scored(itemsOf(cur));
+  var ok = cnt(its, "ok"), ng = cnt(its, "ng"), na = cnt(its, "na");
+  var left = its.length - ok - ng - na;
+  var C = [["all", "Tất cả", its.length, ""], ["left", "Chưa xét", left, ""],
+           ["ng", "Không đạt", ng, "f-ng"], ["ok", "Đạt", ok, "f-ok"]];
+  var s = "";
+  C.forEach(function (c) {
+    s += '<button class="chip ' + c[3] + (filt === c[0] ? " on" : "") + '" data-filt="' + c[0] + '">' +
+      c[1] + "<b>" + c[2] + "</b></button>";
+  });
+  document.getElementById("chips").innerHTML = s;
+
+  var o = '<option value="">☰</option>';
+  cur.groups.forEach(function (g, i) {
+    o += '<option value="grp-' + cur.id + "-" + i + '">' + esc(g.g) + "</option>";
+  });
+  document.getElementById("jump").innerHTML = o;
+}
+document.getElementById("chips").addEventListener("click", function (e) {
+  var b = e.target.closest("[data-filt]");
+  if (!b) return;
+  filt = b.getAttribute("data-filt");
+  draw();
+  window.scrollTo(0, 0);
+});
+document.getElementById("jump").addEventListener("change", function () {
+  var el = this.value && document.getElementById(this.value);
+  this.value = "";
+  if (!el) return;
+  var top = document.querySelector(".top");
+  var y = el.getBoundingClientRect().top + (window.scrollY || window.pageYOffset || 0) -
+          ((top ? top.offsetHeight : 120) + 10);
+  window.scrollTo(0, Math.max(0, y));
+});
+
+/* Cuộn xuống thì thu gọn đầu trang lại */
+var scTick = false;
+window.addEventListener("scroll", function () {
+  if (scTick || !window.requestAnimationFrame) return;
+  scTick = true;
+  window.requestAnimationFrame(function () {
+    var y = window.scrollY || window.pageYOffset || 0;
+    var on = document.body.className.indexOf("sc") >= 0;
+    if (y > 80 && !on) document.body.className += " sc";
+    else if (y < 30 && on) document.body.className = document.body.className.replace(/\s*\bsc\b/g, "");
+    scTick = false;
+  });
+}, false);
+
 function draw() {
   var cur = DATA.filter(function (d) { return d.id === tab; })[0];
   var curItems = scored(itemsOf(cur));
@@ -2626,10 +2745,14 @@ function draw() {
     "<div><b>" + ok + "</b> đạt</div><div><b>" + ng + "</b> không đạt</div>" +
     "<div><b>" + na + "</b> N/A</div><div><b>" + left + "</b> chưa xét</div>";
 
+  drawSub(cur);
+
   var html = "";
-  cur.groups.forEach(function (g) {
-    html += '<div class="grp"><span>' + esc(g.g) + "</span></div>";
-    g.items.forEach(function (it) {
+  cur.groups.forEach(function (g, gi) {
+    var vis = g.items.filter(passFilter);
+    if (!vis.length) return;
+    html += '<div class="grp" id="grp-' + cur.id + "-" + gi + '"><span>' + esc(g.g) + "</span></div>";
+    vis.forEach(function (it) {
       var st = (state[it.id] || {}).s || "";
       var nt = (state[it.id] || {}).n || "";
       var isOpen = !!open[it.id];
@@ -2640,9 +2763,9 @@ function draw() {
         (isOpen ? "▲ thu gọn" : it.refOnly ? "▼ mở bảng tra" : "▼ xem lưu ý") + "</em></button>";
       if (!it.refOnly) {
         html += '<div class="btns">' +
-          '<button class="b ' + (st === "ok" ? "s-ok" : "") + '" data-set="' + it.id + '" data-v="ok">✓</button>' +
-          '<button class="b ' + (st === "ng" ? "s-ng" : "") + '" data-set="' + it.id + '" data-v="ng">✕</button>' +
-          '<button class="b na ' + (st === "na" ? "s-na" : "") + '" data-set="' + it.id + '" data-v="na">N/A</button>' +
+          '<button class="b ' + (st === "ok" ? "s-ok" : "") + '" data-set="' + it.id + '" data-v="ok"><u>✓</u>Đạt</button>' +
+          '<button class="b ' + (st === "ng" ? "s-ng" : "") + '" data-set="' + it.id + '" data-v="ng"><u>✕</u>Không đạt</button>' +
+          '<button class="b na ' + (st === "na" ? "s-na" : "") + '" data-set="' + it.id + '" data-v="na">Không áp dụng</button>' +
           "</div>";
       }
       html += "</div>";
@@ -2656,6 +2779,10 @@ function draw() {
       html += "</article>";
     });
   });
+  if (!html) {
+    html = '<div class="viol-empty">Không có mục nào ở bộ lọc này.<br>' +
+      'Bấm “Tất cả” ở thanh trên để xem lại toàn bộ.</div>';
+  }
   document.getElementById("list").innerHTML = html;
 }
 
@@ -4002,7 +4129,15 @@ document.getElementById("tabs").addEventListener("click", function (e) {
   tab = b.getAttribute("data-tab");
   drawTabs(); draw();
   window.scrollTo(0, 0);
+  keoTabVaoTam();
 });
+/* Kéo tab đang chọn vào giữa dải cuộn ngang */
+function keoTabVaoTam() {
+  var box = document.getElementById("tabs");
+  var t = box && box.querySelector(".tab.on");
+  if (!t) return;
+  box.scrollLeft = Math.max(0, t.offsetLeft - (box.clientWidth - t.offsetWidth) / 2);
+}
 
 document.getElementById("list").addEventListener("click", function (e) {
   var gt = e.target.closest("[data-gl]");
@@ -4285,6 +4420,16 @@ function viewKy() {
 
   var h = '<div class="card">' + shipSelect("f-ship") +
     '<div class="muted">Chọn tàu để xem các kỳ kiểm tra đã nhập. Mỗi kỳ là một biên bản: cấp IV, cấp III/ISM, kiểm tra tình trạng tàu, PSC…</div></div>';
+
+  h += '<div class="card"><h3>📁 Nạp hồ sơ kiểm tra các năm trước</h3>' +
+    '<div class="muted">Chọn <b>một lúc nhiều file</b> biên bản .docx của những năm trước. ' +
+    'Máy tự đoán loại kiểm tra, ngày, số biên bản rồi tách bảng phát hiện thành từng dòng. ' +
+    'Nạp xong nhớ mở từng kỳ soát lại mảng và phân loại.<br>' +
+    'Biên bản bản scan (ảnh, PDF chụp) máy không đọc chữ được — dùng nút “Dán bảng từ Word” trong từng kỳ.</div>' +
+    '<div class="btns" style="margin-top:10px">' +
+    '<button class="b acc" id="b-bulk">📄 Chọn nhiều file Word</button></div>' +
+    '<input type="file" id="f-bulk" accept=".docx" multiple style="display:none">' +
+    '<div id="bulk-log" class="muted" style="margin-top:9px"></div></div>';
 
   var list = curShip ? kyOfShip(curShip) : DB.ky.slice().sort(function (a, b) {
     return (b.ngay || "").localeCompare(a.ngay || "");
@@ -5204,6 +5349,7 @@ PTR.addEventListener("click", function (e) {
     save(); draw(); return;
   }
   if (e.target.id === "b-docx") { document.getElementById("f-docx").click(); return; }
+  if (e.target.id === "b-bulk") { document.getElementById("f-bulk").click(); return; }
   if (e.target.id === "b-paste") { openPaste(); return; }
 
   t = e.target.closest("[data-rep]");
@@ -5215,6 +5361,14 @@ PTR.addEventListener("change", function (e) {
   var t = e.target;
   if (t.id === "f-ship" || t.id === "f-ship2" || t.id === "f-ship3") {
     curShip = t.value; save(); draw(); return;
+  }
+  if (t.id === "f-bulk") {
+    if (!t.files || !t.files.length) return;
+    /* Phải sao ra mảng TRƯỚC khi xóa value — t.files là danh sách sống, xóa value là mất */
+    var fs = [].slice.call(t.files);
+    t.value = "";
+    napNhieuFile(fs);
+    return;
   }
   if (t.id === "f-docx") {
     if (!t.files || !t.files.length) return;
@@ -5279,6 +5433,88 @@ function editShip(id) {
   };
   document.getElementById("s-cancel").onclick = closeSheet;
 }
+/* ===== Nạp hàng loạt biên bản của các năm trước ===== */
+/* Đoán loại kiểm tra từ nội dung file, sau đó tới tên file */
+function guessLoai(txt, name) {
+  var s = noDia(String(txt).substring(0, 4000) + " " + name);
+  /* Xét cái đặc trưng nhất trước: tên biểu mẫu, rồi mới tới chữ chung chung */
+  if (s.indexOf("tinh trang ky thuat") >= 0 || s.indexOf("ket qua kiem tra tinh trang") >= 0 ||
+      s.indexOf("tinh trang tau") >= 0) return "tt";
+  if (s.indexOf("vtb07-02-04") >= 0 || s.indexOf("ghi nhan va su khong phu hop") >= 0) return "c3";
+  if (s.indexOf("452") >= 0 || s.indexOf("cap iv") >= 0) return "c4";
+  if (s.indexOf("cap iii") >= 0 || s.indexOf("danh gia noi bo") >= 0) return "c3";
+  if (s.indexOf("port state") >= 0 || s.indexOf("psc") >= 0 || s.indexOf("cang vu") >= 0) return "psc";
+  if (s.indexOf("dang kiem") >= 0 || s.indexOf("vietnam register") >= 0) return "dk";
+  if (s.indexOf("ecmid") >= 0 || s.indexOf("ovid") >= 0 || s.indexOf("imca") >= 0) return "ch";
+  return "kh";
+}
+/* Đoán ngày: ưu tiên dạng “ngày 12 tháng 8 năm 2026”, rồi 12/08/2026, rồi tên file */
+function guessNgay(txt, name) {
+  var s = String(txt).substring(0, 6000);
+  var m = s.match(/ng[àa]y\s*(\d{1,2})\s*th[áa]ng\s*(\d{1,2})\s*n[ăa]m\s*(\d{4})/i);
+  if (m) return isoNgay(m[3], m[2], m[1]);
+  m = s.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](20\d{2})/);
+  if (m) return isoNgay(m[3], m[2], m[1]);
+  m = String(name).match(/(20\d{2})[-_]?(\d{2})[-_]?(\d{2})/);
+  if (m) return isoNgay(m[1], m[2], m[3]);
+  m = String(name).match(/(20\d{2})/);
+  if (m) return m[1] + "-01-01";
+  return today();
+}
+function isoNgay(y, m, d) {
+  m = +m; d = +d;
+  if (!(m >= 1 && m <= 12) || !(d >= 1 && d <= 31)) return today();
+  return y + "-" + (m < 10 ? "0" : "") + m + "-" + (d < 10 ? "0" : "") + d;
+}
+function guessSo(txt) {
+  var s = String(txt).substring(0, 3000);
+  var re = /S[ốo]\s*(?:BB|bi[êe]n b[ảa]n|ki[ểe]m so[áa]t)?[^\n:]{0,24}[:.]?\s*([A-Za-z0-9][A-Za-z0-9\-\/.]{0,15})/g;
+  var m;
+  while ((m = re.exec(s))) {
+    /* chỉ nhận cụm có chữ số, để khỏi bắt nhầm chữ như “Control”, “No” */
+    if (/[0-9]/.test(m[1])) return m[1].replace(/[.]+$/, "");
+  }
+  return "";
+}
+
+function napNhieuFile(files) {
+  var sid = curShip || (DB.ships[0] && DB.ships[0].id);
+  if (!sid) { alert("Sang tab TÀU thêm tàu trước đã — hồ sơ xếp theo từng tàu."); return; }
+  var ten = shipById(sid);
+  var list = [].slice.call(files), i = 0, okN = 0, rowN = 0, loi = [];
+  var box = document.getElementById("bulk-log");
+
+  function ghi(s) { if (box) box.innerHTML = s; }
+  ghi("Đang đọc " + list.length + " file cho tàu " + esc(ten ? ten.ten : "") + "…");
+
+  (function tiep() {
+    if (i >= list.length) {
+      save(); draw();
+      var s = "Xong: nạp được <b>" + okN + "/" + list.length + "</b> file, tổng <b>" + rowN + "</b> phát hiện.";
+      if (loi.length) s += "<br>Không đọc được: " + esc(loi.join("; "));
+      s += "<br>Mở từng kỳ soát lại mảng và phân loại, rồi sang tab PHÂN TÍCH xem lỗi lặp lại.";
+      var b2 = document.getElementById("bulk-log");
+      if (b2) b2.innerHTML = s;
+      return;
+    }
+    var f = list[i++];
+    ghi("Đang đọc file " + i + "/" + list.length + ": " + esc(f.name) + "…");
+    docxText(f, function (txt, err) {
+      if (err || !txt) { loi.push(f.name); tiep(); return; }
+      var loai = guessLoai(txt, f.name);
+      var ngay = guessNgay(txt, f.name);
+      var rows = parseRows(txt, loai, ngay);
+      if (!rows.length) { loi.push(f.name + " (không tách được dòng nào)"); tiep(); return; }
+      DB.ky.push({
+        id: uid(), shipId: sid, loai: loai, ngay: ngay, so: guessSo(txt),
+        doan: "", nguon: f.name, items: rows
+      });
+      okN++; rowN += rows.length;
+      tiep();
+    });
+  })();
+}
+
 function addKy() {
   var sid = curShip || (DB.ships[0] && DB.ships[0].id);
   if (!sid) { alert("Thêm tàu trước đã."); return; }
@@ -5391,6 +5627,7 @@ function setMode(m) {
   document.getElementById("rail").style.display = isKT ? "" : "none";
   document.getElementById("pt").hidden = isKT;
   document.getElementById("pt-tabs").hidden = isKT;
+  document.getElementById("sub").hidden = !isKT;
   var bs = document.getElementById("mode").getElementsByTagName("button");
   for (var i = 0; i < bs.length; i++) {
     bs[i].className = bs[i].getAttribute("data-mode") === m ? "on" : "";
@@ -5458,11 +5695,12 @@ document.getElementById("bb-sync").onclick = function () {
 /* ===================== KHỞI ĐỘNG =====================
    APP_VER hiện ở góc phải đầu trang. Nếu số này không đổi sau khi cập nhật,
    nghĩa là trình duyệt còn giữ bản cũ trong bộ nhớ đệm — tải lại trang. */
-var APP_VER = "b\u1ea3n 2026-08-15/5";
+var APP_VER = "b\u1ea3n 2026-08-15/7";
 document.getElementById("ver").textContent = APP_VER;
 load();
 drawTabs();
 draw();
+keoTabVaoTam();
 moDauSoKy();
 try {
   var m0 = localStorage.getItem(MODE_KEY);
