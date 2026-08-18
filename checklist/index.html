@@ -377,6 +377,23 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
 #pt .ai-goiy .chip{white-space:normal;text-align:left;line-height:1.35;max-width:100%}
 #pt .ai-hoi{flex:1;min-height:42px;max-height:110px;resize:none;border:1px solid var(--line);
   border-radius:8px;padding:10px 11px;font-family:inherit;font-size:16px;line-height:1.4}
+#pt .ai-anh{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+#pt .ai-th{position:relative;width:74px}
+#pt .ai-th img{width:74px;height:74px;object-fit:cover;border-radius:7px;border:1px solid var(--line);display:block}
+#pt .ai-th span{display:block;font-size:9.5px;color:var(--ink2);margin-top:2px;line-height:1.2;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#pt .ai-th button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;
+  border:1px solid var(--line);background:#fff;color:var(--ng);font-size:12px;font-weight:800;
+  cursor:pointer;line-height:1;padding:0}
+#pt .ai-u-anh{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px}
+#pt .ai-u-anh img{width:58px;height:58px;object-fit:cover;border-radius:6px;display:block}
+#pt .ai-pht{margin:-4px 0 10px}
+#pt .ai-pht-i{background:#fff;border:1px solid var(--line);border-left:4px solid var(--ng);
+  border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:13px;line-height:1.55}
+#pt .ai-pht-h{font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--ng);margin-bottom:4px}
+#pt .ai-pht-k{margin-top:6px;color:var(--ink2)}
+#pt .ai-pht-n{font-size:11.5px;color:var(--na);line-height:1.5;padding:0 2px}
 @media (max-width:340px){
   .b{font-size:10.5px;padding:0 2px}
   .b u{display:none}
@@ -4538,7 +4555,10 @@ function fiHtml(f, i) {
     "</div>" +
     '<input data-fi="' + i + '" data-ff="cc" value="' + esc(f.cc) + '" placeholder="Căn cứ (ISM, SOLAS, VSP-000-ATMT…)" style="margin-bottom:7px">' +
     (qh ? '<span class="pill qh">QUÁ HẠN</span>' : "") +
-    '<button class="del" data-fidel="' + i + '">✕ Xóa dòng</button>' +
+    '<div class="btns" style="margin-top:4px">' +
+    '<button class="b" data-aifix="' + i + '" style="padding:7px 10px;font-size:12.5px">' +
+    '🛠 Hỏi cách khắc phục</button>' +
+    '<button class="del" data-fidel="' + i + '">✕ Xóa dòng</button></div>' +
     "</div>";
 }
 
@@ -5398,6 +5418,53 @@ PTR.addEventListener("click", function (e) {
   }
   t = e.target.closest("[data-aigoiy]");
   if (t) { aiGoi(AI_GOI_Y[+t.getAttribute("data-aigoiy")]); return; }
+
+  if (e.target.id === "ai-chup") { document.getElementById("f-aichup").click(); return; }
+  if (e.target.id === "ai-anh") { document.getElementById("f-aianh").click(); return; }
+  if (e.target.id === "ai-video") { document.getElementById("f-aivideo").click(); return; }
+  if (e.target.id === "ai-soi") { aiGoi(AI_NHAC_SOI, true); return; }
+  t = e.target.closest("[data-aianhxoa]");
+  if (t) { aiAnh.splice(+t.getAttribute("data-aianhxoa"), 1); viewTro(); return; }
+
+  /* Thêm một phát hiện do trợ lý nêu vào biên bản đang lập */
+  t = e.target.closest("[data-aiadd]");
+  if (t) {
+    var pos = t.getAttribute("data-aiadd").split("_");
+    var msg = aiMsgs[+pos[0]], ph = msg ? aiBocJson(msg.content) : null;
+    var f0 = ph && ph[+pos[1]];
+    if (!f0) { alert("Không đọc lại được mục này."); return; }
+    var anhKem = "";
+    var uMsg = aiMsgs[+pos[0] - 1];
+    if (uMsg && uMsg.anh && uMsg.anh.length) {
+      var idx = (+f0.anh || 1) - 1;
+      if (uMsg.anh[idx]) anhKem = uMsg.anh[idx].data;
+    }
+    var noi = String(f0.nd || "");
+    if (f0.khac_phuc) noi += "\nKhắc phục: " + f0.khac_phuc;
+    if (f0.chong_tai_dien) noi += "\nChống tái diễn: " + f0.chong_tai_dien;
+    var n = themViPhamTuAI({ nd: noi, bp: f0.bp, pl: f0.pl, muc: f0.muc, cc: f0.cc, anh: anhKem });
+    t.textContent = "✓ Đã thêm (dòng " + n + ")";
+    t.className = "b";
+    return;
+  }
+
+  /* Hỏi cách khắc phục cho một phát hiện đã nhập */
+  t = e.target.closest("[data-aifix]");
+  if (t) {
+    var kx = kyById(curKy);
+    var fx = kx && kx.items && kx.items[+t.getAttribute("data-aifix")];
+    if (!fx) return;
+    if (!aiCfg.key) { alert("Vào tab TRỢ LÝ nhập chìa khóa API trước đã."); tab = "tro"; draw(); return; }
+    var shx = shipById(kx.shipId);
+    tab = "tro"; curKy = ""; draw();
+    aiGoi("Phát hiện trên tàu " + (shx ? shx.ten : "") + " (" + nameOf(BO_PHAN, fx.bp || "khac") + "): “" +
+      String(fx.nd || "").replace(/\s+/g, " ") + "”" +
+      (fx.cc ? " — căn cứ " + fx.cc : "") + ".\n\n" +
+      "Cho tôi: (1) nguyên nhân gốc có thể có, (2) cách khắc phục ngay — làm gì, ai làm, bao lâu, " +
+      "(3) biện pháp chống tái diễn — sửa vào đâu trong hệ thống quản lý để lần sau không lặp lại, " +
+      "(4) căn cứ quy định nếu chắc chắn. Ngắn gọn, gạch đầu dòng.");
+    return;
+  }
   if (e.target.id === "b-paste") { openPaste(); return; }
 
   t = e.target.closest("[data-rep]");
@@ -5409,6 +5476,25 @@ PTR.addEventListener("change", function (e) {
   var t = e.target;
   if (t.id === "f-ship" || t.id === "f-ship2" || t.id === "f-ship3") {
     curShip = t.value; save(); draw(); return;
+  }
+  if (t.id === "f-aichup" || t.id === "f-aianh") {
+    if (!t.files || !t.files.length) return;
+    var fsA = [].slice.call(t.files); t.value = "";
+    aiThemAnh(fsA, function () { viewTro(); });
+    return;
+  }
+  if (t.id === "f-aivideo") {
+    if (!t.files || !t.files.length) return;
+    var fv = t.files[0]; t.value = "";
+    var vlog = document.getElementById("ai-vlog");
+    if (vlog) vlog.textContent = "Đang tách khung hình từ video…";
+    aiTachKhung(fv, AI_MAX_ANH - aiAnh.length, function (err) {
+      if (err) { alert(err); }
+      viewTro();
+      var v2 = document.getElementById("ai-vlog");
+      if (v2 && !err) v2.textContent = "Đã tách xong. Bấm “Soi ảnh tìm lỗi”.";
+    });
+    return;
   }
   if (t.id === "f-bulk") {
     if (!t.files || !t.files.length) return;
@@ -5695,7 +5781,164 @@ var AI_SYSTEM =
   "đừng trích số điều khoản một cách chắc nịch khi không chắc.\n" +
   "- Người dùng có thể chưa học hàng hải: gặp từ viết tắt thì mở ngoặc giải thích ngắn.\n" +
   "- Khi được nhờ soạn văn bản (báo cáo, kết luận, kiến nghị), viết theo văn phong hành chính " +
-  "Việt Nam, đúng cách xưng hô của Vietsovpetro.";
+  "Việt Nam, đúng cách xưng hô của Vietsovpetro.\n\n" +
+  "KHI NGƯỜI DÙNG GỬI ẢNH CHỤP TRÊN TÀU:\n" +
+  "- Bạn là người soi ảnh giúp một chuyên viên an toàn đang đứng trên tàu. Hãy chỉ ra những " +
+  "điểm KHÔNG AN TOÀN hoặc KHÔNG PHÙ HỢP nhìn thấy được: hoen gỉ, móp méo, rò rỉ, thiếu thiết bị, " +
+  "tem/nhãn hết hạn, đường thoát nạn bị chặn, dây cáp hỏng, thiếu biển báo, thiếu che chắn bộ phận " +
+  "quay, bình chữa cháy sai vị trí, vật để bừa gây vấp ngã, người không đủ bảo hộ, v.v.\n" +
+  "- Nói rõ mình nhìn thấy Ở ẢNH SỐ MẤY và ở chỗ nào trong ảnh.\n" +
+  "- KHÔNG suy đoán quá đà. Ảnh chỉ cho biết cái nhìn thấy được; hạn dùng, kết quả thử, hồ sơ " +
+  "thì phải xuống tàu kiểm mới biết. Cái nào chỉ NGHI NGỜ thì ghi rõ là nghi ngờ, cần xác minh tại chỗ.\n" +
+  "- Không nêu tên hay nhận dạng người trong ảnh.\n" +
+  "- Ảnh mờ, tối, chụp xa thì nói thẳng là không đủ rõ để kết luận, đề nghị chụp lại gần hơn.\n\n" +
+  "MỖI KHI NÊU MỘT LỖI, luôn kèm đủ ba phần:\n" +
+  "1. LỖI — mô tả đúng như sẽ ghi vào biên bản, ngắn gọn, khách quan.\n" +
+  "2. KHẮC PHỤC NGAY — làm gì, ai làm, trong bao lâu.\n" +
+  "3. CHỐNG TÁI DIỄN — sửa vào đâu trong hệ thống quản lý để lần sau không lặp lại: " +
+  "đưa vào danh mục bảo dưỡng định kỳ (PMS), sửa quy trình trong sổ tay SMS, thêm vào checklist " +
+  "tuần của sỹ quan phụ trách, huấn luyện lại, đổi vật tư, dán nhãn cảnh báo…";
+
+/* ═══════ ẢNH & VIDEO ═══════
+   Claude nhận ảnh JPEG/PNG/GIF/WebP, KHÔNG nhận video. Video được tách thành
+   vài khung hình rồi gửi như ảnh thường. */
+var aiAnh = [];                    /* [{data: dataURL, ten: "Ảnh 1"}] */
+var AI_MAX_ANH = 6;
+var AI_CANH_ANH = 1600;            /* cạnh dài tối đa — đủ đọc nhãn, chi phí vừa phải */
+
+function aiThemAnh(files, cb) {
+  var list = [].slice.call(files), i = 0;
+  (function tiep() {
+    if (!list.length || aiAnh.length >= AI_MAX_ANH) { if (cb) cb(); return; }
+    var f = list.shift();
+    if (!f.type || f.type.indexOf("image/") !== 0) { tiep(); return; }
+    compressImage(f, AI_CANH_ANH, 0.8, function (d) {
+      aiAnh.push({ data: d, ten: "Ảnh " + (aiAnh.length + 1) });
+      i++; tiep();
+    });
+  })();
+}
+
+/* Tách khung hình từ video ngay trên máy — không gửi file video đi đâu */
+function aiTachKhung(file, soKhung, cb) {
+  var url = URL.createObjectURL(file);
+  var v = document.createElement("video");
+  v.preload = "metadata";
+  v.muted = true;
+  v.setAttribute("playsinline", "");
+  var xong = false;
+  function loi(m) { if (xong) return; xong = true; try { URL.revokeObjectURL(url); } catch (e) {} cb(m); }
+
+  v.onerror = function () { loi("Không đọc được video này. Thử quay lại bằng định dạng MP4."); };
+  v.onloadedmetadata = function () {
+    var d = v.duration;
+    if (!d || d === Infinity) { loi("Không đọc được độ dài video."); return; }
+    var moc = [], k;
+    for (k = 0; k < soKhung; k++) moc.push(d * (k + 0.5) / soKhung);
+    var i = 0;
+    v.onseeked = function () {
+      var w = v.videoWidth, hh = v.videoHeight, M = AI_CANH_ANH;
+      if (!w || !hh) { loi("Không lấy được hình từ video."); return; }
+      if (w > hh && w > M) { hh = Math.round(hh * M / w); w = M; }
+      else if (hh > M) { w = Math.round(w * M / hh); hh = M; }
+      var c = document.createElement("canvas");
+      c.width = w; c.height = hh;
+      try { c.getContext("2d").drawImage(v, 0, 0, w, hh); }
+      catch (e) { loi("Trình duyệt không cho lấy hình từ video này."); return; }
+      if (aiAnh.length < AI_MAX_ANH) {
+        aiAnh.push({ data: c.toDataURL("image/jpeg", 0.8),
+                     ten: "Khung " + (i + 1) + " — giây " + Math.round(moc[i]) });
+      }
+      i++;
+      if (i >= moc.length || aiAnh.length >= AI_MAX_ANH) {
+        xong = true; try { URL.revokeObjectURL(url); } catch (e) {}
+        cb(null); return;
+      }
+      v.currentTime = moc[i];
+    };
+    v.currentTime = moc[0];
+  };
+  v.src = url;
+  try { v.load(); } catch (e) {}
+}
+
+function aiAnhHtml() {
+  if (!aiAnh.length) return "";
+  var s = '<div class="ai-anh">';
+  for (var i = 0; i < aiAnh.length; i++) {
+    s += '<div class="ai-th"><img src="' + aiAnh[i].data + '">' +
+      '<span>' + esc(aiAnh[i].ten) + "</span>" +
+      '<button data-aianhxoa="' + i + '">✕</button></div>';
+  }
+  s += "</div>";
+  return s;
+}
+
+/* Lời nhắc riêng cho việc soi ảnh — bắt trả về kèm một khối JSON để máy đọc lại được */
+var AI_NHAC_SOI =
+  "Đây là ảnh tôi vừa chụp trên tàu khi đi kiểm tra. Hãy soi kỹ từng ảnh và chỉ ra các điểm " +
+  "không an toàn / không phù hợp nhìn thấy được.\n\n" +
+  "Trả lời theo đúng thứ tự sau:\n" +
+  "1) Vài dòng nhận xét chung: ảnh chụp khu vực nào, có đủ rõ để kết luận không.\n" +
+  "2) Từng phát hiện, mỗi cái ghi rõ: thấy ở ảnh nào, mô tả lỗi, mức độ chắc chắn, " +
+  "cách khắc phục ngay, và cách chống tái diễn.\n" +
+  "3) Cuối cùng, lặp lại danh sách phát hiện dưới dạng một khối mã JSON để máy đọc lại, " +
+  "theo đúng khuôn sau (không thêm bớt tên trường):\n" +
+  "```json\n" +
+  '{"phat_hien":[{"anh":1,"nd":"mô tả lỗi như ghi vào biên bản","bp":"boong",' +
+  '"pl":"nc","muc":"3","cc":"căn cứ nếu chắc chắn, không chắc thì để rỗng",' +
+  '"tin_cay":"cao","khac_phuc":"làm gì ngay","chong_tai_dien":"sửa vào đâu trong hệ thống"}]}\n' +
+  "```\n" +
+  "Quy ước: bp là một trong boong, may, dien, cuusinh, cuuhoa, hoso, bep, nang, moitruong, " +
+  "anninh, nguoi, khac. pl là nc (không phù hợp), obs (ghi nhận) hoặc kn (khuyến nghị). " +
+  "muc là 1 dừng ngay, 2 trước khi rời bến, 3 có thời hạn, 4 ghi nhận cải tiến. " +
+  "tin_cay là cao, vua hoặc thap. " +
+  "Nếu ảnh không đủ rõ hoặc không thấy lỗi nào thì để \"phat_hien\":[].";
+
+/* Bóc khối JSON trong câu trả lời.
+   Mô hình đôi khi chèn thêm chữ hoặc ký tự lạ quanh khối JSON, nên thử lần hai
+   bằng cách cắt từ dấu { đầu tiên tới dấu } cuối cùng. */
+function aiThuParse(raw) {
+  if (!raw) return null;
+  try { return JSON.parse(raw); } catch (e) {}
+  var a = raw.indexOf("{"), b = raw.lastIndexOf("}");
+  if (a >= 0 && b > a) {
+    try { return JSON.parse(raw.substring(a, b + 1)); } catch (e2) {}
+  }
+  return null;
+}
+function aiBocJson(s) {
+  var t = String(s || ""), raw = null;
+  var m = t.match(/```json\s*([\s\S]*?)```/);
+  if (m) raw = m[1];
+  if (!raw && t.indexOf("phat_hien") >= 0) raw = t;
+  var o = aiThuParse(raw);
+  return (o && o.phat_hien && o.phat_hien.length) ? o.phat_hien : null;
+}
+/* Bỏ khối JSON khỏi phần chữ hiển thị cho người đọc */
+function aiBoJson(s) {
+  return String(s || "").replace(/```json[\s\S]*?```/g, "").replace(/\n{3,}/g, "\n\n");
+}
+
+function aiTheHtml(list, mi) {
+  var s = '<div class="ai-pht">', i;
+  for (i = 0; i < list.length; i++) {
+    var f = list[i];
+    s += '<div class="ai-pht-i">' +
+      '<div class="ai-pht-h">' + (f.anh ? "Ảnh " + esc(String(f.anh)) + " · " : "") +
+      esc(nameOf(BO_PHAN, f.bp || "khac")) + " · " +
+      ((f.pl || "nc") === "kn" ? "Khuyến nghị" : (f.pl === "obs" ? "Ghi nhận" : "Không phù hợp")) +
+      (f.tin_cay ? " · chắc chắn: " + esc(f.tin_cay) : "") + "</div>" +
+      "<b>" + esc(f.nd || "") + "</b>" +
+      (f.khac_phuc ? '<div class="ai-pht-k"><b>Khắc phục ngay:</b> ' + esc(f.khac_phuc) + "</div>" : "") +
+      (f.chong_tai_dien ? '<div class="ai-pht-k"><b>Chống tái diễn:</b> ' + esc(f.chong_tai_dien) + "</div>" : "") +
+      '<button class="b acc" data-aiadd="' + mi + "_" + i + '" ' +
+      'style="margin-top:8px;padding:8px 11px;font-size:12.5px">＋ Đưa vào biên bản</button>' +
+      "</div>";
+  }
+  s += '<div class="ai-pht-n">Máy nhìn ảnh có thể sai. Xác minh lại tại chỗ trước khi ghi vào biên bản chính thức.</div>';
+  return s + "</div>";
+}
 
 function aiMdHtml(s) {
   var t = esc(s);
@@ -5707,11 +5950,17 @@ function aiMdHtml(s) {
 }
 
 /* ---- Gọi Claude API ---- */
-function aiGoi(cauHoi) {
+function aiGoi(cauHoi, kemAnh) {
   if (aiBusy) return;
   if (!aiCfg.key) { alert("Nhập chìa khóa API trước đã."); return; }
   aiBusy = true;
-  aiMsgs.push({ role: "user", content: cauHoi });
+  var anhGui = null;
+  if (kemAnh && aiAnh.length) {
+    anhGui = [];
+    for (var z = 0; z < aiAnh.length; z++) anhGui.push(aiAnh[z]);
+    aiAnh = [];
+  }
+  aiMsgs.push({ role: "user", content: cauHoi, anh: anhGui });
   aiMsgs.push({ role: "assistant", content: "", dangCho: true });
   aiSave(); viewTro(); aiCuonXuong();
 
@@ -5720,15 +5969,36 @@ function aiGoi(cauHoi) {
   else sys += "\n\n(Người dùng đã TẮT việc gửi kèm dữ liệu hồ sơ, nên bạn không có số liệu " +
     "của đội tàu. Chỉ trả lời phần chuyên môn chung; nếu câu hỏi cần số liệu thì nhắc họ bật lại.)";
 
+  /* Ảnh chỉ gửi lại ở lượt có ảnh MỚI NHẤT — gửi lại toàn bộ mỗi lượt sẽ rất tốn tiền */
+  var lastAnh = -1, i;
+  for (i = 0; i < aiMsgs.length; i++) if (aiMsgs[i].anh && aiMsgs[i].anh.length) lastAnh = i;
+
   var guiMsgs = [];
-  for (var i = 0; i < aiMsgs.length; i++) {
-    if (aiMsgs[i].dangCho) continue;
-    guiMsgs.push({ role: aiMsgs[i].role, content: aiMsgs[i].content });
+  for (i = 0; i < aiMsgs.length; i++) {
+    var m0 = aiMsgs[i];
+    if (m0.dangCho) continue;
+    if (m0.anh && m0.anh.length && i === lastAnh) {
+      var ct = [];
+      for (var a = 0; a < m0.anh.length; a++) {
+        var du = m0.anh[a].data;
+        var kieu = du.substring(5, du.indexOf(";"));
+        ct.push({ type: "text", text: m0.anh[a].ten + ":" });
+        ct.push({ type: "image", source: { type: "base64", media_type: kieu,
+          data: du.substring(du.indexOf(",") + 1) } });
+      }
+      ct.push({ type: "text", text: m0.content });
+      guiMsgs.push({ role: m0.role, content: ct });
+    } else if (m0.anh && m0.anh.length) {
+      guiMsgs.push({ role: m0.role,
+        content: "(" + m0.anh.length + " ảnh đã gửi ở lượt trước, không gửi lại để đỡ tốn) " + m0.content });
+    } else {
+      guiMsgs.push({ role: m0.role, content: m0.content });
+    }
   }
 
   var body = {
     model: aiCfg.model,
-    max_tokens: 4000,
+    max_tokens: 6000,
     stream: true,
     system: sys,
     output_config: { effort: "medium" },
@@ -5839,7 +6109,8 @@ var AI_GOI_Y = [
   "Tuần này tôi nên ưu tiên xử lý những gì?",
   "Có mục nào quá hạn mà chưa ai làm không?",
   "Soạn giúp tôi phần kết luận cho báo cáo tháng",
-  "Trước khi đi kiểm tra tàu này cần soi kỹ những gì?"
+  "Trước khi đi kiểm tra tàu này cần soi kỹ những gì?",
+  "Lỗi lặp lại nhiều nhất — làm sao chống tái diễn tận gốc?"
 ];
 
 function viewTro() {
@@ -5892,16 +6163,44 @@ function viewTro() {
   for (i = 0; i < aiMsgs.length; i++) {
     var m = aiMsgs[i];
     if (m.role === "user") {
-      h += '<div class="ai-u">' + esc(m.content) + "</div>";
+      var anhU = "";
+      if (m.anh && m.anh.length) {
+        anhU = '<div class="ai-u-anh">';
+        for (var w = 0; w < m.anh.length; w++) anhU += '<img src="' + m.anh[w].data + '">';
+        anhU += "</div>";
+      }
+      h += '<div class="ai-u">' + anhU + esc(m.content) + "</div>";
     } else {
       h += '<div class="ai-a' + (m.loi ? " ai-loi" : "") + '"' +
         (m.dangCho ? ' id="ai-dang"' : "") + ">" +
-        (m.dangCho ? "<i>đang suy nghĩ…</i>" : aiMdHtml(m.content)) +
+        (m.dangCho ? "<i>đang suy nghĩ…</i>" : aiMdHtml(aiBoJson(m.content))) +
         (m.tok ? '<div class="ai-tok">' + m.tok.v + " token vào · " + m.tok.r + " token ra</div>" : "") +
         "</div>";
+      if (!m.dangCho) {
+        var ph = aiBocJson(m.content);
+        if (ph) h += aiTheHtml(ph, i);
+      }
     }
   }
   h += "</div>";
+
+  /* Khu đính ảnh */
+  h += '<div class="card" style="padding:10px 11px">' +
+    '<div class="muted" style="font-size:12.5px"><b>📷 Soi ảnh tìm lỗi</b> — chụp hoặc chọn ảnh ' +
+    'chỗ đang kiểm tra, máy chỉ ra điểm không an toàn nhìn thấy được, kèm cách khắc phục và ' +
+    'cách chống tái diễn. Video sẽ được tách thành ' + AI_MAX_ANH + ' khung hình (Claude không ' +
+    'xem video trực tiếp được).</div>' +
+    aiAnhHtml() +
+    '<div class="btns" style="margin-top:9px">' +
+    '<button class="b" id="ai-chup">📷 Chụp ảnh</button>' +
+    '<button class="b" id="ai-anh">🖼 Chọn ảnh</button>' +
+    '<button class="b" id="ai-video">🎬 Video</button>' +
+    (aiAnh.length ? '<button class="b acc" id="ai-soi">🔎 Soi ' + aiAnh.length + ' ảnh tìm lỗi</button>' : "") +
+    "</div>" +
+    '<input type="file" id="f-aichup" accept="image/*" capture="environment" multiple style="display:none">' +
+    '<input type="file" id="f-aianh" accept="image/*" multiple style="display:none">' +
+    '<input type="file" id="f-aivideo" accept="video/*" style="display:none">' +
+    '<div id="ai-vlog" class="muted" style="margin-top:7px"></div></div>';
 
   h += '<div class="ai-goiy">';
   for (i = 0; i < AI_GOI_Y.length; i++) {
@@ -6065,6 +6364,22 @@ return {
 })();
 
 
+/* Trợ lý (nằm trong phần phân tích) đẩy một phát hiện sang biên bản đang lập.
+   Phải để ở phạm vi ngoài vì save/drawViPham của phần checklist bị che bên trong. */
+function themViPhamTuAI(o) {
+  bb.viPham.push({
+    noidung: String(o.nd || ""),
+    thoihan: o.han || "", trachnhiem: "",
+    lsr: "", muc: o.muc || "",
+    bp: o.bp || "khac", pl: o.pl || "nc", c3: true,
+    cc: o.cc || "", ykien: "",
+    photos: o.anh ? [o.anh] : []
+  });
+  save();
+  drawViPham();
+  return bb.viPham.length;
+}
+
 /* ===================== CHUYỂN GIỮA HAI CHẾ ĐỘ ===================== */
 var MODE_KEY = "atskmt-kiemtratau-mode-v1";
 var appMode = "kt";
@@ -6145,7 +6460,7 @@ document.getElementById("bb-sync").onclick = function () {
 /* ===================== KHỞI ĐỘNG =====================
    APP_VER hiện ở góc phải đầu trang. Nếu số này không đổi sau khi cập nhật,
    nghĩa là trình duyệt còn giữ bản cũ trong bộ nhớ đệm — tải lại trang. */
-var APP_VER = "b\u1ea3n 2026-08-15/8";
+var APP_VER = "b\u1ea3n 2026-08-15/9";
 document.getElementById("ver").textContent = APP_VER;
 load();
 drawTabs();

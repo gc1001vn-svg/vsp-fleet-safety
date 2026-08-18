@@ -172,6 +172,29 @@ trên điện thoại (Add to Home Screen). Đây là **app dùng chung**, gồm
 - Lỗi được dịch sang tiếng Việt dễ hiểu: sai chìa khóa, hết hạn mức, hết tiền,
   mất mạng, mở bằng `file://` thay vì https.
 
+**Soi ảnh / video tìm lỗi (vision):**
+
+- Đính tối đa 6 ảnh mỗi lượt: **📷 Chụp ảnh** (mở thẳng camera điện thoại),
+  **🖼 Chọn ảnh**, hoặc **🎬 Video**. Ảnh được nén xuống cạnh dài 1600 px, JPEG 0.8
+  ngay trên máy trước khi gửi.
+- **Claude không xem video trực tiếp được** (chỉ nhận JPEG/PNG/GIF/WebP), nên app
+  tự tách video thành 6 khung hình cách đều bằng `<video>` + canvas — toàn bộ xử
+  lý trên máy, file video không rời khỏi điện thoại.
+- Bấm **🔎 Soi ảnh tìm lỗi**: mô hình chỉ ra điểm không an toàn nhìn thấy được,
+  nói rõ thấy ở ảnh nào, và với mỗi lỗi trả về đủ **ba phần: lỗi → khắc phục ngay
+  → chống tái diễn** (sửa vào đâu trong PMS/SMS/checklist tuần/huấn luyện).
+- Kết quả kèm một khối JSON để máy đọc lại, dựng thành thẻ có nút
+  **＋ Đưa vào biên bản** — đẩy thẳng vào biên bản đang lập với bộ phận, phân loại,
+  mức độ, căn cứ và **chính tấm ảnh làm bằng chứng**. Bộ bóc JSON chịu được rác
+  quanh khối (thử lại bằng cách cắt từ `{` đầu tới `}` cuối).
+- Mỗi dòng phát hiện đã nhập có nút **🛠 Hỏi cách khắc phục** — tự soạn câu hỏi
+  kèm tên tàu, bộ phận, nội dung và căn cứ, hỏi nguyên nhân gốc + cách khắc phục
+  + biện pháp chống tái diễn.
+- Ảnh chỉ được gửi lại ở lượt có ảnh mới nhất; các lượt cũ thay bằng ghi chú để
+  không đội chi phí qua từng lượt hỏi.
+- App nhắc rõ giới hạn: máy nhìn ảnh có thể sai, ảnh mờ/tối thì không kết luận
+  được, hạn dùng và kết quả thử phải xuống tàu kiểm mới biết.
+
 ### Chung
 
 - Dữ liệu lưu trong `localStorage` của trình duyệt (không có backend) — phù
