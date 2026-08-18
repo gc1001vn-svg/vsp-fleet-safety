@@ -365,6 +365,18 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
 #pt .sheet .box .in{max-width:820px;margin:0 auto}
 #pt .sheet h2{margin:0 0 12px;font-size:16px}
 #pt-save{font-size:11px;color:var(--ink2);text-align:center;padding:4px 0 0}
+#pt .ai-u{background:var(--ink);color:#fff;border-radius:12px 12px 3px 12px;padding:10px 12px;
+  margin:0 0 8px auto;max-width:88%;width:fit-content;font-size:13.5px;line-height:1.5;
+  white-space:pre-wrap;word-break:break-word}
+#pt .ai-a{background:#fff;border:1px solid var(--line);border-left:4px solid var(--acc);
+  border-radius:3px 12px 12px 12px;padding:11px 13px;margin-bottom:10px;font-size:13.5px;
+  line-height:1.62;word-break:break-word}
+#pt .ai-a.ai-loi{border-left-color:var(--ng);background:#FDF0EE}
+#pt .ai-tok{font-size:10.5px;color:var(--na);margin-top:7px;padding-top:6px;border-top:1px dashed var(--line)}
+#pt .ai-goiy{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
+#pt .ai-goiy .chip{white-space:normal;text-align:left;line-height:1.35;max-width:100%}
+#pt .ai-hoi{flex:1;min-height:42px;max-height:110px;resize:none;border:1px solid var(--line);
+  border-radius:8px;padding:10px 11px;font-family:inherit;font-size:16px;line-height:1.4}
 @media (max-width:340px){
   .b{font-size:10.5px;padding:0 2px}
   .b u{display:none}
@@ -4365,7 +4377,8 @@ function similar(a, b) {
 }
 
 /* ===================== VẼ ===================== */
-var TABS = [["ky", "KỲ KIỂM TRA"], ["pt", "PHÂN TÍCH"], ["bc", "BÁO CÁO"], ["tau", "TÀU"]];
+var TABS = [["ky", "KỲ KIỂM TRA"], ["pt", "PHÂN TÍCH"], ["bc", "BÁO CÁO"],
+            ["tro", "🤖 TRỢ LÝ"], ["tau", "TÀU"]];
 function drawTabs() {
   document.getElementById("pt-tabs").innerHTML = TABS.map(function (t) {
     return '<button class="tab' + (tab === t[0] ? " on" : "") + '" data-tab="' + t[0] + '">' + t[1] + "</button>";
@@ -4376,6 +4389,7 @@ function draw() {
   if (tab === "tau") viewTau();
   else if (tab === "ky") viewKy();
   else if (tab === "pt") viewPT();
+  else if (tab === "tro") viewTro();
   else viewBC();
 }
 
@@ -5350,6 +5364,40 @@ PTR.addEventListener("click", function (e) {
   }
   if (e.target.id === "b-docx") { document.getElementById("f-docx").click(); return; }
   if (e.target.id === "b-bulk") { document.getElementById("f-bulk").click(); return; }
+
+  /* --- trợ lý --- */
+  if (e.target.id === "ai-caidat") { aiMoCaiDat(); return; }
+  if (e.target.id === "ai-dong") { closeSheet(); return; }
+  if (e.target.id === "ai-luu") {
+    var kEl = document.getElementById("ai-key"), mEl = document.getElementById("ai-model"),
+        gEl = document.getElementById("ai-guidl");
+    if (kEl) aiCfg.key = kEl.value.replace(/^\s+|\s+$/g, "");
+    if (mEl) aiCfg.model = mEl.value;
+    if (gEl) aiCfg.guiDL = !!gEl.checked;
+    if (aiCfg.key && aiCfg.key.indexOf("sk-ant") !== 0) {
+      if (!confirm("Chìa khóa thường bắt đầu bằng “sk-ant-”. Vẫn lưu chứ?")) return;
+    }
+    aiSave(); closeSheet(); tab = "tro"; draw();
+    return;
+  }
+  if (e.target.id === "ai-quen") {
+    if (!confirm("Xóa chìa khóa API khỏi máy này?")) return;
+    aiCfg.key = ""; aiSave(); closeSheet(); draw(); return;
+  }
+  if (e.target.id === "ai-xoa") {
+    if (!confirm("Xóa toàn bộ hội thoại với trợ lý?")) return;
+    aiMsgs = []; aiSave(); viewTro(); return;
+  }
+  if (e.target.id === "ai-gui") {
+    var oh = document.getElementById("ai-hoi");
+    var q = oh ? oh.value.replace(/^\s+|\s+$/g, "") : "";
+    if (!q) return;
+    oh.value = "";
+    aiGoi(q);
+    return;
+  }
+  t = e.target.closest("[data-aigoiy]");
+  if (t) { aiGoi(AI_GOI_Y[+t.getAttribute("data-aigoiy")]); return; }
   if (e.target.id === "b-paste") { openPaste(); return; }
 
   t = e.target.closest("[data-rep]");
@@ -5515,6 +5563,407 @@ function napNhieuFile(files) {
   })();
 }
 
+
+/* ═══════════════════ TRỢ LÝ (gọi thẳng Claude API từ trình duyệt) ═══════════════════
+   Không cần máy chủ riêng. Chìa khóa API lưu trong localStorage của chính máy này.
+   Anthropic cho phép gọi trực tiếp từ trình duyệt khi gửi kèm header
+   "anthropic-dangerous-direct-browser-access: true" — đổi lại, chìa khóa nằm ở
+   phía máy người dùng nên chỉ dùng cho công cụ nội bộ, máy tin cậy. */
+
+var AI_KEY = "atskmt-troly-v1";
+var AI_MODELS = [
+  ["claude-opus-5",   "Opus 5 — mạnh nhất",        "5 / 25 USD mỗi triệu token (vào / ra)"],
+  ["claude-sonnet-5", "Sonnet 5 — cân bằng",       "3 / 15 USD mỗi triệu token"],
+  ["claude-haiku-4-5","Haiku 4.5 — nhanh, rẻ nhất","1 / 5 USD mỗi triệu token"]
+];
+var aiCfg = { key: "", model: "claude-opus-5", guiDL: true };
+var aiMsgs = [];              /* lịch sử hội thoại */
+var aiBusy = false;
+var aiChiPhi = { vao: 0, ra: 0 };
+
+function aiLoad() {
+  try {
+    var v = JSON.parse(localStorage.getItem(AI_KEY) || "{}");
+    if (v.key) aiCfg.key = v.key;
+    if (v.model) aiCfg.model = v.model;
+    if (v.guiDL != null) aiCfg.guiDL = !!v.guiDL;
+    if (v.msgs) aiMsgs = v.msgs;
+    if (v.chiPhi) aiChiPhi = v.chiPhi;
+  } catch (e) {}
+}
+function aiSave() {
+  try {
+    localStorage.setItem(AI_KEY, JSON.stringify({
+      key: aiCfg.key, model: aiCfg.model, guiDL: aiCfg.guiDL,
+      msgs: aiMsgs.slice(-24), chiPhi: aiChiPhi
+    }));
+  } catch (e) {}
+}
+
+/* ---- Dựng bối cảnh gửi kèm: tóm tắt dữ liệu đang có trong máy ---- */
+function aiBoiCanh() {
+  var L = [], i, j, dem = 0, MAX = 260;
+  L.push("DỮ LIỆU HIỆN CÓ TRONG MÁY NGƯỜI DÙNG (hôm nay " + fmtDate(today()) + "):");
+  L.push("");
+
+  /* 1. Đội tàu */
+  L.push("A. ĐỘI TÀU — " + DB.ships.length + " tàu:");
+  for (i = 0; i < DB.ships.length; i++) {
+    var s = DB.ships[i], ks = kyOfShip(s.id);
+    L.push("- " + s.ten + (s.loai ? " (" + s.loai + ")" : "") + " — " + ks.length + " kỳ đã nhập");
+  }
+  if (!DB.ships.length) L.push("- (chưa nhập tàu nào)");
+  L.push("");
+
+  /* 2. Chi tiết từng kỳ, mới nhất trước */
+  var ky = DB.ky.slice().sort(function (a, b) { return (b.ngay || "").localeCompare(a.ngay || ""); });
+  L.push("B. CÁC KỲ KIỂM TRA — " + ky.length + " kỳ:");
+  for (i = 0; i < ky.length; i++) {
+    var k = ky[i], sh = shipById(k.shipId), its = k.items || [];
+    var qh = 0, mo = 0;
+    for (j = 0; j < its.length; j++) {
+      if (isOverdue(its[j])) qh++;
+      if (its[j].tt !== "done") mo++;
+    }
+    L.push("");
+    L.push("KỲ: " + nameOf(LOAI_KY, k.loai) + (k.so ? " số " + k.so : "") +
+      " · tàu " + (sh ? sh.ten : "?") + " · ngày " + fmtDate(k.ngay) +
+      " · " + its.length + " phát hiện (" + mo + " chưa đóng, " + qh + " quá hạn)");
+    for (j = 0; j < its.length; j++) {
+      if (dem >= MAX) break;
+      var f = its[j];
+      dem++;
+      L.push("  · [" + nameOf(BO_PHAN, f.bp || "khac") + "|" + (f.pl || "nc").toUpperCase() +
+        (f.tt === "done" ? "|đã khắc phục" : "|chưa đóng") + (isOverdue(f) ? "|QUÁ HẠN" : "") + "] " +
+        String(f.nd || "").replace(/\s+/g, " ").substring(0, 220) +
+        (f.cc ? " (căn cứ " + f.cc + ")" : "") + (f.han ? " (hạn " + fmtDate(f.han) + ")" : "") +
+        (f.tn ? " (phụ trách " + f.tn + ")" : ""));
+    }
+    if (dem >= MAX) { L.push("  … (đã cắt bớt, tổng cộng còn nhiều mục nữa không liệt kê hết)"); break; }
+  }
+  if (!ky.length) L.push("- (chưa nhập kỳ kiểm tra nào)");
+  L.push("");
+
+  /* 3. Kết quả máy đã tự phân tích */
+  var A = analyse(curShip || "");
+  if (A && A.all && A.all.length) {
+    L.push("C. MÁY ĐÃ TỰ TÍNH (phạm vi: " + (curShip ? (shipById(curShip) || {}).ten : "toàn đội tàu") + "):");
+    L.push("- Tổng phát hiện: " + A.all.length + "; đã khắc phục: " + A.nDone +
+      "; quá hạn: " + A.nQh);
+    if (A.lap && A.lap.length) {
+      L.push("- LỖI LẶP LẠI QUA NHIỀU KỲ (" + A.lap.length + " nhóm, máy so khớp nội dung):");
+      for (i = 0; i < A.lap.length && i < 20; i++) {
+        var gr = A.lap[i], mau = gr.items[0].f;
+        L.push("  · [" + nameOf(BO_PHAN, mau.bp || "khac") + "] " +
+          String(mau.nd || "").replace(/\s+/g, " ").substring(0, 180) +
+          " — xuất hiện ở " + gr.nKy + " kỳ khác nhau");
+      }
+    }
+    L.push("");
+  }
+
+  /* 4. Phiếu checklist đang làm dở bên chế độ đi kiểm tra */
+  try {
+    var vp = (typeof bb !== "undefined" && bb.viPham) ? bb.viPham : [];
+    var co = [];
+    for (i = 0; i < vp.length; i++) if ((vp[i].noidung || "").trim()) co.push(vp[i]);
+    if (co.length) {
+      L.push("D. PHIẾU ĐANG LÀM DỞ Ở CHẾ ĐỘ ĐI KIỂM TRA — tàu " +
+        ((bb.nhathau || "").trim() || "chưa ghi tên") + ", " + co.length + " điểm ghi nhận:");
+      for (i = 0; i < co.length && i < 60; i++) {
+        L.push("  · [" + nameOf(BO_PHAN, co[i].bp || "khac") + "] " +
+          String(co[i].noidung).replace(/\s+/g, " ").substring(0, 200));
+      }
+      L.push("");
+    }
+  } catch (e) {}
+
+  return L.join("\n");
+}
+
+var AI_SYSTEM =
+  "Bạn là trợ lý của một chuyên viên an toàn (ATSKMT) tại Xí nghiệp Vận tải biển và Công tác lặn, " +
+  "Liên doanh Việt–Nga Vietsovpetro. Người dùng quản lý an toàn cho đội 20 tàu dịch vụ dầu khí.\n\n" +
+  "CÁCH TRẢ LỜI:\n" +
+  "- Luôn trả lời bằng TIẾNG VIỆT, giọng đồng nghiệp, đi thẳng vào việc.\n" +
+  "- Đọc trên điện thoại: câu ngắn, gạch đầu dòng, không viết đoạn dài lê thê.\n" +
+  "- Khi nêu con số, nói rõ lấy từ đâu (tàu nào, kỳ nào).\n" +
+  "- CHỈ dựa vào phần DỮ LIỆU HIỆN CÓ bên dưới khi nói về tình hình đội tàu. " +
+  "Không có dữ liệu thì nói thẳng là chưa có, TUYỆT ĐỐI không bịa số liệu, không bịa tên tàu.\n" +
+  "- Kiến thức chuyên môn hàng hải (SOLAS, MARPOL, ISM, ISPS, MLC, STCW, LSA Code, PSC, IMCA) " +
+  "thì cứ dùng, nhưng nếu không chắc chắn một điều khoản cụ thể thì nói rõ là cần tra lại, " +
+  "đừng trích số điều khoản một cách chắc nịch khi không chắc.\n" +
+  "- Người dùng có thể chưa học hàng hải: gặp từ viết tắt thì mở ngoặc giải thích ngắn.\n" +
+  "- Khi được nhờ soạn văn bản (báo cáo, kết luận, kiến nghị), viết theo văn phong hành chính " +
+  "Việt Nam, đúng cách xưng hô của Vietsovpetro.";
+
+function aiMdHtml(s) {
+  var t = esc(s);
+  t = t.replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+  t = t.replace(/^### (.+)$/gm, "<b>$1</b>");
+  t = t.replace(/^## (.+)$/gm, "<b>$1</b>");
+  t = t.replace(/\n/g, "<br>");
+  return t;
+}
+
+/* ---- Gọi Claude API ---- */
+function aiGoi(cauHoi) {
+  if (aiBusy) return;
+  if (!aiCfg.key) { alert("Nhập chìa khóa API trước đã."); return; }
+  aiBusy = true;
+  aiMsgs.push({ role: "user", content: cauHoi });
+  aiMsgs.push({ role: "assistant", content: "", dangCho: true });
+  aiSave(); viewTro(); aiCuonXuong();
+
+  var sys = AI_SYSTEM;
+  if (aiCfg.guiDL) sys += "\n\n════════ DỮ LIỆU HIỆN CÓ ════════\n" + aiBoiCanh();
+  else sys += "\n\n(Người dùng đã TẮT việc gửi kèm dữ liệu hồ sơ, nên bạn không có số liệu " +
+    "của đội tàu. Chỉ trả lời phần chuyên môn chung; nếu câu hỏi cần số liệu thì nhắc họ bật lại.)";
+
+  var guiMsgs = [];
+  for (var i = 0; i < aiMsgs.length; i++) {
+    if (aiMsgs[i].dangCho) continue;
+    guiMsgs.push({ role: aiMsgs[i].role, content: aiMsgs[i].content });
+  }
+
+  var body = {
+    model: aiCfg.model,
+    max_tokens: 4000,
+    stream: true,
+    system: sys,
+    output_config: { effort: "medium" },
+    messages: guiMsgs
+  };
+
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", "https://api.anthropic.com/v1/messages", true);
+  xhr.setRequestHeader("content-type", "application/json");
+  xhr.setRequestHeader("x-api-key", aiCfg.key);
+  xhr.setRequestHeader("anthropic-version", "2023-06-01");
+  xhr.setRequestHeader("anthropic-dangerous-direct-browser-access", "true");
+
+  var daDoc = 0, dem = "", traLoi = "", tokVao = 0, tokRa = 0;
+  var oCho = aiMsgs[aiMsgs.length - 1];
+
+  function veLai() {
+    oCho.content = traLoi;
+    var el = document.getElementById("ai-dang");
+    if (el) el.innerHTML = traLoi ? aiMdHtml(traLoi) : "<i>đang suy nghĩ…</i>";
+  }
+
+  function nuot(txt) {
+    dem += txt;
+    var dong = dem.split("\n");
+    dem = dong.pop();
+    for (var k = 0; k < dong.length; k++) {
+      var ln = dong[k];
+      if (ln.indexOf("data: ") !== 0) continue;
+      var ev;
+      try { ev = JSON.parse(ln.substring(6)); } catch (e) { continue; }
+      if (ev.type === "content_block_delta" && ev.delta && ev.delta.type === "text_delta") {
+        traLoi += ev.delta.text;
+      } else if (ev.type === "message_start" && ev.message && ev.message.usage) {
+        tokVao = ev.message.usage.input_tokens || 0;
+      } else if (ev.type === "message_delta" && ev.usage) {
+        tokRa = ev.usage.output_tokens || 0;
+      } else if (ev.type === "error" && ev.error) {
+        traLoi += "\n\n⚠ " + (ev.error.message || "lỗi không rõ");
+      }
+    }
+    veLai();
+  }
+
+  xhr.onprogress = function () {
+    var s = xhr.responseText;
+    nuot(s.substring(daDoc));
+    daDoc = s.length;
+  };
+  xhr.onerror = function () { aiXong(null, "Không kết nối được tới máy chủ. Kiểm tra mạng."); };
+  xhr.ontimeout = function () { aiXong(null, "Quá thời gian chờ. Thử hỏi lại."); };
+  xhr.onload = function () {
+    if (xhr.status >= 200 && xhr.status < 300) {
+      nuot(xhr.responseText.substring(daDoc));
+      aiChiPhi.vao += tokVao; aiChiPhi.ra += tokRa;
+      aiXong(traLoi || "(không nhận được nội dung trả lời)", null, tokVao, tokRa);
+    } else {
+      aiXong(null, aiLoiText(xhr));
+    }
+  };
+  xhr.timeout = 180000;
+  try { xhr.send(JSON.stringify(body)); }
+  catch (e) { aiXong(null, "Không gửi được yêu cầu: " + e.message); }
+}
+
+function aiLoiText(xhr) {
+  var m = "";
+  try {
+    var j = JSON.parse(xhr.responseText);
+    if (j.error && j.error.message) m = j.error.message;
+  } catch (e) {}
+  if (xhr.status === 401) return "Chìa khóa API sai hoặc đã bị thu hồi. Kiểm tra lại ở phần Cài đặt. (" + m + ")";
+  if (xhr.status === 403) return "Chìa khóa không có quyền dùng mô hình này. (" + m + ")";
+  if (xhr.status === 429) return "Đã chạm giới hạn số lượt gọi hoặc hết tiền trong tài khoản. Đợi một lát rồi thử lại, hoặc nạp thêm tiền ở console.anthropic.com. (" + m + ")";
+  if (xhr.status === 400) return "Yêu cầu không hợp lệ: " + m;
+  if (xhr.status === 0) return "Trình duyệt chặn kết nối. Trang phải chạy qua https (link GitHub Pages), " +
+    "không mở bằng file:// trên máy.";
+  if (xhr.status >= 500) return "Máy chủ đang lỗi, thử lại sau ít phút. (" + m + ")";
+  return "Lỗi " + xhr.status + ": " + m;
+}
+
+function aiXong(noiDung, loi, tv, tr) {
+  aiBusy = false;
+  var o = aiMsgs[aiMsgs.length - 1];
+  if (o && o.dangCho) {
+    delete o.dangCho;
+    o.content = loi ? "⚠ " + loi : noiDung;
+    if (loi) o.loi = true;
+    if (tv || tr) o.tok = { v: tv || 0, r: tr || 0 };
+  }
+  aiSave(); viewTro(); aiCuonXuong();
+}
+
+function aiCuonXuong() {
+  /* Khung hội thoại nằm trong luồng trang nên phải cuộn cả trang xuống cuối */
+  try { window.scrollTo(0, document.body.scrollHeight); } catch (e) {}
+}
+
+function aiTien() {
+  var g = { "claude-opus-5": [5, 25], "claude-sonnet-5": [3, 15], "claude-haiku-4-5": [1, 5] };
+  var p = g[aiCfg.model] || g["claude-opus-5"];
+  return (aiChiPhi.vao / 1e6 * p[0] + aiChiPhi.ra / 1e6 * p[1]);
+}
+
+var AI_GOI_Y = [
+  "Tàu nào đang yếu nhất? Vì sao?",
+  "Lỗi nào lặp lại nhiều nhất toàn đội tàu?",
+  "Tuần này tôi nên ưu tiên xử lý những gì?",
+  "Có mục nào quá hạn mà chưa ai làm không?",
+  "Soạn giúp tôi phần kết luận cho báo cáo tháng",
+  "Trước khi đi kiểm tra tàu này cần soi kỹ những gì?"
+];
+
+function viewTro() {
+  var h = "", i;
+
+  /* --- Chưa có chìa khóa: hướng dẫn lấy --- */
+  if (!aiCfg.key) {
+    h += '<div class="card"><h3>🤖 Trợ lý AI — cần chìa khóa API</h3>' +
+      '<div class="muted">Trợ lý dùng mô hình Claude của Anthropic. App gọi thẳng tới ' +
+      'Anthropic, <b>không qua máy chủ nào của mình</b>, nên anh cần một chìa khóa API riêng.</div></div>';
+
+    h += '<div class="card"><h3>Lấy chìa khóa API — 6 bước</h3><div class="muted">' +
+      '<b>Bước 1.</b> Mở <b>console.anthropic.com</b> trên máy tính, đăng ký tài khoản bằng email công việc.<br><br>' +
+      '<b>Bước 2.</b> Vào mục <b>Billing</b> (Thanh toán), thêm thẻ và nạp tiền. Mức tối thiểu ' +
+      'thường là 5 USD — đủ dùng rất lâu cho việc hỏi đáp thế này.<br><br>' +
+      '<b>Bước 3.</b> Vào mục <b>API keys</b>, bấm <b>Create key</b>.<br><br>' +
+      '<b>Bước 4.</b> Đặt tên cho dễ nhớ, ví dụ “An toàn tàu VTB&CTL”. ' +
+      'Nếu có mục <b>Workspace</b> thì tạo một workspace riêng cho việc này để đặt được hạn mức chi tiêu.<br><br>' +
+      '<b>Bước 5.</b> Bấm tạo, màn hình hiện ra một dãy chữ bắt đầu bằng <b>sk-ant-…</b>. ' +
+      '<b>Chép ngay</b> — đóng đi là không xem lại được nữa, phải tạo cái khác.<br><br>' +
+      '<b>Bước 6.</b> Dán vào ô bên dưới. Chìa khóa chỉ nằm trong máy này.<br><br>' +
+      '<b>Nên làm thêm:</b> trong Billing bật <b>Usage limits</b> đặt trần chi tiêu mỗi tháng ' +
+      '(ví dụ 20 USD) để không bao giờ bị vượt.' +
+      '</div></div>';
+
+    h += aiCaiDatHtml();
+    h += aiCanhBaoHtml();
+    document.getElementById("pt-view").innerHTML = h;
+    document.getElementById("pt-bar").innerHTML =
+      '<button class="b pri" id="ai-luu">Lưu chìa khóa</button>';
+    return;
+  }
+
+  /* --- Đã có chìa khóa: khung hội thoại --- */
+  h += '<div class="card" style="padding:10px 11px">' +
+    '<div class="muted" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">' +
+    '<span>Mô hình: <b>' + esc(nameOf(AI_MODELS, aiCfg.model)) + '</b></span>' +
+    '<span>· Dữ liệu kèm theo: <b>' + (aiCfg.guiDL ? "CÓ gửi" : "KHÔNG gửi") + '</b></span>' +
+    '<span>· Đã dùng khoảng <b>' + aiTien().toFixed(2) + ' USD</b></span>' +
+    '</div>' +
+    '<div class="btns" style="margin-top:8px">' +
+    '<button class="b" id="ai-caidat">⚙ Cài đặt</button>' +
+    '<button class="b" id="ai-xoa">Xóa hội thoại</button></div></div>';
+
+  h += '<div id="ai-list">';
+  if (!aiMsgs.length) {
+    h += '<div class="empty">Hỏi trợ lý bất cứ điều gì về hồ sơ kiểm tra của đội tàu, ' +
+      'hoặc về quy định hàng hải.<br>Bấm một gợi ý bên dưới để bắt đầu.</div>';
+  }
+  for (i = 0; i < aiMsgs.length; i++) {
+    var m = aiMsgs[i];
+    if (m.role === "user") {
+      h += '<div class="ai-u">' + esc(m.content) + "</div>";
+    } else {
+      h += '<div class="ai-a' + (m.loi ? " ai-loi" : "") + '"' +
+        (m.dangCho ? ' id="ai-dang"' : "") + ">" +
+        (m.dangCho ? "<i>đang suy nghĩ…</i>" : aiMdHtml(m.content)) +
+        (m.tok ? '<div class="ai-tok">' + m.tok.v + " token vào · " + m.tok.r + " token ra</div>" : "") +
+        "</div>";
+    }
+  }
+  h += "</div>";
+
+  h += '<div class="ai-goiy">';
+  for (i = 0; i < AI_GOI_Y.length; i++) {
+    h += '<button class="chip" data-aigoiy="' + i + '">' + esc(AI_GOI_Y[i]) + "</button>";
+  }
+  h += "</div>";
+
+  document.getElementById("pt-view").innerHTML = h;
+  document.getElementById("pt-bar").innerHTML =
+    '<textarea id="ai-hoi" class="ai-hoi" rows="1" placeholder="Hỏi trợ lý…"></textarea>' +
+    '<button class="b acc" id="ai-gui" style="flex:0 0 auto;width:74px">Gửi</button>';
+}
+
+function aiCaiDatHtml() {
+  var h = '<div class="card"><h3>Cài đặt</h3>' +
+    '<label class="f"><b>Chìa khóa API (sk-ant-…)</b>' +
+    '<input id="ai-key" type="password" autocomplete="off" placeholder="Dán chìa khóa vào đây" value="' +
+    esc(aiCfg.key) + '"></label>' +
+    '<label class="f"><b>Mô hình</b><select id="ai-model">';
+  for (var i = 0; i < AI_MODELS.length; i++) {
+    h += '<option value="' + AI_MODELS[i][0] + '"' +
+      (AI_MODELS[i][0] === aiCfg.model ? " selected" : "") + ">" +
+      esc(AI_MODELS[i][1]) + " — " + esc(AI_MODELS[i][2]) + "</option>";
+  }
+  h += "</select></label>" +
+    '<div class="muted" style="margin:-4px 0 10px;font-size:12px">' +
+    'Tiền tính theo <b>token</b> — mỗi token khoảng nửa chữ tiếng Việt. Một câu hỏi kèm hồ sơ ' +
+    'đội tàu thường tốn vài nghìn token, tức khoảng vài trăm đồng.</div>' +
+    '<label class="f" style="display:flex;gap:9px;align-items:flex-start">' +
+    '<input type="checkbox" id="ai-guidl" style="width:18px;height:18px;margin-top:2px"' +
+    (aiCfg.guiDL ? " checked" : "") + ">" +
+    '<span style="font-size:13px;line-height:1.5">Gửi kèm dữ liệu hồ sơ (tên tàu, nội dung phát hiện) ' +
+    'để trợ lý trả lời được về tình hình đội tàu.<br>' +
+    '<b>Tắt</b> thì chỉ gửi câu hỏi, trợ lý sẽ không biết số liệu của mình.</span></label>' +
+    "</div>";
+  return h;
+}
+
+function aiCanhBaoHtml() {
+  return '<div class="card" style="border-left:5px solid var(--ng)">' +
+    '<h3>⚠ Đọc kỹ trước khi dùng với dữ liệu thật</h3><div class="muted">' +
+    '<b>1. Dữ liệu đi ra ngoài.</b> Câu hỏi và phần dữ liệu gửi kèm (tên tàu, nội dung các ' +
+    'phát hiện) được gửi tới máy chủ Anthropic ở nước ngoài để xử lý. Đây là <b>dữ liệu công ty</b> ' +
+    '— nên hỏi ý kiến cấp trên và bộ phận CNTT trước khi dùng với hồ sơ thật. ' +
+    'Muốn thử trước cho an tâm thì tắt “Gửi kèm dữ liệu hồ sơ” ở phần Cài đặt.<br><br>' +
+    '<b>2. Chìa khóa nằm trong máy này.</b> Nó được lưu trong bộ nhớ trình duyệt, không gửi đi đâu ' +
+    'ngoài Anthropic. Nhưng ai mượn được máy/điện thoại này thì cũng lấy được. ' +
+    'Máy dùng chung thì đừng lưu chìa khóa.<br><br>' +
+    '<b>3. Tốn tiền theo lượt hỏi.</b> Mỗi câu hỏi trừ tiền trong tài khoản Anthropic của anh. ' +
+    'Nên đặt trần chi tiêu tháng trong phần Billing.<br><br>' +
+    '<b>4. Trợ lý có thể sai.</b> Nó đọc đúng số liệu trong máy, nhưng phần trích dẫn điều khoản ' +
+    'và tư vấn kỹ thuật thì phải tự kiểm chứng lại trước khi đưa vào văn bản chính thức.' +
+    "</div></div>";
+}
+
+function aiMoCaiDat() {
+  openSheet("<h2>Cài đặt trợ lý</h2>" + aiCaiDatHtml() + aiCanhBaoHtml() +
+    '<div class="btns"><button class="b pri" id="ai-luu">Lưu</button>' +
+    '<button class="b dan" id="ai-quen">Xóa chìa khóa khỏi máy</button>' +
+    '<button class="b" id="ai-dong">Đóng</button></div>');
+}
+
 function addKy() {
   var sid = curShip || (DB.ships[0] && DB.ships[0].id);
   if (!sid) { alert("Thêm tàu trước đã."); return; }
@@ -5606,6 +6055,7 @@ function napTuChecklist(d) {
 }
 
 load();
+aiLoad();
 return {
   draw: function () { draw(); },
   napTuChecklist: napTuChecklist,
@@ -5695,7 +6145,7 @@ document.getElementById("bb-sync").onclick = function () {
 /* ===================== KHỞI ĐỘNG =====================
    APP_VER hiện ở góc phải đầu trang. Nếu số này không đổi sau khi cập nhật,
    nghĩa là trình duyệt còn giữ bản cũ trong bộ nhớ đệm — tải lại trang. */
-var APP_VER = "b\u1ea3n 2026-08-15/7";
+var APP_VER = "b\u1ea3n 2026-08-15/8";
 document.getElementById("ver").textContent = APP_VER;
 load();
 drawTabs();

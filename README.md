@@ -152,6 +152,26 @@ trên điện thoại (Add to Home Screen). Đây là **app dùng chung**, gồm
   kiểm tra cấp IV (VSP-000-ATMT-452/F-001); danh mục sự ghi nhận và sự không
   phù hợp (VTB07-02-04A); báo cáo kết quả kiểm tra tình trạng tàu.
 
+### 🤖 Trợ lý AI (tab TRỢ LÝ trong chế độ Tổng hợp & phân tích)
+
+- Gọi **thẳng Claude API từ trình duyệt**, không qua máy chủ trung gian nào —
+  header `anthropic-dangerous-direct-browser-access: true`, endpoint
+  `POST https://api.anthropic.com/v1/messages`, có streaming (SSE) nên câu trả
+  lời hiện dần chứ không đợi im lặng.
+- **Chìa khóa API do người dùng tự tạo** ở console.anthropic.com và lưu trong
+  `localStorage` của chính máy đó. App có hướng dẫn lấy chìa khóa 6 bước ngay
+  trên màn hình. Không có chìa khóa nào nằm trong mã nguồn.
+- Bối cảnh gửi kèm được dựng từ dữ liệu trong máy: danh sách tàu, từng kỳ kiểm
+  tra với đủ phát hiện (bộ phận, NC/Obs, căn cứ, hạn, trạng thái), phần máy đã
+  tự tính (tỷ lệ khắc phục, quá hạn, **lỗi lặp lại qua nhiều kỳ**) và phiếu
+  checklist đang làm dở. Giới hạn 260 dòng phát hiện để khỏi phình chi phí.
+- **Công tắc "Gửi kèm dữ liệu hồ sơ"** cho phép tắt hẳn phần dữ liệu — chỉ gửi
+  câu hỏi. Đây là dữ liệu công ty nên app cảnh báo rõ trước khi dùng thật.
+- Chọn được mô hình (Opus 5 mặc định / Sonnet 5 / Haiku 4.5), hiện số token và
+  chi phí ước tính tích lũy.
+- Lỗi được dịch sang tiếng Việt dễ hiểu: sai chìa khóa, hết hạn mức, hết tiền,
+  mất mạng, mở bằng `file://` thay vì https.
+
 ### Chung
 
 - Dữ liệu lưu trong `localStorage` của trình duyệt (không có backend) — phù
