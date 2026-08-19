@@ -152,6 +152,28 @@ trên điện thoại (Add to Home Screen). Đây là **app dùng chung**, gồm
   kiểm tra cấp IV (VSP-000-ATMT-452/F-001); danh mục sự ghi nhận và sự không
   phù hợp (VTB07-02-04A); báo cáo kết quả kiểm tra tình trạng tàu.
 
+### 📈 Báo cáo tổng hợp theo thời gian (tab BÁO CÁO)
+
+Gộp mọi kỳ kiểm tra của **mọi tàu** trong một khoảng ngày — khác với báo cáo
+điểm mạnh–điểm yếu vốn chỉ gộp theo một tàu. Dùng để viết báo cáo quý và báo
+cáo năm.
+
+- Chọn khoảng bằng nút nhanh (Quý này / Quý trước / Năm nay / Năm trước / Tất cả)
+  hoặc gõ tay từ ngày – đến ngày. Số liệu tính lại ngay trên màn hình.
+- Nội dung tổng hợp: diễn biến theo quý, xếp hạng tàu theo mức cần chú ý, phân
+  bố theo bộ phận và loại kiểm tra, **lỗi lặp lại trên cùng một tàu** qua nhiều
+  kỳ, danh sách quá hạn kèm số ngày trễ, và phần nhận xét – kiến nghị tự soạn.
+- **Xuất Word (.docx)** — 6 mục đánh số, bảng kẻ ô, dòng ký tên, dùng chung bộ
+  đóng gói `docxPackage` với các mẫu biên bản khác.
+- **Xuất Excel (.xlsx) thật** — 6 trang tính: Tổng quan · Theo quý · Theo tàu ·
+  Toàn bộ phát hiện (để tự lọc) · Lỗi lặp lại · Quá hạn. Số ghi vào ô dạng số
+  nên cộng và vẽ biểu đồ được ngay. Bộ ghi `xlsxPackage` tự viết bằng
+  SpreadsheetML, dùng lại `_zipStore`/`_crc32` của .docx — không thư viện ngoài,
+  chuỗi ghi thẳng vào ô (`inlineStr`) nên khỏi dựng bảng sharedStrings.
+- **PDF:** không sinh trực tiếp. Sinh PDF có dấu tiếng Việt đúng phông đòi hỏi
+  nhúng font vào file, nặng và dễ vỡ chữ; mở file Word rồi *Lưu thành PDF* cho
+  kết quả tốt hơn hẳn. App có ghi rõ điều này ngay dưới nút tải.
+
 ### 📹 Quét trực tiếp qua camera
 
 Mở camera, vừa đi vừa giơ máy — máy tự soi từng khung hình, báo lỗi ngay trên
@@ -252,7 +274,14 @@ không mất vì `localStorage` gắn với tên miền chứ không gắn với
 
 1. ~~Kho dữ liệu nền~~ (Giai đoạn 1 — `app/`)
 2. ~~Checklist kiểm tra đa nguồn~~ (Giai đoạn 2 — `checklist/`, xem trên)
-3. Đồng bộ kết quả kiểm tra vào kho dữ liệu (không nhập tay 2 lần)
-4. AI phân tích & tư vấn dựa trên dữ liệu đã lưu
-5. Báo cáo tổng hợp theo thời gian, xuất Word/PDF/Excel
-6. AI kiểm tra qua hình ảnh/video/camera (dự án riêng, làm cuối)
+3. Đồng bộ kết quả kiểm tra vào kho dữ liệu (không nhập tay 2 lần) — **chưa làm**
+4. ~~AI phân tích & tư vấn dựa trên dữ liệu đã lưu~~ (tab TRỢ LÝ)
+5. ~~Báo cáo tổng hợp theo thời gian, xuất Word/Excel~~ (xem trên; PDF thì
+   xuất Word rồi Lưu thành PDF)
+6. ~~AI kiểm tra qua hình ảnh/video/camera~~ (Quét trực tiếp + Soi ảnh)
+
+**Về mục 3:** `checklist/` là trang tĩnh trên GitHub Pages, không có máy chủ;
+`app/` là FastAPI chạy trong mạng nội bộ. Điện thoại ngoài công trường không
+gọi thẳng vào `app/` được. Hai hướng khả dĩ: (a) xuất/nhập một file JSON để
+chuyển dữ liệu hai chiều mà không cần kết nối trực tiếp, hoặc (b) mở một điểm
+tiếp nhận có xác thực trên `app/`, việc này phải hỏi bộ phận CNTT trước.

@@ -342,6 +342,15 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
 #pt .stat div{background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 8px;text-align:center}
 #pt .stat b{display:block;font-size:20px;line-height:1.2;color:var(--ink)}
 #pt .stat span{font-size:10.5px;color:var(--ink2);letter-spacing:.03em}
+#pt .stat div.xau{border-color:var(--ng)}
+#pt .stat div.xau b{color:var(--ng)}
+#pt .th-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+#pt .th-chips .b{flex:0 0 auto;padding:9px 13px;font-size:12.5px}
+#pt .th-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+#pt .th-row label{display:block;font-size:10px;font-weight:700;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--ink2)}
+#pt .th-row input{width:100%;margin-top:3px;border:1px solid var(--line);border-radius:6px;
+  padding:8px 9px;font-family:inherit;font-size:13px;color:var(--ink);background:#fff}
 #pt .bar{margin-bottom:7px;position:static;background:none;border:0;padding:0;display:block}
 #pt .bar .lb{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px}
 #pt .bar .tr{height:9px;background:#E4EAEF;border-radius:5px;overflow:hidden}
@@ -3809,6 +3818,146 @@ function secRow(width, span, txt, txt2) {
 
 /* Đóng gói .docx: nhận hàm dựng thân bài, trả về mảng byte của file ZIP.
    makeBody(ctx) — ctx.img(dataUrl, rongCm, caoCm) trả sẵn đoạn ảnh đã canh cỡ. */
+/* ═════════════════ XUẤT FILE EXCEL THẬT (.xlsx) ═════════════════
+   Cùng nguyên lý với .docx: file Office là một ZIP chứa mấy file XML.
+   Dùng lại _zipStore / _enc / _xe ở trên, không cần thư viện ngoài.
+   Chuỗi ghi thẳng vào ô (inlineStr) nên khỏi phải dựng bảng sharedStrings. */
+
+var XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+/* Kiểu ô: 0 thường · 1 tiêu đề bảng · 2 nội dung có kẻ ô · 3 chữ đậm không kẻ */
+var XL_STYLES =
+  '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+  '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+  '<fonts count="2">' +
+  '<font><sz val="11"/><color theme="1"/><name val="Times New Roman"/></font>' +
+  '<font><b/><sz val="11"/><color theme="1"/><name val="Times New Roman"/></font>' +
+  "</fonts>" +
+  '<fills count="3"><fill><patternFill patternType="none"/></fill>' +
+  '<fill><patternFill patternType="gray125"/></fill>' +
+  '<fill><patternFill patternType="solid"><fgColor rgb="FFD9E2EC"/>' +
+  '<bgColor indexed="64"/></patternFill></fill></fills>' +
+  '<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border>' +
+  '<border><left style="thin"><color rgb="FF9AA8B4"/></left>' +
+  '<right style="thin"><color rgb="FF9AA8B4"/></right>' +
+  '<top style="thin"><color rgb="FF9AA8B4"/></top>' +
+  '<bottom style="thin"><color rgb="FF9AA8B4"/></bottom><diagonal/></border></borders>' +
+  '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
+  '<cellXfs count="4">' +
+  '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
+  '<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" ' +
+  'applyBorder="1" applyAlignment="1">' +
+  '<alignment horizontal="center" vertical="center" wrapText="1"/></xf>' +
+  '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" ' +
+  'applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>' +
+  '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>' +
+  "</cellXfs>" +
+  '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>' +
+  "</styleSheet>";
+
+function xlCol(i) {
+  var s = "";
+  i++;
+  while (i > 0) {
+    var r = (i - 1) % 26;
+    s = String.fromCharCode(65 + r) + s;
+    i = Math.floor((i - 1) / 26);
+  }
+  return s;
+}
+/* Excel không cho tên trang tính quá 31 ký tự và cấm mấy dấu này */
+function xlTenTrang(s, i) {
+  var t = String(s || "").replace(/[\[\]\*\?\/\\:]/g, " ").replace(/^\s+|\s+$/g, "");
+  if (!t) t = "Trang " + (i + 1);
+  return t.substring(0, 31);
+}
+function xlO(cot, dong, o) {
+  var r = xlCol(cot) + dong;
+  if (o == null || o === "") return '<c r="' + r + '" s="2"/>';
+  if (typeof o === "object") {
+    if (o.n != null && o.n !== "") {
+      return '<c r="' + r + '" s="' + (o.s == null ? 2 : o.s) + '"><v>' + o.n + "</v></c>";
+    }
+    return '<c r="' + r + '" s="' + (o.s == null ? 2 : o.s) + '" t="inlineStr"><is><t xml:space="preserve">' +
+      _xe(String(o.v == null ? "" : o.v)) + "</t></is></c>";
+  }
+  if (typeof o === "number") return '<c r="' + r + '" s="2"><v>' + o + "</v></c>";
+  return '<c r="' + r + '" s="2" t="inlineStr"><is><t xml:space="preserve">' +
+    _xe(String(o)) + "</t></is></c>";
+}
+function xlTrang(t) {
+  var s = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">';
+  if (t.cols && t.cols.length) {
+    s += "<cols>";
+    for (var c = 0; c < t.cols.length; c++) {
+      s += '<col min="' + (c + 1) + '" max="' + (c + 1) + '" width="' + t.cols[c] +
+        '" customWidth="1"/>';
+    }
+    s += "</cols>";
+  }
+  s += "<sheetData>";
+  for (var i = 0; i < t.rows.length; i++) {
+    var hang = t.rows[i], o = "";
+    for (var j = 0; j < hang.length; j++) o += xlO(j, i + 1, hang[j]);
+    s += '<row r="' + (i + 1) + '">' + o + "</row>";
+  }
+  s += "</sheetData></worksheet>";
+  return s;
+}
+
+/* sheets = [{ ten, cols: [bề rộng cột], rows: [[ô, ô, …]] }]
+   Ô là chuỗi, số, hoặc { v: chữ, n: số, s: kiểu }. */
+function xlsxPackage(sheets) {
+  var files = [], ct = "", wbSheets = "", wbRels = "", i;
+  for (i = 0; i < sheets.length; i++) {
+    var nm = "xl/worksheets/sheet" + (i + 1) + ".xml";
+    files.push({ name: nm, data: _enc(xlTrang(sheets[i])) });
+    ct += '<Override PartName="/' + nm + '" ContentType="application/vnd.openxmlformats-' +
+      'officedocument.spreadsheetml.worksheet+xml"/>';
+    wbSheets += '<sheet name="' + _xe(xlTenTrang(sheets[i].ten, i)) + '" sheetId="' + (i + 1) +
+      '" r:id="rId' + (i + 1) + '"/>';
+    wbRels += '<Relationship Id="rId' + (i + 1) + '" Type="http://schemas.openxmlformats.org/' +
+      'officeDocument/2006/relationships/worksheet" Target="worksheets/sheet' + (i + 1) + '.xml"/>';
+  }
+  wbRels += '<Relationship Id="rId' + (sheets.length + 1) + '" Type="http://schemas.openxmlformats.org/' +
+    'officeDocument/2006/relationships/styles" Target="styles.xml"/>';
+
+  files.push({ name: "[Content_Types].xml", data: _enc(
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+    '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+    '<Default Extension="xml" ContentType="application/xml"/>' +
+    '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-' +
+    'officedocument.spreadsheetml.sheet.main+xml"/>' + ct +
+    '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-' +
+    'officedocument.spreadsheetml.styles+xml"/></Types>') });
+
+  files.push({ name: "_rels/.rels", data: _enc(
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/' +
+    'relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>') });
+
+  files.push({ name: "xl/workbook.xml", data: _enc(
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" ' +
+    'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
+    "<sheets>" + wbSheets + "</sheets></workbook>") });
+
+  files.push({ name: "xl/_rels/workbook.xml.rels", data: _enc(
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    wbRels + "</Relationships>") });
+
+  files.push({ name: "xl/styles.xml", data: _enc(XL_STYLES) });
+
+  return _zipStore(files);
+}
+function saveXlsx(bytes, filename) {
+  f002SaveBlob(new Blob([bytes], { type: XLSX_MIME }), filename, XLSX_MIME);
+}
+
 function docxPackage(makeBody, hdr1, hdr2, ftrLeft) {
   var media = [];                 /* các phần ảnh dùng chung trong ZIP */
   var docRels = [], docRid = 4;   /* rId1 styles, rId2 header, rId3 footer */
@@ -4890,6 +5039,124 @@ function analyse(sid) {
     nDone: nDone, nQh: nQh, lap: groups
   };
 }
+/* ═════════ TỔNG HỢP THEO KHOẢNG THỜI GIAN — TOÀN ĐỘI TÀU ═════════
+   Khác với analyse(): analyse gộp theo MỘT tàu, cái này gộp theo KHOẢNG NGÀY
+   và chẻ ra theo tàu, theo quý, để viết báo cáo quý / báo cáo năm. */
+
+var thTu = "", thDen = "";   /* khoảng ngày đang chọn, rỗng = không giới hạn */
+
+function quyCua(iso) {
+  if (!iso || iso.length < 7) return "";
+  var y = iso.substring(0, 4), m = +iso.substring(5, 7);
+  return y + "-Q" + (m <= 3 ? 1 : m <= 6 ? 2 : m <= 9 ? 3 : 4);
+}
+function quyChu(q) {
+  if (!q) return "Không rõ";
+  var p = q.split("-Q");
+  return "Quý " + p[1] + "/" + p[0];
+}
+/* Mốc quý / năm để bấm nhanh */
+function khoangNhanh(loai) {
+  var d = new Date(), y = d.getFullYear(), m = d.getMonth() + 1;
+  var q = m <= 3 ? 1 : m <= 6 ? 2 : m <= 9 ? 3 : 4;
+  function bien(yy, qq) {
+    var t = (qq - 1) * 3 + 1, s = qq * 3;
+    var cuoi = new Date(yy, s, 0).getDate();
+    return [yy + "-" + (t < 10 ? "0" : "") + t + "-01",
+            yy + "-" + (s < 10 ? "0" : "") + s + "-" + cuoi];
+  }
+  if (loai === "qnay") return bien(y, q);
+  if (loai === "qtruoc") return q === 1 ? bien(y - 1, 4) : bien(y, q - 1);
+  if (loai === "nnay") return [y + "-01-01", y + "-12-31"];
+  if (loai === "ntruoc") return [(y - 1) + "-01-01", (y - 1) + "-12-31"];
+  return ["", ""];
+}
+
+function tongHop(tu, den) {
+  var ky = [], i, j;
+  for (i = 0; i < DB.ky.length; i++) {
+    var k = DB.ky[i], ng = k.ngay || "";
+    if (tu && (!ng || ng < tu)) continue;
+    if (den && (!ng || ng > den)) continue;
+    ky.push(k);
+  }
+  ky.sort(function (a, b) { return (a.ngay || "").localeCompare(b.ngay || ""); });
+
+  var all = [];
+  for (i = 0; i < ky.length; i++) {
+    var its = ky[i].items || [];
+    for (j = 0; j < its.length; j++) all.push({ f: its[j], k: ky[i] });
+  }
+
+  var byBP = {}, byPL = {}, byLoai = {}, byQuy = {}, byTau = {};
+  var nDone = 0, nQh = 0, quaHan = [];
+  for (i = 0; i < all.length; i++) {
+    var f = all[i].f, k2 = all[i].k;
+    byBP[f.bp] = (byBP[f.bp] || 0) + 1;
+    byPL[f.pl] = (byPL[f.pl] || 0) + 1;
+    byLoai[k2.loai] = (byLoai[k2.loai] || 0) + 1;
+    var q = quyCua(k2.ngay);
+    if (!byQuy[q]) byQuy[q] = { n: 0, done: 0, ky: {} };
+    byQuy[q].n++;
+    byQuy[q].ky[k2.id] = 1;
+    if (f.tt === "done") byQuy[q].done++;
+    if (!byTau[k2.shipId]) byTau[k2.shipId] = { n: 0, done: 0, qh: 0, ky: {}, bp: {} };
+    var T = byTau[k2.shipId];
+    T.n++; T.ky[k2.id] = 1;
+    T.bp[f.bp] = (T.bp[f.bp] || 0) + 1;
+    if (f.tt === "done") { nDone++; T.done++; }
+    if (isOverdue(f)) { nQh++; T.qh++; quaHan.push(all[i]); }
+  }
+
+  /* Lỗi lặp lại — cùng tàu, cùng bộ phận, nội dung giống nhau ở từ 2 kỳ trở lên */
+  var lap = [], used = {};
+  for (i = 0; i < all.length; i++) {
+    if (used[i]) continue;
+    var g = [all[i]]; used[i] = 1;
+    for (j = i + 1; j < all.length; j++) {
+      if (used[j]) continue;
+      if (all[j].k.shipId !== all[i].k.shipId) continue;
+      if (all[j].f.bp !== all[i].f.bp) continue;
+      if (similar(all[i].f.nd, all[j].f.nd) >= 0.5) { g.push(all[j]); used[j] = 1; }
+    }
+    if (g.length > 1) {
+      var ks = {}, n = 0;
+      for (var q2 = 0; q2 < g.length; q2++) if (!ks[g[q2].k.id]) { ks[g[q2].k.id] = 1; n++; }
+      if (n > 1) lap.push({ items: g, nKy: n, shipId: g[0].k.shipId });
+    }
+  }
+  lap.sort(function (a, b) { return b.nKy - a.nKy || b.items.length - a.items.length; });
+
+  /* Xếp hạng tàu: nhiều phát hiện chưa đóng và quá hạn thì xếp trước */
+  var tau = [];
+  for (var sid in byTau) {
+    if (!byTau.hasOwnProperty(sid)) continue;
+    var t = byTau[sid], sk = 0;
+    for (var kk in t.ky) if (t.ky.hasOwnProperty(kk)) sk++;
+    tau.push({ id: sid, ten: (shipById(sid) || {}).ten || "(không rõ tàu)",
+      nKy: sk, n: t.n, done: t.done, qh: t.qh, bp: t.bp,
+      tyle: t.n ? Math.round(t.done * 100 / t.n) : 0 });
+  }
+  tau.sort(function (a, b) { return (b.qh - a.qh) || ((b.n - b.done) - (a.n - a.done)) || (b.n - a.n); });
+
+  /* Quý xếp theo thứ tự thời gian */
+  var quy = [];
+  for (var qk in byQuy) {
+    if (!byQuy.hasOwnProperty(qk)) continue;
+    var Q = byQuy[qk], nk = 0;
+    for (var k3 in Q.ky) if (Q.ky.hasOwnProperty(k3)) nk++;
+    quy.push({ q: qk, n: Q.n, done: Q.done, nKy: nk,
+      tyle: Q.n ? Math.round(Q.done * 100 / Q.n) : 0 });
+  }
+  quy.sort(function (a, b) { return a.q.localeCompare(b.q); });
+
+  quaHan.sort(function (a, b) { return (a.f.han || "").localeCompare(b.f.han || ""); });
+
+  return { tu: tu, den: den, ky: ky, all: all, byBP: byBP, byPL: byPL, byLoai: byLoai,
+    nDone: nDone, nQh: nQh, quaHan: quaHan, lap: lap, tau: tau, quy: quy,
+    tyle: all.length ? Math.round(nDone * 100 / all.length) : 0 };
+}
+
 function strongWeak(A) {
   var manh = [], yeu = [], i;
   var n = A.all.length;
@@ -5016,10 +5283,53 @@ var MAU = [
   ["tt", "Báo cáo kết quả kiểm tra tình trạng tàu", "Công văn gửi Giám đốc Xí nghiệp"]
 ];
 function viewBC() {
-  var h = '<div class="card">' + shipSelect("f-ship3") +
+  var h = "", i;
+
+  /* ── Báo cáo tổng hợp theo thời gian — toàn đội tàu ── */
+  h += '<div class="grp"><span>Báo cáo tổng hợp theo thời gian — toàn đội tàu</span></div>';
+  h += '<div class="card"><div class="muted">Gộp mọi kỳ kiểm tra của <b>mọi tàu</b> trong khoảng ngày ' +
+    'đã chọn: xu hướng theo quý, xếp hạng tàu, lỗi lặp lại, danh sách quá hạn. ' +
+    'Dùng để viết báo cáo quý và báo cáo năm.</div>' +
+    '<div class="th-chips">' +
+    '<button class="b" data-thn="qnay">Quý này</button>' +
+    '<button class="b" data-thn="qtruoc">Quý trước</button>' +
+    '<button class="b" data-thn="nnay">Năm nay</button>' +
+    '<button class="b" data-thn="ntruoc">Năm trước</button>' +
+    '<button class="b" data-thn="het">Tất cả</button></div>' +
+    '<div class="th-row">' +
+    '<label>Từ ngày<input type="date" id="th-tu" value="' + esc(thTu) + '"></label>' +
+    '<label>Đến ngày<input type="date" id="th-den" value="' + esc(thDen) + '"></label>' +
+    "</div>";
+
+  var TH = tongHop(thTu, thDen);
+  if (!TH.all.length) {
+    h += '<div class="empty" style="margin-top:10px">Khoảng ngày này chưa có phát hiện nào.</div></div>';
+  } else {
+    h += '<div class="stat" style="margin-top:11px">' +
+      '<div><b>' + TH.ky.length + "</b><span>kỳ kiểm tra</span></div>" +
+      '<div><b>' + TH.tau.length + "</b><span>tàu</span></div>" +
+      '<div><b>' + TH.all.length + "</b><span>phát hiện</span></div>" +
+      '<div><b>' + TH.tyle + "%</b><span>đã khắc phục</span></div>" +
+      '<div class="' + (TH.nQh ? "xau" : "") + '"><b>' + TH.nQh + "</b><span>quá hạn</span></div>" +
+      '<div class="' + (TH.lap.length ? "xau" : "") + '"><b>' + TH.lap.length + "</b><span>lỗi lặp lại</span></div>" +
+      "</div>";
+    if (TH.tau.length) {
+      h += '<div class="muted" style="margin-top:10px"><b>Cần chú ý nhất:</b> ' +
+        esc(TH.tau[0].ten) + " — " + TH.tau[0].n + " phát hiện, " + TH.tau[0].qh +
+        " quá hạn, khắc phục " + TH.tau[0].tyle + "%.</div>";
+    }
+    h += '<div class="btns" style="margin-top:11px">' +
+      '<button class="b acc" data-rep="th">📄 Tải Word</button>' +
+      '<button class="b acc" data-rep="thx">📊 Tải Excel</button></div>' +
+      '<div class="muted" style="margin-top:8px;font-size:11.5px">Cần PDF thì mở file Word ra ' +
+      'rồi bấm Lưu thành PDF — như vậy giữ đúng phông chữ và dấu tiếng Việt.</div></div>';
+  }
+
+  /* ── Báo cáo theo một tàu ── */
+  h += '<div class="grp"><span>Báo cáo theo một tàu</span></div>';
+  h += '<div class="card">' + shipSelect("f-ship3") +
     '<div class="muted">Báo cáo điểm mạnh – điểm yếu tổng hợp từ mọi kỳ của tàu đã chọn. Ba mẫu còn lại xuất từ MỘT kỳ kiểm tra cụ thể.</div></div>';
 
-  h += '<div class="grp"><span>Báo cáo tổng hợp</span></div>';
   h += '<div class="card"><h3>Báo cáo điểm mạnh – điểm yếu</h3>' +
     '<div class="muted">Gộp toàn bộ kỳ kiểm tra của tàu đã chọn: thống kê, lỗi lặp lại, danh sách quá hạn và kết luận.</div>' +
     '<div class="btns" style="margin-top:10px"><button class="b acc" data-rep="sw">Tải file Word</button></div></div>';
@@ -5072,6 +5382,235 @@ function secRow(w, txt) {
 }
 
 /* --- 1. Báo cáo điểm mạnh – điểm yếu --- */
+/* Nhãn khoảng thời gian đọc được, dùng cho tiêu đề và tên file */
+function thNhan() {
+  if (!thTu && !thDen) return "TOÀN BỘ DỮ LIỆU ĐÃ CÓ";
+  if (thTu && thDen) return "TỪ " + fmtDate(thTu) + " ĐẾN " + fmtDate(thDen);
+  if (thTu) return "TỪ " + fmtDate(thTu);
+  return "ĐẾN " + fmtDate(thDen);
+}
+
+function repTongHop() {
+  var TH = tongHop(thTu, thDen), b = "", i, j;
+
+  b += dxPara(dxRun("BÁO CÁO TỔNG HỢP CÔNG TÁC KIỂM TRA AN TOÀN ĐỘI TÀU",
+    { b: true, sz: 30 }), { align: "center", after: 40 });
+  b += dxPara(dxRun(thNhan(), { b: true, sz: 26 }), { align: "center", after: 140 });
+  b += dxPara(dxRun("Ngày lập báo cáo: " + fmtDate(today())));
+  b += dxPara(dxRun("Phạm vi: " + TH.tau.length + " tàu · " + TH.ky.length + " kỳ kiểm tra · " +
+    TH.all.length + " phát hiện."), { after: 40 });
+  b += dxPara(dxRun("Tỷ lệ khắc phục: " + TH.tyle + "%. Còn quá hạn: " + TH.nQh +
+    " mục. Lỗi lặp lại qua nhiều kỳ: " + TH.lap.length + " nhóm."), { after: 120 });
+
+  /* 1. Xu hướng theo quý */
+  if (TH.quy.length) {
+    b += dxPara(dxRun("1. DIỄN BIẾN THEO QUÝ", { b: true, sz: 24 }), { before: 100, after: 60 });
+    var G1 = [2400, 1800, 2200, 2200, 1605];
+    var r1 = dxRow(thTop("Kỳ", "", G1[0]) + thTop("Số kỳ kiểm tra", "", G1[1]) +
+      thTop("Phát hiện", "", G1[2]) + thTop("Đã khắc phục", "", G1[3]) + thTop("Tỷ lệ", "", G1[4]));
+    for (i = 0; i < TH.quy.length; i++) {
+      var Q = TH.quy[i];
+      r1 += dxRow(tdC(G1[0], quyChu(Q.q)) + tdC(G1[1], String(Q.nKy), { align: "center" }) +
+        tdC(G1[2], String(Q.n), { align: "center" }) + tdC(G1[3], String(Q.done), { align: "center" }) +
+        tdC(G1[4], Q.tyle + "%", { align: "center" }));
+    }
+    b += dxTable(G1, r1) + dxPara("", { after: 100 });
+  }
+
+  /* 2. Xếp hạng tàu */
+  b += dxPara(dxRun("2. TỔNG HỢP THEO TÀU", { b: true, sz: 24 }), { before: 100, after: 60 });
+  b += dxPara(dxRun("Xếp theo mức độ cần chú ý: nhiều mục quá hạn và chưa đóng thì xếp trước.",
+    { i: true, sz: 22 }), { after: 60 });
+  var G2 = [600, 3000, 1200, 1400, 1500, 1505];
+  var r2 = dxRow(thTop("TT", "", G2[0]) + thTop("Tên tàu", "", G2[1]) + thTop("Số kỳ", "", G2[2]) +
+    thTop("Phát hiện", "", G2[3]) + thTop("Đã khắc phục", "", G2[4]) + thTop("Quá hạn", "", G2[5]));
+  for (i = 0; i < TH.tau.length; i++) {
+    var T = TH.tau[i];
+    r2 += dxRow(tdC(G2[0], String(i + 1), { align: "center" }) + tdC(G2[1], T.ten) +
+      tdC(G2[2], String(T.nKy), { align: "center" }) + tdC(G2[3], String(T.n), { align: "center" }) +
+      tdC(G2[4], T.done + " (" + T.tyle + "%)", { align: "center" }) +
+      tdC(G2[5], String(T.qh), { align: "center" }));
+  }
+  b += dxTable(G2, r2) + dxPara("", { after: 100 });
+
+  /* 3. Theo bộ phận */
+  b += dxPara(dxRun("3. PHÂN BỐ THEO BỘ PHẬN", { b: true, sz: 24 }), { before: 100, after: 60 });
+  var G3 = [4200, 2500, 2505];
+  var r3 = dxRow(thTop("Bộ phận", "", G3[0]) + thTop("Số phát hiện", "", G3[1]) +
+    thTop("Tỷ trọng", "", G3[2]));
+  for (i = 0; i < BO_PHAN.length; i++) {
+    var sl = TH.byBP[BO_PHAN[i][0]] || 0;
+    if (!sl) continue;
+    r3 += dxRow(tdC(G3[0], BO_PHAN[i][1]) + tdC(G3[1], String(sl), { align: "center" }) +
+      tdC(G3[2], Math.round(sl * 100 / TH.all.length) + "%", { align: "center" }));
+  }
+  b += dxTable(G3, r3) + dxPara("", { after: 100 });
+
+  /* 4. Lỗi lặp lại */
+  b += dxPara(dxRun("4. LỖI LẶP LẠI QUA NHIỀU KỲ", { b: true, sz: 24 }), { before: 100, after: 60 });
+  if (!TH.lap.length) {
+    b += dxPara(dxRun("Không phát hiện lỗi nào lặp lại trên cùng một tàu trong khoảng thời gian này."),
+      { after: 100 });
+  } else {
+    b += dxPara(dxRun("Đây là những chỗ khắc phục xong rồi lại tái diễn — cần sửa vào hệ thống " +
+      "quản lý chứ không chỉ sửa hiện tượng.", { i: true, sz: 22 }), { after: 60 });
+    var G4 = [600, 2200, 4000, 1200, 1805];
+    var r4 = dxRow(thTop("TT", "", G4[0]) + thTop("Tàu", "", G4[1]) + thTop("Nội dung", "", G4[2]) +
+      thTop("Số kỳ", "", G4[3]) + thTop("Bộ phận", "", G4[4]));
+    for (i = 0; i < TH.lap.length && i < 40; i++) {
+      var L = TH.lap[i];
+      r4 += dxRow(tdC(G4[0], String(i + 1), { align: "center" }) +
+        tdC(G4[1], (shipById(L.shipId) || {}).ten || "") +
+        tdC(G4[2], String(L.items[0].f.nd || "")) +
+        tdC(G4[3], String(L.nKy), { align: "center" }) +
+        tdC(G4[4], nameOf(BO_PHAN, L.items[0].f.bp)));
+    }
+    b += dxTable(G4, r4) + dxPara("", { after: 100 });
+  }
+
+  /* 5. Quá hạn */
+  b += dxPara(dxRun("5. CÁC MỤC ĐÃ QUÁ HẠN KHẮC PHỤC", { b: true, sz: 24 }), { before: 100, after: 60 });
+  if (!TH.quaHan.length) {
+    b += dxPara(dxRun("Không có mục nào quá hạn."), { after: 100 });
+  } else {
+    var G5 = [600, 2000, 3600, 1400, 2205];
+    var r5 = dxRow(thTop("TT", "", G5[0]) + thTop("Tàu", "", G5[1]) + thTop("Nội dung", "", G5[2]) +
+      thTop("Hạn", "", G5[3]) + thTop("Trách nhiệm", "", G5[4]));
+    for (i = 0; i < TH.quaHan.length && i < 80; i++) {
+      var X = TH.quaHan[i];
+      r5 += dxRow(tdC(G5[0], String(i + 1), { align: "center" }) +
+        tdC(G5[1], (shipById(X.k.shipId) || {}).ten || "") +
+        tdC(G5[2], String(X.f.nd || "")) +
+        tdC(G5[3], fmtDate(X.f.han), { align: "center" }) +
+        tdC(G5[4], X.f.tn || ""));
+    }
+    b += dxTable(G5, r5) + dxPara("", { after: 100 });
+  }
+
+  /* 6. Nhận xét */
+  b += dxPara(dxRun("6. NHẬN XÉT VÀ KIẾN NGHỊ", { b: true, sz: 24 }), { before: 100, after: 60 });
+  var nx = [];
+  if (TH.tyle >= 80) nx.push("Tỷ lệ khắc phục đạt " + TH.tyle + "%, công tác đóng tồn đọng được duy trì tốt.");
+  else if (TH.tyle >= 60) nx.push("Tỷ lệ khắc phục đạt " + TH.tyle + "%, cần đôn đốc thêm để đóng dứt điểm các mục còn lại.");
+  else nx.push("Tỷ lệ khắc phục mới đạt " + TH.tyle + "% — thấp, cần rà soát lại việc giao trách nhiệm và thời hạn.");
+  if (TH.nQh) nx.push("Còn " + TH.nQh + " mục quá hạn khắc phục, đề nghị các tàu báo cáo lý do và cam kết thời hạn mới.");
+  if (TH.lap.length) nx.push(TH.lap.length + " nhóm lỗi lặp lại qua nhiều kỳ — đề nghị đưa các nội dung này vào kế hoạch bảo dưỡng định kỳ (PMS) và checklist tuần của sỹ quan phụ trách, thay vì chỉ khắc phục theo từng lần phát hiện.");
+  if (TH.tau.length) nx.push("Tàu cần tập trung nhất trong kỳ: " + TH.tau[0].ten + ".");
+  for (i = 0; i < nx.length; i++) b += dxPara(dxRun((i + 1) + ". " + nx[i]), { after: 50 });
+
+  b += dxPara("", { after: 200 });
+  var G6 = [4600, 4605];
+  b += dxTable(G6, dxRow(
+    tdC(G6[0], "", { align: "center" }) +
+    tdC(G6[1], "Ngày ..... tháng ..... năm .....\nNGƯỜI LẬP BÁO CÁO", { align: "center", b: true })
+  ), "none");
+
+  return docxPackage(function () { return b; },
+    "BÁO CÁO TỔNG HỢP CÔNG TÁC KIỂM TRA AN TOÀN ĐỘI TÀU",
+    "XN VẬN TẢI BIỂN & CÔNG TÁC LẶN · VIETSOVPETRO",
+    "Tổng hợp kiểm tra an toàn");
+}
+
+/* Cùng số liệu, xuất ra Excel để còn lọc và vẽ biểu đồ */
+function repTongHopXlsx() {
+  var TH = tongHop(thTu, thDen), i, j;
+  var H = function (a) {
+    var r = [], k;
+    for (k = 0; k < a.length; k++) r.push({ v: a[k], s: 1 });
+    return r;
+  };
+  var sheets = [];
+
+  /* Trang 1 — tổng quan */
+  var r = [];
+  r.push([{ v: "BÁO CÁO TỔNG HỢP CÔNG TÁC KIỂM TRA AN TOÀN ĐỘI TÀU", s: 3 }]);
+  r.push([{ v: thNhan(), s: 3 }]);
+  r.push([{ v: "Lập ngày " + fmtDate(today()), s: 0 }]);
+  r.push([]);
+  r.push(H(["Chỉ tiêu", "Giá trị"]));
+  r.push(["Số tàu có kỳ kiểm tra", { n: TH.tau.length }]);
+  r.push(["Số kỳ kiểm tra", { n: TH.ky.length }]);
+  r.push(["Tổng số phát hiện", { n: TH.all.length }]);
+  r.push(["Đã khắc phục", { n: TH.nDone }]);
+  r.push(["Tỷ lệ khắc phục (%)", { n: TH.tyle }]);
+  r.push(["Còn quá hạn", { n: TH.nQh }]);
+  r.push(["Nhóm lỗi lặp lại", { n: TH.lap.length }]);
+  r.push([]);
+  r.push(H(["Bộ phận", "Số phát hiện", "Tỷ trọng (%)"]));
+  for (i = 0; i < BO_PHAN.length; i++) {
+    var sl = TH.byBP[BO_PHAN[i][0]] || 0;
+    if (!sl) continue;
+    r.push([BO_PHAN[i][1], { n: sl }, { n: TH.all.length ? Math.round(sl * 100 / TH.all.length) : 0 }]);
+  }
+  r.push([]);
+  r.push(H(["Loại kiểm tra", "Số phát hiện"]));
+  for (i = 0; i < LOAI_KY.length; i++) {
+    var sl2 = TH.byLoai[LOAI_KY[i][0]] || 0;
+    if (sl2) r.push([LOAI_KY[i][1], { n: sl2 }]);
+  }
+  sheets.push({ ten: "Tổng quan", cols: [42, 16, 16], rows: r });
+
+  /* Trang 2 — theo quý */
+  var r2 = [H(["Kỳ", "Số kỳ kiểm tra", "Phát hiện", "Đã khắc phục", "Tỷ lệ (%)"])];
+  for (i = 0; i < TH.quy.length; i++) {
+    var Q = TH.quy[i];
+    r2.push([quyChu(Q.q), { n: Q.nKy }, { n: Q.n }, { n: Q.done }, { n: Q.tyle }]);
+  }
+  sheets.push({ ten: "Theo quý", cols: [16, 16, 13, 15, 12], rows: r2 });
+
+  /* Trang 3 — theo tàu */
+  var r3 = [H(["TT", "Tên tàu", "Số kỳ", "Phát hiện", "Đã khắc phục", "Tỷ lệ (%)", "Quá hạn"])];
+  for (i = 0; i < TH.tau.length; i++) {
+    var T = TH.tau[i];
+    r3.push([{ n: i + 1 }, T.ten, { n: T.nKy }, { n: T.n }, { n: T.done }, { n: T.tyle }, { n: T.qh }]);
+  }
+  sheets.push({ ten: "Theo tàu", cols: [6, 30, 9, 12, 15, 12, 11], rows: r3 });
+
+  /* Trang 4 — toàn bộ phát hiện, để tự lọc */
+  var r4 = [H(["Tàu", "Ngày", "Loại kiểm tra", "Số biên bản", "Bộ phận", "Phân loại",
+    "Nội dung", "Căn cứ", "Hạn", "Trách nhiệm", "Trạng thái"])];
+  for (i = 0; i < TH.all.length; i++) {
+    var f = TH.all[i].f, k = TH.all[i].k;
+    r4.push([(shipById(k.shipId) || {}).ten || "", fmtDate(k.ngay), nameOf(LOAI_KY, k.loai),
+      k.so || "", nameOf(BO_PHAN, f.bp), nameOf(PHAN_LOAI, f.pl), String(f.nd || ""),
+      f.cc || "", f.han ? fmtDate(f.han) : "", f.tn || "",
+      f.tt === "done" ? "Đã khắc phục" : (isOverdue(f) ? "QUÁ HẠN" : "Đang mở")]);
+  }
+  sheets.push({ ten: "Toàn bộ phát hiện",
+    cols: [22, 12, 22, 13, 16, 18, 60, 20, 12, 18, 15], rows: r4 });
+
+  /* Trang 5 — lỗi lặp lại */
+  var r5 = [H(["TT", "Tàu", "Bộ phận", "Nội dung", "Số kỳ lặp", "Các kỳ"])];
+  for (i = 0; i < TH.lap.length; i++) {
+    var L = TH.lap[i], ds = [], seen = {};
+    for (j = 0; j < L.items.length; j++) {
+      var kk = L.items[j].k;
+      if (seen[kk.id]) continue;
+      seen[kk.id] = 1;
+      ds.push(fmtDate(kk.ngay) + " " + nameOf(LOAI_KY, kk.loai));
+    }
+    r5.push([{ n: i + 1 }, (shipById(L.shipId) || {}).ten || "",
+      nameOf(BO_PHAN, L.items[0].f.bp), String(L.items[0].f.nd || ""),
+      { n: L.nKy }, ds.join(" · ")]);
+  }
+  sheets.push({ ten: "Lỗi lặp lại", cols: [6, 22, 16, 60, 11, 44], rows: r5 });
+
+  /* Trang 6 — quá hạn */
+  var r6 = [H(["TT", "Tàu", "Bộ phận", "Nội dung", "Hạn", "Trách nhiệm", "Số ngày quá hạn"])];
+  for (i = 0; i < TH.quaHan.length; i++) {
+    var X = TH.quaHan[i], so = "";
+    if (X.f.han) {
+      so = Math.round((new Date(today()) - new Date(X.f.han)) / 86400000);
+    }
+    r6.push([{ n: i + 1 }, (shipById(X.k.shipId) || {}).ten || "",
+      nameOf(BO_PHAN, X.f.bp), String(X.f.nd || ""), fmtDate(X.f.han), X.f.tn || "",
+      so === "" ? "" : { n: so }]);
+  }
+  sheets.push({ ten: "Quá hạn", cols: [6, 22, 16, 60, 12, 18, 16], rows: r6 });
+
+  return xlsxPackage(sheets);
+}
+
 function repSW() {
   var s = shipById(curShip), A = analyse(curShip), SW = strongWeak(A), b = "", i;
   var ten = s ? s.ten : "TOÀN ĐỘI TÀU";
@@ -5547,6 +6086,14 @@ PTR.addEventListener("click", function (e) {
   }
   if (e.target.id === "b-paste") { openPaste(); return; }
 
+  t = e.target.closest("[data-thn]");
+  if (t) {
+    var kh = khoangNhanh(t.getAttribute("data-thn"));
+    thTu = kh[0]; thDen = kh[1];
+    viewBC();
+    return;
+  }
+
   t = e.target.closest("[data-rep]");
   if (t) { doReport(t.getAttribute("data-rep"), t.getAttribute("data-ky")); return; }
 
@@ -5557,6 +6104,8 @@ PTR.addEventListener("change", function (e) {
   if (t.id === "f-ship" || t.id === "f-ship2" || t.id === "f-ship3") {
     curShip = t.value; save(); draw(); return;
   }
+  if (t.id === "th-tu") { thTu = t.value; viewBC(); return; }
+  if (t.id === "th-den") { thDen = t.value; viewBC(); return; }
   if (t.id === "f-aichup" || t.id === "f-aianh") {
     if (!t.files || !t.files.length) return;
     var fsA = [].slice.call(t.files); t.value = "";
@@ -6932,7 +7481,13 @@ function closeSheet() {
 function doReport(kind, kyId) {
   try {
     var bytes, fn;
-    if (kind === "sw") {
+    if (kind === "th" || kind === "thx") {
+      var THx = tongHop(thTu, thDen);
+      if (!THx.all.length) { alert("Khoảng ngày này chưa có phát hiện nào để lập báo cáo."); return; }
+      var hau = slug(thNhan());
+      if (kind === "th") { bytes = repTongHop(); fn = "Bao-cao-tong-hop-doi-tau-" + hau + ".docx"; }
+      else { saveXlsx(repTongHopXlsx(), "Bao-cao-tong-hop-doi-tau-" + hau + ".xlsx"); return; }
+    } else if (kind === "sw") {
       var s = shipById(curShip);
       if (!analyse(curShip).all.length) { alert("Chưa có dữ liệu để lập báo cáo."); return; }
       bytes = repSW();
@@ -7104,7 +7659,7 @@ document.getElementById("bb-sync").onclick = function () {
 /* ===================== KHỞI ĐỘNG =====================
    APP_VER hiện ở góc phải đầu trang. Nếu số này không đổi sau khi cập nhật,
    nghĩa là trình duyệt còn giữ bản cũ trong bộ nhớ đệm — tải lại trang. */
-var APP_VER = "b\u1ea3n 2026-08-19/11";
+var APP_VER = "b\u1ea3n 2026-08-19/12";
 document.getElementById("ver").textContent = APP_VER;
 load();
 drawTabs();
