@@ -2742,16 +2742,29 @@ document.getElementById("jump").addEventListener("change", function () {
   window.scrollTo(0, Math.max(0, y));
 });
 
-/* Cuộn xuống thì thu gọn đầu trang lại */
+/* Cuộn xuống thì thu gọn đầu trang lại.
+   Thu gọn làm trang NGẮN ĐI khoảng 120 px, nên nếu chỉ xét chiều cao hiện tại thì
+   trang ngắn sẽ nhấp nháy: thu gọn → hết chỗ cuộn → bung ra → lại thu gọn.
+   Vì vậy cộng bù phần đã giấu trước khi xét, và chỉ thu gọn khi trang đủ dài. */
 var scTick = false;
+function scDangThuGon() { return document.body.className.indexOf("sc") >= 0; }
+function scDatThuGon(bat) {
+  if (bat === scDangThuGon()) return;
+  document.body.className = bat
+    ? document.body.className + " sc"
+    : document.body.className.replace(/\s*\bsc\b/g, "");
+}
 window.addEventListener("scroll", function () {
   if (scTick || !window.requestAnimationFrame) return;
   scTick = true;
   window.requestAnimationFrame(function () {
     var y = window.scrollY || window.pageYOffset || 0;
-    var on = document.body.className.indexOf("sc") >= 0;
-    if (y > 80 && !on) document.body.className += " sc";
-    else if (y < 30 && on) document.body.className = document.body.className.replace(/\s*\bsc\b/g, "");
+    var de = document.documentElement;
+    var thua = de.scrollHeight - window.innerHeight;
+    if (scDangThuGon()) thua += 120;          /* cộng lại phần đầu trang đang bị giấu */
+    if (thua < 420) scDatThuGon(false);       /* trang ngắn thì để nguyên, khỏi nhấp nháy */
+    else if (y > 90) scDatThuGon(true);
+    else if (y < 40) scDatThuGon(false);
     scTick = false;
   });
 }, false);
@@ -5387,6 +5400,7 @@ PTR.addEventListener("click", function (e) {
 
   /* --- trợ lý --- */
   if (e.target.id === "ai-caidat") { aiMoCaiDat(); return; }
+  if (e.target.id === "ai-thu") { aiThuKetNoi(); return; }
   if (e.target.id === "ai-dong") { closeSheet(); return; }
   if (e.target.id === "ai-luu") {
     var kEl = document.getElementById("ai-key"), mEl = document.getElementById("ai-model"),
@@ -6072,7 +6086,8 @@ function aiLoiText(xhr) {
   } catch (e) {}
   if (xhr.status === 401) return "Chìa khóa API sai hoặc đã bị thu hồi. Kiểm tra lại ở phần Cài đặt. (" + m + ")";
   if (xhr.status === 403) return "Chìa khóa không có quyền dùng mô hình này. (" + m + ")";
-  if (xhr.status === 429) return "Đã chạm giới hạn số lượt gọi hoặc hết tiền trong tài khoản. Đợi một lát rồi thử lại, hoặc nạp thêm tiền ở console.anthropic.com. (" + m + ")";
+  if (xhr.status === 429) return "Đã chạm giới hạn số lượt gọi hoặc hết tiền trong tài khoản. " +
+    "Đợi một lát rồi thử lại, hoặc nạp thêm tiền ở platform.claude.com → Settings → Billing. (" + m + ")";
   if (xhr.status === 400) return "Yêu cầu không hợp lệ: " + m;
   if (xhr.status === 0) return "Trình duyệt chặn kết nối. Trang phải chạy qua https (link GitHub Pages), " +
     "không mở bằng file:// trên máy.";
@@ -6123,17 +6138,25 @@ function viewTro() {
       'Anthropic, <b>không qua máy chủ nào của mình</b>, nên anh cần một chìa khóa API riêng.</div></div>';
 
     h += '<div class="card"><h3>Lấy chìa khóa API — 6 bước</h3><div class="muted">' +
-      '<b>Bước 1.</b> Mở <b>console.anthropic.com</b> trên máy tính, đăng ký tài khoản bằng email công việc.<br><br>' +
-      '<b>Bước 2.</b> Vào mục <b>Billing</b> (Thanh toán), thêm thẻ và nạp tiền. Mức tối thiểu ' +
-      'thường là 5 USD — đủ dùng rất lâu cho việc hỏi đáp thế này.<br><br>' +
-      '<b>Bước 3.</b> Vào mục <b>API keys</b>, bấm <b>Create key</b>.<br><br>' +
+      '<b>Bước 1.</b> Trên MÁY TÍNH, mở <a href="https://platform.claude.com" target="_blank" ' +
+      'rel="noopener"><b>platform.claude.com</b></a> và đăng ký tài khoản bằng email công việc. ' +
+      'Đây là trang dành cho lập trình (Claude Console), khác với trang chat claude.ai.<br><br>' +
+      '<b>Bước 2.</b> Vào phần <b>Settings → Billing</b>, thêm thẻ và nạp tiền trước. ' +
+      'Chưa nạp tiền thì chìa khóa tạo ra vẫn gọi được nhưng sẽ báo hết hạn mức. ' +
+      'Nạp mức nhỏ nhất là đủ dùng rất lâu cho việc hỏi đáp thế này.<br><br>' +
+      '<b>Bước 3.</b> Vào <a href="https://platform.claude.com/settings/keys" target="_blank" ' +
+      'rel="noopener"><b>Settings → API keys</b></a>, bấm <b>Create key</b>.<br><br>' +
       '<b>Bước 4.</b> Đặt tên cho dễ nhớ, ví dụ “An toàn tàu VTB&CTL”. ' +
-      'Nếu có mục <b>Workspace</b> thì tạo một workspace riêng cho việc này để đặt được hạn mức chi tiêu.<br><br>' +
-      '<b>Bước 5.</b> Bấm tạo, màn hình hiện ra một dãy chữ bắt đầu bằng <b>sk-ant-…</b>. ' +
-      '<b>Chép ngay</b> — đóng đi là không xem lại được nữa, phải tạo cái khác.<br><br>' +
-      '<b>Bước 6.</b> Dán vào ô bên dưới. Chìa khóa chỉ nằm trong máy này.<br><br>' +
-      '<b>Nên làm thêm:</b> trong Billing bật <b>Usage limits</b> đặt trần chi tiêu mỗi tháng ' +
-      '(ví dụ 20 USD) để không bao giờ bị vượt.' +
+      'Nếu tài khoản có <b>Workspace</b> thì tạo một workspace riêng cho việc này — ' +
+      'sau này đặt được trần chi tiêu riêng và thu hồi riêng.<br><br>' +
+      '<b>Bước 5.</b> Bấm tạo, màn hình hiện một dãy chữ bắt đầu bằng <b>sk-ant-…</b>. ' +
+      '<b>Chép ngay</b> — đóng cửa sổ đi là không xem lại được nữa, phải tạo cái khác.<br><br>' +
+      '<b>Bước 6.</b> Mở app này TRÊN ĐIỆN THOẠI, dán chìa khóa vào ô bên dưới rồi bấm ' +
+      '<b>Lưu chìa khóa</b>, sau đó bấm <b>Thử kết nối</b> để chắc chắn chạy được. ' +
+      'Cách chuyển sang điện thoại: tự gửi cho mình qua email hoặc tin nhắn, ' +
+      'hoặc dùng chức năng đồng bộ ghi chú.<br><br>' +
+      '<b>Nên làm thêm:</b> trong <b>Settings → Limits</b> đặt trần chi tiêu mỗi tháng ' +
+      '(ví dụ 20 USD) để không bao giờ bị vượt ngoài dự tính.' +
       '</div></div>';
 
     h += aiCaiDatHtml();
@@ -6153,7 +6176,9 @@ function viewTro() {
     '</div>' +
     '<div class="btns" style="margin-top:8px">' +
     '<button class="b" id="ai-caidat">⚙ Cài đặt</button>' +
-    '<button class="b" id="ai-xoa">Xóa hội thoại</button></div></div>';
+    '<button class="b" id="ai-thu">🔌 Thử kết nối</button>' +
+    '<button class="b" id="ai-xoa">Xóa hội thoại</button></div>' +
+    '<div id="ai-thulog" class="muted" style="margin-top:8px"></div></div>';
 
   h += '<div id="ai-list">';
   if (!aiMsgs.length) {
@@ -6214,6 +6239,49 @@ function viewTro() {
     '<button class="b acc" id="ai-gui" style="flex:0 0 auto;width:74px">Gửi</button>';
 }
 
+/* Gọi một lượt cực ngắn để xác nhận chìa khóa dùng được — tốn chưa tới 1 đồng */
+function aiThuKetNoi() {
+  var box = document.getElementById("ai-thulog");
+  function ghi(s, mau) {
+    if (!box) return;
+    box.innerHTML = s;
+    box.style.color = mau || "";
+  }
+  if (!aiCfg.key) { ghi("Chưa có chìa khóa. Vào ⚙ Cài đặt dán vào đã.", "var(--ng)"); return; }
+  ghi("Đang thử kết nối tới Anthropic…");
+
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", "https://api.anthropic.com/v1/messages", true);
+  xhr.setRequestHeader("content-type", "application/json");
+  xhr.setRequestHeader("x-api-key", aiCfg.key);
+  xhr.setRequestHeader("anthropic-version", "2023-06-01");
+  xhr.setRequestHeader("anthropic-dangerous-direct-browser-access", "true");
+  xhr.timeout = 45000;
+  xhr.onerror = function () {
+    ghi("✕ Không kết nối được. Kiểm tra mạng, hoặc trang đang mở bằng file:// thay vì https.", "var(--ng)");
+  };
+  xhr.ontimeout = function () { ghi("✕ Quá thời gian chờ. Thử lại.", "var(--ng)"); };
+  xhr.onload = function () {
+    if (xhr.status >= 200 && xhr.status < 300) {
+      var m = "";
+      try {
+        var j = JSON.parse(xhr.responseText);
+        if (j.content && j.content[0] && j.content[0].text) m = j.content[0].text;
+      } catch (e) {}
+      ghi("✓ <b>Chạy được rồi.</b> Máy chủ trả lời: “" + esc(String(m).substring(0, 40)) +
+        "”. Mô hình đang dùng: " + esc(nameOf(AI_MODELS, aiCfg.model)) + ".", "var(--ok)");
+    } else {
+      ghi("✕ " + esc(aiLoiText(xhr)), "var(--ng)");
+    }
+  };
+  try {
+    xhr.send(JSON.stringify({
+      model: aiCfg.model, max_tokens: 16,
+      messages: [{ role: "user", content: "Trả lời đúng hai chữ: Đã kết nối" }]
+    }));
+  } catch (e) { ghi("✕ Không gửi được: " + esc(e.message), "var(--ng)"); }
+}
+
 function aiCaiDatHtml() {
   var h = '<div class="card"><h3>Cài đặt</h3>' +
     '<label class="f"><b>Chìa khóa API (sk-ant-…)</b>' +
@@ -6250,7 +6318,7 @@ function aiCanhBaoHtml() {
     'ngoài Anthropic. Nhưng ai mượn được máy/điện thoại này thì cũng lấy được. ' +
     'Máy dùng chung thì đừng lưu chìa khóa.<br><br>' +
     '<b>3. Tốn tiền theo lượt hỏi.</b> Mỗi câu hỏi trừ tiền trong tài khoản Anthropic của anh. ' +
-    'Nên đặt trần chi tiêu tháng trong phần Billing.<br><br>' +
+    'Nên vào platform.claude.com → Settings → Limits đặt trần chi tiêu mỗi tháng.<br><br>' +
     '<b>4. Trợ lý có thể sai.</b> Nó đọc đúng số liệu trong máy, nhưng phần trích dẫn điều khoản ' +
     'và tư vấn kỹ thuật thì phải tự kiểm chứng lại trước khi đưa vào văn bản chính thức.' +
     "</div></div>";
@@ -6460,7 +6528,7 @@ document.getElementById("bb-sync").onclick = function () {
 /* ===================== KHỞI ĐỘNG =====================
    APP_VER hiện ở góc phải đầu trang. Nếu số này không đổi sau khi cập nhật,
    nghĩa là trình duyệt còn giữ bản cũ trong bộ nhớ đệm — tải lại trang. */
-var APP_VER = "b\u1ea3n 2026-08-15/9";
+var APP_VER = "b\u1ea3n 2026-08-15/10";
 document.getElementById("ver").textContent = APP_VER;
 load();
 drawTabs();

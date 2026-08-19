@@ -158,9 +158,11 @@ trên điện thoại (Add to Home Screen). Đây là **app dùng chung**, gồm
   header `anthropic-dangerous-direct-browser-access: true`, endpoint
   `POST https://api.anthropic.com/v1/messages`, có streaming (SSE) nên câu trả
   lời hiện dần chứ không đợi im lặng.
-- **Chìa khóa API do người dùng tự tạo** ở console.anthropic.com và lưu trong
-  `localStorage` của chính máy đó. App có hướng dẫn lấy chìa khóa 6 bước ngay
-  trên màn hình. Không có chìa khóa nào nằm trong mã nguồn.
+- **Chìa khóa API do người dùng tự tạo** ở `platform.claude.com/settings/keys`
+  và lưu trong `localStorage` của chính máy đó. App có hướng dẫn lấy chìa khóa
+  6 bước ngay trên màn hình (kèm link bấm thẳng) và nút **🔌 Thử kết nối** gọi
+  một lượt 16 token để xác nhận chìa khóa dùng được trước khi hỏi thật.
+  Không có chìa khóa nào nằm trong mã nguồn.
 - Bối cảnh gửi kèm được dựng từ dữ liệu trong máy: danh sách tàu, từng kỳ kiểm
   tra với đủ phát hiện (bộ phận, NC/Obs, căn cứ, hạn, trạng thái), phần máy đã
   tự tính (tỷ lệ khắc phục, quá hạn, **lỗi lặp lại qua nhiều kỳ**) và phiếu
