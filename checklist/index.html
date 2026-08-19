@@ -387,6 +387,53 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
   cursor:pointer;line-height:1;padding:0}
 #pt .ai-u-anh{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px}
 #pt .ai-u-anh img{width:58px;height:58px;object-fit:cover;border-radius:6px;display:block}
+/* ---- Quét trực tiếp qua camera ---- */
+.lv{position:fixed;inset:0;z-index:60;background:#000;display:flex;flex-direction:column}
+.lv[hidden]{display:none!important}
+#lv-cam{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
+.lv-top,.lv-mid,.lv-bot{position:relative;z-index:2}
+.lv-top{padding:calc(env(safe-area-inset-top) + 8px) 11px 9px;
+  background:linear-gradient(#000E,#000A 65%,#0000);color:#fff}
+.lv-hd{display:flex;align-items:center;gap:8px}
+.lv-hd b{font-size:13.5px;flex:1}
+.lv-x{background:#FFFFFF22;border:1px solid #FFFFFF44;color:#fff;border-radius:8px;
+  width:34px;height:32px;font-size:15px;line-height:1;cursor:pointer}
+.lv-st{margin-top:6px;font-size:12px;color:#DCE6EE;line-height:1.45;min-height:17px}
+.lv-dem{margin-top:5px;font-size:11px;color:#9FB4C4;letter-spacing:.02em}
+.lv-mid{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:4px 10px 6px;
+  display:flex;flex-direction:column-reverse;gap:8px}
+.lv-c{background:#101B24EE;border:1px solid #2C4356;border-left:4px solid var(--ng);
+  border-radius:10px;padding:10px 11px;color:#fff;font-size:13px;line-height:1.5}
+.lv-c.tc-thap{border-left-color:var(--warn)}
+.lv-c-h{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  color:#8FA9BC;margin-bottom:4px}
+.lv-c-k{margin-top:6px;color:#BFD1DE;font-size:12.5px}
+.lv-c-r{display:flex;gap:7px;margin-top:9px;align-items:center}
+.lv-c-r img{width:48px;height:48px;object-fit:cover;border-radius:7px;flex:0 0 auto;
+  border:1px solid #2C4356}
+.lv-c-r button{flex:1;background:var(--acc);border:0;color:#fff;border-radius:8px;
+  padding:9px 10px;font-size:12.5px;font-weight:700;cursor:pointer}
+.lv-c-r button.xong{background:#1F3243;color:#8FE0B4;border:1px solid #2C4356}
+.lv-bot{padding:8px 10px calc(env(safe-area-inset-bottom) + 10px);
+  background:linear-gradient(#0000,#000A 35%,#000E)}
+.lv-btn{display:flex;gap:8px}
+.lv-btn button{flex:1;border:1px solid #FFFFFF33;background:#FFFFFF1A;color:#fff;
+  border-radius:10px;padding:13px 10px;font-size:14px;font-weight:700;cursor:pointer}
+.lv-btn button.go{background:var(--ok);border-color:var(--ok)}
+.lv-btn button.stop{background:var(--ng);border-color:var(--ng)}
+.lv-btn button.sm{flex:0 0 auto;width:56px;font-size:16px;padding:13px 0}
+.lv-cai{background:#0B141BF2;border:1px solid #2C4356;border-radius:10px;padding:11px;
+  margin-bottom:8px;color:#DCE6EE;font-size:12.5px;line-height:1.55}
+.lv-cai label{display:block;margin:8px 0 3px;color:#9FB4C4;font-size:11.5px}
+.lv-cai select,.lv-cai input[type=text]{width:100%;background:#16232E;color:#fff;
+  border:1px solid #2C4356;border-radius:7px;padding:8px 9px;font-size:13px}
+.lv-cai .ck{display:flex;gap:8px;align-items:flex-start;margin-top:10px}
+.lv-cai .ck input{margin-top:3px;flex:0 0 auto;width:17px;height:17px}
+.lv-cai .no{color:#A8BCC9;font-size:11.5px;margin-top:8px;line-height:1.5}
+.lv-open{position:fixed;right:13px;bottom:96px;z-index:19;border:0;border-radius:26px;
+  background:var(--acc);color:#fff;padding:13px 17px;font-size:13.5px;font-weight:800;
+  box-shadow:0 6px 18px rgba(224,90,0,.42);cursor:pointer}
+.lv-open[hidden]{display:none!important}
 #pt .ai-pht{margin:-4px 0 10px}
 #pt .ai-pht-i{background:#fff;border:1px solid var(--line);border-left:4px solid var(--ng);
   border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:13px;line-height:1.55}
@@ -579,6 +626,24 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
       <button id="btn-copy">Sao chép</button>
       <button id="btn-close" class="p">Đóng</button>
     </div>
+  </div>
+</div>
+
+<!-- QUÉT TRỰC TIẾP QUA CAMERA -->
+<button class="lv-open" id="lv-open" hidden>📹 Quét trực tiếp</button>
+<div class="lv" id="lv" hidden>
+  <video id="lv-cam" playsinline muted autoplay></video>
+  <div class="lv-top">
+    <div class="lv-hd"><b id="lv-ten">📹 Quét trực tiếp</b>
+      <button class="lv-x" id="lv-cai-nut" title="Cài đặt">⚙</button>
+      <button class="lv-x" id="lv-dong" title="Đóng">✕</button></div>
+    <div class="lv-st" id="lv-st"></div>
+    <div class="lv-dem" id="lv-dem"></div>
+  </div>
+  <div class="lv-mid" id="lv-mid"></div>
+  <div class="lv-bot">
+    <div id="lv-cai" hidden></div>
+    <div class="lv-btn" id="lv-btn"></div>
   </div>
 </div>
 
@@ -5400,6 +5465,7 @@ PTR.addEventListener("click", function (e) {
 
   /* --- trợ lý --- */
   if (e.target.id === "ai-caidat") { aiMoCaiDat(); return; }
+  if (e.target.id === "ai-quet") { lvMo(); return; }
   if (e.target.id === "ai-thu") { aiThuKetNoi(); return; }
   if (e.target.id === "ai-dong") { closeSheet(); return; }
   if (e.target.id === "ai-luu") {
@@ -5934,6 +6000,9 @@ function aiBoJson(s) {
   return String(s || "").replace(/```json[\s\S]*?```/g, "").replace(/\n{3,}/g, "\n\n");
 }
 
+var TIN_CAY = [["cao", "Cao"], ["vua", "Vừa"], ["thap", "Thấp"]];
+function tinCayChu(v) { return v ? nameOf(TIN_CAY, v) : ""; }
+
 function aiTheHtml(list, mi) {
   var s = '<div class="ai-pht">', i;
   for (i = 0; i < list.length; i++) {
@@ -5942,7 +6011,7 @@ function aiTheHtml(list, mi) {
       '<div class="ai-pht-h">' + (f.anh ? "Ảnh " + esc(String(f.anh)) + " · " : "") +
       esc(nameOf(BO_PHAN, f.bp || "khac")) + " · " +
       ((f.pl || "nc") === "kn" ? "Khuyến nghị" : (f.pl === "obs" ? "Ghi nhận" : "Không phù hợp")) +
-      (f.tin_cay ? " · chắc chắn: " + esc(f.tin_cay) : "") + "</div>" +
+      (f.tin_cay ? " · chắc chắn: " + esc(tinCayChu(f.tin_cay)) : "") + "</div>" +
       "<b>" + esc(f.nd || "") + "</b>" +
       (f.khac_phuc ? '<div class="ai-pht-k"><b>Khắc phục ngay:</b> ' + esc(f.khac_phuc) + "</div>" : "") +
       (f.chong_tai_dien ? '<div class="ai-pht-k"><b>Chống tái diễn:</b> ' + esc(f.chong_tai_dien) + "</div>" : "") +
@@ -5962,6 +6031,494 @@ function aiMdHtml(s) {
   t = t.replace(/\n/g, "<br>");
   return t;
 }
+
+/* ══════════════════════ QUÉT TRỰC TIẾP QUA CAMERA ══════════════════════
+   Ý tưởng: vừa đi vừa giơ điện thoại, máy tự soi từng khung hình và báo lỗi
+   ngay trên màn hình, bấm một cái là vào biên bản kèm ảnh.
+
+   Ba điều cần nói thẳng:
+   1. Claude nhận ẢNH, không nhận luồng video. Nên đây là chụp khung hình theo
+      nhịp rồi gửi từng cái — gần như trực tiếp, không phải trực tiếp thật.
+   2. Mỗi khung hình gửi đi đều mất tiền. Vì vậy khung nào GIỐNG khung trước
+      (đứng yên, quay vào chỗ đã soi) thì bỏ qua, không gọi.
+   3. Có trần lượt và trần tiền, chạm là tự dừng — để quên máy trong túi cũng
+      không cháy tài khoản. */
+
+var LV_KEY = "atskmt-quet-truc-tiep-v1";
+var lvCfg = {
+  giay: 6,          /* nhịp soi, giây */
+  nhay: 5,          /* ngưỡng đổi cảnh — nhỏ thì nhạy, gửi nhiều hơn */
+  tuGhi: false,     /* tự ghi thẳng vào biên bản, không cần bấm */
+  model: "",        /* rỗng = dùng chung mô hình với trợ lý */
+  tranLuot: 60,
+  tranTien: 1
+};
+var LV_EP = 5;   /* bỏ qua liên tiếp bấy nhiêu khung thì soi ép một cái */
+var lvOn = false, lvBusy = false, lvStream = null, lvTimer = null, lvWake = null;
+var lvPh = [], lvSeq = 0;
+var lvLuot = 0, lvBoQua = 0, lvGhi = 0, lvBoLien = 0;
+var lvTok = { vao: 0, ra: 0 };
+var lvKhungTruoc = null, lvNhan = "", lvMoCai = false;
+
+var LV_SYS =
+  "Bạn là chuyên gia an toàn hàng hải, đang nhìn qua camera điện thoại của một cán bộ " +
+  "đang đi kiểm tra tàu dịch vụ dầu khí. Mỗi lượt bạn nhận đúng MỘT khung hình.\n\n" +
+  "Việc của bạn: chỉ ra những điểm KHÔNG AN TOÀN / KHÔNG PHÙ HỢP mà bạn NHÌN THẤY RÕ " +
+  "trong khung hình này.\n\n" +
+  "Quy tắc bắt buộc:\n" +
+  "- Chỉ nêu điều nhìn thấy được. Không suy đoán, không viết kiểu “nên kiểm tra thêm”, " +
+  "“có thể đã quá hạn”. Không thấy rõ thì đừng nêu.\n" +
+  "- Ảnh mờ, tối, rung, hoặc không có gì đáng nói thì trả về danh sách RỖNG. " +
+  "Rỗng là câu trả lời đúng và tốt.\n" +
+  "- Tối đa 3 phát hiện mỗi khung, chọn cái rõ ràng và nghiêm trọng nhất.\n" +
+  "- nd viết đúng như câu sẽ ghi vào biên bản: ngắn, khách quan, nêu rõ vật thể và " +
+  "tình trạng nhìn thấy. Không dùng chữ “có vẻ”, “dường như”.\n" +
+  "- khac_phuc và chong_tai_dien mỗi cái một câu ngắn.\n\n" +
+  "CHỈ trả về một khối JSON, không viết gì thêm trước hay sau:\n" +
+  "```json\n" +
+  '{"phat_hien":[{"nd":"…","bp":"cuuhoa","pl":"nc","muc":"2","cc":"",' +
+  '"tin_cay":"cao","khac_phuc":"…","chong_tai_dien":"…"}]}\n' +
+  "```\n" +
+  "bp là một trong boong, may, dien, cuusinh, cuuhoa, hoso, bep, nang, moitruong, " +
+  "anninh, nguoi, khac. pl là nc (không phù hợp), obs (ghi nhận) hoặc kn (khuyến nghị). " +
+  "muc là 1 dừng ngay, 2 trước khi rời bến, 3 có thời hạn, 4 cải tiến. " +
+  "tin_cay là cao, vua hoặc thap — ảnh không thật rõ thì để thap. " +
+  "cc chỉ ghi khi chắc chắn điều khoản, không chắc thì để rỗng.";
+
+function lvLoad() {
+  try {
+    var v = JSON.parse(localStorage.getItem(LV_KEY) || "{}");
+    if (v.giay) lvCfg.giay = +v.giay;
+    if (v.nhay) lvCfg.nhay = +v.nhay;
+    if (v.tuGhi != null) lvCfg.tuGhi = !!v.tuGhi;
+    if (v.model != null) lvCfg.model = v.model;
+    if (v.tranLuot) lvCfg.tranLuot = +v.tranLuot;
+    if (v.tranTien) lvCfg.tranTien = +v.tranTien;
+  } catch (e) {}
+}
+function lvSave() { try { localStorage.setItem(LV_KEY, JSON.stringify(lvCfg)); } catch (e) {} }
+
+function lvModel() { return lvCfg.model || aiCfg.model; }
+function lvTien() {
+  var g = { "claude-opus-5": [5, 25], "claude-sonnet-5": [3, 15], "claude-haiku-4-5": [1, 5] };
+  var p = g[lvModel()] || g["claude-opus-5"];
+  return lvTok.vao / 1e6 * p[0] + lvTok.ra / 1e6 * p[1];
+}
+
+/* ---- Lấy hình từ camera ---- */
+function lvChup(canh, chatLuong) {
+  var v = document.getElementById("lv-cam");
+  if (!v || !v.videoWidth) return null;
+  var w = v.videoWidth, hh = v.videoHeight, M = canh;
+  if (w > hh && w > M) { hh = Math.round(hh * M / w); w = M; }
+  else if (hh > M) { w = Math.round(w * M / hh); hh = M; }
+  var c = document.createElement("canvas");
+  c.width = w; c.height = hh;
+  try { c.getContext("2d").drawImage(v, 0, 0, w, hh); } catch (e) { return null; }
+  try { return c.toDataURL("image/jpeg", chatLuong); } catch (e2) { return null; }
+}
+
+/* Vân tay 48×36 điểm sáng — để biết cảnh đã đổi chưa mà khỏi gọi thừa */
+function lvVanTay() {
+  var v = document.getElementById("lv-cam");
+  if (!v || !v.videoWidth) return null;
+  var c = document.createElement("canvas");
+  c.width = 48; c.height = 36;
+  var x = c.getContext("2d"), d;
+  try { x.drawImage(v, 0, 0, 48, 36); d = x.getImageData(0, 0, 48, 36).data; }
+  catch (e) { return null; }
+  var out = [], i;
+  for (i = 0; i < d.length; i += 4) out.push((d[i] * 3 + d[i + 1] * 6 + d[i + 2]) / 10);
+  return out;
+}
+function lvLechBaoNhieu(a, b) {
+  if (!a || !b || a.length !== b.length) return 999;
+  var s = 0, i;
+  for (i = 0; i < a.length; i++) s += Math.abs(a[i] - b[i]);
+  return s / a.length;
+}
+
+/* ---- Mở / đóng camera ---- */
+function lvMoCam(cb) {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    cb("Trình duyệt này không mở được camera. Dùng Chrome hoặc Safari, và trang phải " +
+       "chạy qua https (link GitHub Pages), không mở bằng file:// trên máy.");
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: { ideal: "environment" },
+             width: { ideal: 1920 }, height: { ideal: 1080 } },
+    audio: false
+  }).then(function (s) {
+    lvStream = s;
+    var v = document.getElementById("lv-cam");
+    v.srcObject = s;
+    var pr = v.play();
+    if (pr && pr["catch"]) pr["catch"](function () {});
+    cb(null);
+  })["catch"](function (e) {
+    var n = e && e.name;
+    if (n === "NotAllowedError" || n === "SecurityError") {
+      cb("Anh chưa cho phép quyền camera. Bấm vào biểu tượng ổ khóa trên thanh địa chỉ " +
+         "→ bật Camera cho trang này, rồi mở lại.");
+    } else if (n === "NotFoundError") {
+      cb("Máy này không tìm thấy camera nào.");
+    } else if (n === "NotReadableError") {
+      cb("Camera đang bị ứng dụng khác chiếm. Đóng app camera / Zalo / Messenger rồi thử lại.");
+    } else {
+      cb("Không mở được camera: " + ((e && e.message) || "lỗi không rõ"));
+    }
+  });
+}
+function lvDongCam() {
+  if (lvStream) {
+    var t = lvStream.getTracks ? lvStream.getTracks() : [];
+    for (var i = 0; i < t.length; i++) { try { t[i].stop(); } catch (e) {} }
+    lvStream = null;
+  }
+  var v = document.getElementById("lv-cam");
+  if (v) { try { v.srcObject = null; } catch (e2) {} }
+}
+function lvGiuMan(bat) {
+  try {
+    if (bat) {
+      if (navigator.wakeLock && navigator.wakeLock.request) {
+        navigator.wakeLock.request("screen").then(function (w) { lvWake = w; })["catch"](function () {});
+      }
+    } else if (lvWake) { try { lvWake.release(); } catch (e) {} lvWake = null; }
+  } catch (e3) {}
+}
+
+/* ---- Gọi Claude cho MỘT khung hình ---- */
+function lvGoiMot(du) {
+  var kieu = du.substring(5, du.indexOf(";"));
+  var nhac = lvNhan
+    ? "Khu vực đang kiểm tra: " + lvNhan + ". Đây là khung hình hiện tại."
+    : "Đây là khung hình hiện tại.";
+  var body = {
+    model: lvModel(),
+    max_tokens: 2000,
+    system: LV_SYS,
+    output_config: { effort: "low" },
+    messages: [{ role: "user", content: [
+      { type: "image", source: { type: "base64", media_type: kieu,
+        data: du.substring(du.indexOf(",") + 1) } },
+      { type: "text", text: nhac }
+    ] }]
+  };
+
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", "https://api.anthropic.com/v1/messages", true);
+  xhr.setRequestHeader("content-type", "application/json");
+  xhr.setRequestHeader("x-api-key", aiCfg.key);
+  xhr.setRequestHeader("anthropic-version", "2023-06-01");
+  xhr.setRequestHeader("anthropic-dangerous-direct-browser-access", "true");
+  xhr.timeout = 60000;
+
+  function xong() { lvBusy = false; lvVeTop(); lvHen(); }
+
+  xhr.onerror = function () { lvTrangThai("✕ Mất mạng ở lượt này, bỏ qua."); xong(); };
+  xhr.ontimeout = function () { lvTrangThai("✕ Lượt này quá lâu, bỏ qua."); xong(); };
+  xhr.onload = function () {
+    if (xhr.status < 200 || xhr.status >= 300) {
+      /* Lỗi chìa khóa hoặc hết tiền thì dừng hẳn, đừng gọi tiếp cho tốn */
+      if (xhr.status === 401 || xhr.status === 403 || xhr.status === 429) {
+        lvBusy = false;
+        lvDung("✕ " + aiLoiText(xhr));
+        return;
+      }
+      lvTrangThai("✕ " + aiLoiText(xhr));
+      xong(); return;
+    }
+    var chu = "", j, i;
+    try {
+      j = JSON.parse(xhr.responseText);
+      if (j.usage) {
+        lvTok.vao += j.usage.input_tokens || 0;
+        lvTok.ra += j.usage.output_tokens || 0;
+        aiChiPhi.vao += j.usage.input_tokens || 0;
+        aiChiPhi.ra += j.usage.output_tokens || 0;
+        aiSave();
+      }
+      if (j.content) {
+        for (i = 0; i < j.content.length; i++) {
+          if (j.content[i].type === "text") chu += j.content[i].text;
+        }
+      }
+    } catch (e) {}
+    var ds = aiBocJson(chu);
+    var them = ds ? lvNhanKetQua(ds, du) : 0;
+    lvTrangThai(them ? "⚠ Thấy " + them + " điểm cần xem lại."
+      : "Khung này không thấy lỗi rõ ràng. Tiếp tục quét…");
+    xong();
+  };
+  try { xhr.send(JSON.stringify(body)); }
+  catch (e4) { lvTrangThai("✕ Không gửi được: " + e4.message); xong(); }
+}
+
+/* ---- Nhận phát hiện, bỏ trùng, vẽ thẻ ---- */
+function lvNhanKetQua(list, du) {
+  var them = 0, i, j;
+  for (i = 0; i < list.length; i++) {
+    var f = list[i];
+    var nd = String(f.nd || "").replace(/^\s+|\s+$/g, "");
+    if (!nd) continue;
+    /* Giơ máy vào đúng chỗ cũ 5 lần thì cũng chỉ ghi một dòng */
+    var trung = false;
+    for (j = 0; j < lvPh.length; j++) {
+      if (similar(nd, lvPh[j].nd) >= 0.55) { trung = true; break; }
+    }
+    if (trung) continue;
+    lvSeq++;
+    var o = { id: "p" + lvSeq, nd: nd, bp: f.bp || "khac", pl: f.pl || "nc",
+              muc: f.muc || "", cc: f.cc || "", tin_cay: f.tin_cay || "",
+              khac_phuc: f.khac_phuc || "", chong_tai_dien: f.chong_tai_dien || "",
+              anh: du, daGhi: false };
+    lvPh.unshift(o);
+    them++;
+    if (lvCfg.tuGhi) lvGhiVaoBB(o);
+  }
+  if (them) {
+    try { if (navigator.vibrate) navigator.vibrate([130, 70, 130]); } catch (e5) {}
+    lvVeThe();
+  }
+  return them;
+}
+
+function lvGhiVaoBB(o) {
+  if (o.daGhi) return 0;
+  var noi = o.nd;
+  if (o.khac_phuc) noi += "\nKhắc phục: " + o.khac_phuc;
+  if (o.chong_tai_dien) noi += "\nChống tái diễn: " + o.chong_tai_dien;
+  var n = themViPhamTuAI({ nd: noi, bp: o.bp, pl: o.pl, muc: o.muc, cc: o.cc, anh: o.anh });
+  o.daGhi = true; o.dong = n; lvGhi++;
+  return n;
+}
+
+/* ---- Vẽ ---- */
+function lvTrangThai(s) {
+  var el = document.getElementById("lv-st");
+  if (el) el.textContent = s || "";
+}
+function lvVeTop() {
+  var d = document.getElementById("lv-dem");
+  if (!d) return;
+  d.textContent = lvLuot + " lượt soi · " + lvBoQua + " khung bỏ qua vì cảnh chưa đổi · " +
+    lvPh.length + " phát hiện · " + lvGhi + " đã ghi biên bản · ~" +
+    lvTien().toFixed(3) + " USD phiên này";
+}
+function lvVeThe() {
+  var m = document.getElementById("lv-mid");
+  if (!m) return;
+  if (!lvPh.length) {
+    m.innerHTML = "";
+    return;
+  }
+  var s = "", i;
+  for (i = 0; i < lvPh.length; i++) {
+    var f = lvPh[i];
+    s += '<div class="lv-c' + (f.tin_cay === "thap" ? " tc-thap" : "") + '">' +
+      '<div class="lv-c-h">' + esc(nameOf(BO_PHAN, f.bp)) + " · " +
+      (f.pl === "kn" ? "Khuyến nghị" : (f.pl === "obs" ? "Ghi nhận" : "Không phù hợp")) +
+      (f.muc ? " · mức " + esc(f.muc) : "") +
+      (f.tin_cay ? " · chắc chắn: " + esc(tinCayChu(f.tin_cay)) : "") + "</div>" +
+      "<b>" + esc(f.nd) + "</b>" +
+      (f.khac_phuc ? '<div class="lv-c-k"><b>Khắc phục:</b> ' + esc(f.khac_phuc) + "</div>" : "") +
+      (f.chong_tai_dien ? '<div class="lv-c-k"><b>Chống tái diễn:</b> ' +
+        esc(f.chong_tai_dien) + "</div>" : "") +
+      '<div class="lv-c-r"><img src="' + f.anh + '">' +
+      '<button data-lvadd="' + f.id + '"' + (f.daGhi ? ' class="xong"' : "") + ">" +
+      (f.daGhi ? "✓ Đã vào biên bản (dòng " + f.dong + ")" : "＋ Ghi vào biên bản") +
+      "</button></div></div>";
+  }
+  m.innerHTML = s;
+}
+function lvVeNut() {
+  var b = document.getElementById("lv-btn");
+  if (!b) return;
+  b.innerHTML = lvOn
+    ? '<button class="stop" id="lv-stop">⏸ Dừng quét</button>' +
+      '<button class="sm" id="lv-ngay" title="Soi khung hình này ngay">📸</button>'
+    : '<button class="go" id="lv-start">▶ Bắt đầu quét</button>' +
+      '<button class="sm" id="lv-ngay" title="Soi khung hình này ngay">📸</button>';
+}
+function lvVeCaiDat() {
+  var el = document.getElementById("lv-cai");
+  if (!el) return;
+  el.hidden = !lvMoCai;
+  if (!lvMoCai) { el.innerHTML = ""; return; }
+  var i, s = '<div class="lv-cai">';
+  s += '<label>Nhịp soi — bao lâu soi một khung</label><select id="lv-giay">';
+  var nhip = [[4, "4 giây — nhanh, tốn hơn"], [6, "6 giây — vừa"],
+              [10, "10 giây — tiết kiệm"], [20, "20 giây — rất tiết kiệm"]];
+  for (i = 0; i < nhip.length; i++) {
+    s += '<option value="' + nhip[i][0] + '"' + (lvCfg.giay === nhip[i][0] ? " selected" : "") +
+      ">" + nhip[i][1] + "</option>";
+  }
+  s += "</select>";
+
+  s += '<label>Mô hình dùng khi quét</label><select id="lv-model">' +
+    '<option value=""' + (lvCfg.model === "" ? " selected" : "") +
+    ">Dùng chung với trợ lý (" + esc(nameOf(AI_MODELS, aiCfg.model)) + ")</option>";
+  for (i = 0; i < AI_MODELS.length; i++) {
+    s += '<option value="' + AI_MODELS[i][0] + '"' +
+      (lvCfg.model === AI_MODELS[i][0] ? " selected" : "") + ">" +
+      esc(AI_MODELS[i][1]) + " — " + esc(AI_MODELS[i][2]) + "</option>";
+  }
+  s += "</select>";
+
+  s += '<label>Khu vực đang kiểm tra (không bắt buộc — giúp máy đoán đúng hơn)</label>' +
+    '<input type="text" id="lv-nhan" value="' + esc(lvNhan) +
+    '" placeholder="ví dụ: buồng máy, boong mũi, bếp, kho sơn">';
+
+  s += '<label>Tự dừng sau</label><select id="lv-tran">';
+  var tran = [[20, 0.3], [60, 1], [150, 2.5], [400, 6]];
+  for (i = 0; i < tran.length; i++) {
+    s += '<option value="' + i + '"' + (lvCfg.tranLuot === tran[i][0] ? " selected" : "") +
+      ">" + tran[i][0] + " lượt hoặc ~" + tran[i][1] + " USD</option>";
+  }
+  s += "</select>";
+
+  s += '<div class="ck"><input type="checkbox" id="lv-tughi"' + (lvCfg.tuGhi ? " checked" : "") +
+    '><label for="lv-tughi" style="margin:0;color:#DCE6EE;font-size:12.5px">' +
+    '<b>Tự ghi thẳng vào biên bản</b> — không phải bấm từng cái. Nhanh nhưng sẽ có dòng thừa, ' +
+    'phải rà lại trước khi xuất công văn.</label></div>';
+
+  s += '<div class="no"><b>Máy nhìn có thể sai.</b> Đây là để nhắc anh khỏi bỏ sót, ' +
+    'không thay được mắt người. Mọi dòng đều phải tự xác minh tại chỗ trước khi ký biên bản.<br>' +
+    'Khung hình được gửi sang máy chủ Anthropic ở nước ngoài. Không quay vào hồ sơ mật, ' +
+    'màn hình máy tính, hay mặt người khi không cần.</div>';
+  s += "</div>";
+  el.innerHTML = s;
+}
+
+/* ---- Vòng quét ---- */
+function lvHen() {
+  if (lvTimer) { clearTimeout(lvTimer); lvTimer = null; }
+  if (!lvOn) return;
+  lvTimer = setTimeout(lvNhip, Math.max(2, lvCfg.giay) * 1000);
+}
+function lvNhip() {
+  if (!lvOn || lvBusy) return;
+  if (lvLuot >= lvCfg.tranLuot) {
+    lvDung("Đã soi đủ " + lvCfg.tranLuot + " lượt — tự dừng cho khỏi tốn. Bấm chạy lại nếu cần.");
+    return;
+  }
+  if (lvTien() >= lvCfg.tranTien) {
+    lvDung("Đã tiêu khoảng " + lvTien().toFixed(2) + " USD trong phiên này — tự dừng. " +
+      "Đổi trần trong ⚙ nếu muốn quét tiếp.");
+    return;
+  }
+  var vt = lvVanTay();
+  if (!vt) { lvHen(); return; }
+  if (lvKhungTruoc && lvBoLien < LV_EP && lvLechBaoNhieu(vt, lvKhungTruoc) < lvCfg.nhay) {
+    lvBoQua++; lvBoLien++;
+    lvTrangThai("Cảnh chưa đổi — không gọi, đỡ tốn tiền. Quay sang chỗ khác, " +
+      "hoặc bấm 📸 để soi ngay chỗ này.");
+    lvVeTop(); lvHen(); return;
+  }
+  lvBoLien = 0;
+  lvSoiNgay(vt);
+}
+/* Soi khung hình hiện tại — bỏ qua bước so cảnh, dùng cho nút 📸 */
+function lvSoiNgay(vt) {
+  if (lvBusy) return;
+  if (!aiCfg.key) { lvTrangThai("✕ Chưa có chìa khóa API. Vào tab 🤖 TRỢ LÝ nhập trước đã."); return; }
+  var du = lvChup(1024, 0.7);
+  if (!du) { lvTrangThai("Chưa lấy được hình từ camera, đợi một chút…"); lvHen(); return; }
+  lvKhungTruoc = vt || lvVanTay();
+  lvBusy = true; lvLuot++;
+  lvTrangThai("Đang soi khung hình…");
+  lvVeTop();
+  lvGoiMot(du);
+}
+
+function lvChay() {
+  if (!aiCfg.key) {
+    alert("Chưa có chìa khóa API. Vào 📊 Tổng hợp & phân tích → 🤖 TRỢ LÝ nhập chìa khóa trước đã.");
+    return;
+  }
+  /* Bấm chạy là soi ngay khung đầu tiên, đừng bắt người ta lắc máy mới chịu chạy */
+  lvKhungTruoc = null; lvBoLien = 0;
+  lvOn = true; lvVeNut(); lvGiuMan(true);
+  lvTrangThai("Đang quét. Giơ máy quét chậm qua từng khu vực, dừng lại 1–2 giây ở chỗ nghi ngờ.");
+  lvNhip();
+}
+function lvDung(vi) {
+  lvOn = false;
+  if (lvTimer) { clearTimeout(lvTimer); lvTimer = null; }
+  lvGiuMan(false);
+  lvVeNut();
+  lvTrangThai(vi || "Đã dừng quét.");
+  lvVeTop();
+}
+
+function lvMo() {
+  lvLoad();
+  var el = document.getElementById("lv");
+  el.hidden = false;
+  lvPh = []; lvLuot = 0; lvBoQua = 0; lvGhi = 0;
+  lvTok = { vao: 0, ra: 0 };
+  lvKhungTruoc = null; lvBoLien = 0; lvBusy = false; lvMoCai = false;
+  lvVeNut(); lvVeThe(); lvVeTop(); lvVeCaiDat();
+  lvTrangThai("Đang mở camera…");
+  lvMoCam(function (loi) {
+    if (loi) { lvTrangThai("✕ " + loi); return; }
+    lvTrangThai("Camera đã sẵn sàng. Bấm ▶ Bắt đầu quét, hoặc 📸 để soi một khung ngay.");
+  });
+}
+function lvDong() {
+  lvDung("");
+  lvDongCam();
+  var el = document.getElementById("lv");
+  if (el) el.hidden = true;
+  /* Ghi được dòng nào thì vẽ lại biên bản cho thấy ngay */
+  if (lvGhi) { try { drawViPham(); } catch (e) {} }
+}
+
+/* Cắm nút bấm cho lớp phủ — nó nằm ngoài #pt nên phải nghe riêng */
+(function () {
+  var el = document.getElementById("lv");
+  if (!el) return;
+  el.addEventListener("click", function (e) {
+    var t = e.target;
+    if (t.id === "lv-dong") { lvDong(); return; }
+    if (t.id === "lv-cai-nut") { lvMoCai = !lvMoCai; lvVeCaiDat(); return; }
+    if (t.id === "lv-start") { lvChay(); return; }
+    if (t.id === "lv-stop") { lvDung("Đã dừng. Bấm ▶ để quét tiếp."); return; }
+    if (t.id === "lv-ngay") { lvSoiNgay(null); return; }
+    var b = t.closest ? t.closest("[data-lvadd]") : null;
+    if (b) {
+      var id = b.getAttribute("data-lvadd"), i;
+      for (i = 0; i < lvPh.length; i++) {
+        if (lvPh[i].id === id) {
+          if (lvPh[i].daGhi) return;
+          var n = lvGhiVaoBB(lvPh[i]);
+          b.className = "xong";
+          b.textContent = "✓ Đã vào biên bản (dòng " + n + ")";
+          lvVeTop();
+          return;
+        }
+      }
+    }
+  }, false);
+  el.addEventListener("change", function (e) {
+    var t = e.target;
+    if (t.id === "lv-giay") { lvCfg.giay = +t.value; lvSave(); return; }
+    if (t.id === "lv-model") { lvCfg.model = t.value; lvSave(); lvVeTop(); return; }
+    if (t.id === "lv-tughi") { lvCfg.tuGhi = !!t.checked; lvSave(); return; }
+    if (t.id === "lv-nhan") { lvNhan = t.value; return; }
+    if (t.id === "lv-tran") {
+      var tr = [[20, 0.3], [60, 1], [150, 2.5], [400, 6]][+t.value] || [60, 1];
+      lvCfg.tranLuot = tr[0]; lvCfg.tranTien = tr[1]; lvSave(); lvVeTop(); return;
+    }
+  }, false);
+})();
+
+/* Cất máy vào túi / chuyển sang app khác thì dừng ngay, đừng gọi tiếp cho tốn */
+document.addEventListener("visibilitychange", function () {
+  if (document.hidden && lvOn) lvDung("Đã tự dừng vì anh chuyển sang màn hình khác.");
+}, false);
 
 /* ---- Gọi Claude API ---- */
 function aiGoi(cauHoi, kemAnh) {
@@ -6175,6 +6732,7 @@ function viewTro() {
     '<span>· Đã dùng khoảng <b>' + aiTien().toFixed(2) + ' USD</b></span>' +
     '</div>' +
     '<div class="btns" style="margin-top:8px">' +
+    '<button class="b acc" id="ai-quet">📹 Quét trực tiếp</button>' +
     '<button class="b" id="ai-caidat">⚙ Cài đặt</button>' +
     '<button class="b" id="ai-thu">🔌 Thử kết nối</button>' +
     '<button class="b" id="ai-xoa">Xóa hội thoại</button></div>' +
@@ -6211,7 +6769,11 @@ function viewTro() {
 
   /* Khu đính ảnh */
   h += '<div class="card" style="padding:10px 11px">' +
-    '<div class="muted" style="font-size:12.5px"><b>📷 Soi ảnh tìm lỗi</b> — chụp hoặc chọn ảnh ' +
+    '<div class="muted" style="font-size:12.5px"><b>Vừa đi vừa soi?</b> Bấm ' +
+    '<b>📹 Quét trực tiếp</b> ở trên — mở camera, máy tự soi từng khung hình và báo lỗi ngay ' +
+    'trên màn hình, bấm một cái là vào biên bản kèm ảnh. Khung dưới đây dành cho việc soi kỹ ' +
+    'ảnh đã chụp sẵn.</div>' +
+    '<div class="muted" style="font-size:12.5px;margin-top:8px"><b>📷 Soi ảnh tìm lỗi</b> — chụp hoặc chọn ảnh ' +
     'chỗ đang kiểm tra, máy chỉ ra điểm không an toàn nhìn thấy được, kèm cách khắc phục và ' +
     'cách chống tái diễn. Video sẽ được tách thành ' + AI_MAX_ANH + ' khung hình (Claude không ' +
     'xem video trực tiếp được).</div>' +
@@ -6427,10 +6989,23 @@ return {
   draw: function () { draw(); },
   napTuChecklist: napTuChecklist,
   soKy: function () { return DB.ky.length; },
-  xemPhanTich: function () { tab = "pt"; curKy = ""; save(); draw(); }
+  xemPhanTich: function () { tab = "pt"; curKy = ""; save(); draw(); },
+  moQuet: function () { lvMo(); },
+  coChiaKhoa: function () { return !!aiCfg.key; }
 };
 })();
 
+
+document.getElementById("lv-open").addEventListener("click", function () {
+  if (!PT.coChiaKhoa()) {
+    alert("Quét trực tiếp cần chìa khóa API.\n\n" +
+      "Vào 📊 Tổng hợp & phân tích → 🤖 TRỢ LÝ, làm theo 6 bước lấy chìa khóa, " +
+      "dán vào rồi quay lại đây.");
+    setMode("pt");
+    return;
+  }
+  PT.moQuet();
+}, false);
 
 /* Trợ lý (nằm trong phần phân tích) đẩy một phát hiện sang biên bản đang lập.
    Phải để ở phạm vi ngoài vì save/drawViPham của phần checklist bị che bên trong. */
@@ -6459,6 +7034,7 @@ function setMode(m) {
   document.getElementById("tabs").hidden = !isKT;
   document.getElementById("rail").style.display = isKT ? "" : "none";
   document.getElementById("pt").hidden = isKT;
+  document.getElementById("lv-open").hidden = !isKT;
   document.getElementById("pt-tabs").hidden = isKT;
   document.getElementById("sub").hidden = !isKT;
   var bs = document.getElementById("mode").getElementsByTagName("button");
@@ -6528,7 +7104,7 @@ document.getElementById("bb-sync").onclick = function () {
 /* ===================== KHỞI ĐỘNG =====================
    APP_VER hiện ở góc phải đầu trang. Nếu số này không đổi sau khi cập nhật,
    nghĩa là trình duyệt còn giữ bản cũ trong bộ nhớ đệm — tải lại trang. */
-var APP_VER = "b\u1ea3n 2026-08-15/10";
+var APP_VER = "b\u1ea3n 2026-08-19/11";
 document.getElementById("ver").textContent = APP_VER;
 load();
 drawTabs();
@@ -6537,7 +7113,7 @@ keoTabVaoTam();
 moDauSoKy();
 try {
   var m0 = localStorage.getItem(MODE_KEY);
-  if (m0 === "pt") setMode("pt");
+  setMode(m0 === "pt" ? "pt" : "kt");
 } catch (e) {}
 </script>
 </body>

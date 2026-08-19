@@ -152,6 +152,33 @@ trên điện thoại (Add to Home Screen). Đây là **app dùng chung**, gồm
   kiểm tra cấp IV (VSP-000-ATMT-452/F-001); danh mục sự ghi nhận và sự không
   phù hợp (VTB07-02-04A); báo cáo kết quả kiểm tra tình trạng tàu.
 
+### 📹 Quét trực tiếp qua camera
+
+Mở camera, vừa đi vừa giơ máy — máy tự soi từng khung hình, báo lỗi ngay trên
+màn hình, bấm một cái là dòng đó vào biên bản kèm ảnh. Vào từ nút nổi
+**📹 Quét trực tiếp** ở chế độ *Đi kiểm tra*, hoặc từ tab **🤖 TRỢ LÝ**.
+
+- Claude nhận **ảnh, không nhận luồng video**. Nên đây là chụp khung hình theo
+  nhịp (mặc định 6 giây) rồi gửi từng cái — gần như trực tiếp, không phải trực
+  tiếp thật. Mỗi lượt là một request `POST /v1/messages` không streaming,
+  `output_config.effort = "low"` cho nhanh, `max_tokens` 2000.
+- **Lọc khung trùng để đỡ tốn tiền:** mỗi nhịp lấy vân tay 48×36 điểm sáng từ
+  khung hình, so với khung trước; lệch dưới ngưỡng thì bỏ qua, không gọi API.
+  Đứng yên hay quay lại chỗ đã soi đều không mất tiền. Bỏ qua liên tiếp 5 lần
+  thì soi ép một cái, để người cố tình giơ máy đứng im vẫn được soi.
+- **Lọc phát hiện trùng:** so bằng Jaccard trên token đã bỏ dấu (`similar` ≥ 0.55)
+  với các phát hiện đã có trong phiên, nên giơ máy vào đúng cái bình chữa cháy
+  đó 5 lần cũng chỉ ra một dòng.
+- **Trần lượt và trần tiền**, chạm là tự dừng (mặc định 60 lượt / ~1 USD). Gặp
+  lỗi 401/403/429 là dừng hẳn chứ không gọi tiếp. Chuyển sang app khác hay tắt
+  màn hình cũng tự dừng (`visibilitychange`). Giữ màn hình sáng bằng
+  Screen Wake Lock khi đang quét.
+- Bối cảnh **không** gửi kèm dữ liệu đội tàu — system prompt gọn (~1,3 KB), chỉ
+  ảnh và tên khu vực đang kiểm tra (tùy chọn). Vừa rẻ vừa đỡ lộ dữ liệu.
+- Có công tắc **tự ghi thẳng vào biên bản** cho ai muốn đi nhanh, và bộ đếm
+  lượt / phát hiện / tiền đã tiêu hiện ngay trên màn hình.
+- Ảnh khung hình đi thẳng vào `photos` của dòng vi phạm nên xuất .docx là có ảnh.
+
 ### 🤖 Trợ lý AI (tab TRỢ LÝ trong chế độ Tổng hợp & phân tích)
 
 - Gọi **thẳng Claude API từ trình duyệt**, không qua máy chủ trung gian nào —
