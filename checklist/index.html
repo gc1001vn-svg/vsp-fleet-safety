@@ -661,8 +661,9 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
 <div class="sheet" id="sheetDoc" hidden>
   <div class="sheet-in">
     <div class="doc-switch">
-      <button id="doc-tab-bc" class="on">Báo cáo kết quả<br>kiểm tra tình trạng tàu</button>
-      <button id="doc-tab-c3">Biên bản đánh giá<br>kiểm tra cấp III</button>
+      <button id="doc-tab-bc" class="on">📷 Bản kèm ảnh<br>có khắc phục &amp; chống tái diễn</button>
+      <button id="doc-tab-ky">🖊 Bản in để ký<br>chỉ ghi lỗi</button>
+      <button id="doc-tab-c3">📋 Biên bản<br>cấp III</button>
     </div>
     <div id="docOut" class="doc"></div>
     <div class="sheet-act">
@@ -3769,7 +3770,14 @@ document.getElementById("bb-nap-vipham").onclick = function () {
   v.forEach(function (x) {
     var text = x.t + " (" + x.ref + ")" + (x.n ? " — " + x.n : "");
     var cu = null;
-    bb.viPham.forEach(function (r) { if (r.noidung === text) cu = r; });
+    /* Khớp theo MÃ MỤC trước, rồi mới tới nội dung. Nếu chỉ so nội dung thì một
+       lỗi trợ lý ghi vào sổ (mô tả theo lời máy, và mục đó đã bị đánh dấu Không
+       đạt) sẽ vào biên bản lần thứ hai với tiêu đề mục — thành hai dòng cùng
+       một lỗi. */
+    bb.viPham.forEach(function (r) {
+      if (!cu && x.id && r.mucId === x.id) cu = r;
+    });
+    if (!cu) bb.viPham.forEach(function (r) { if (r.noidung === text) cu = r; });
     if (cu) {                                            /* dòng đã có: chỉ bù phần còn trống */
       if (!cu.muc && x.m) cu.muc = x.m;
       if (!cu.cc) cu.cc = x.ref || "";
@@ -4126,6 +4134,8 @@ function f002Footer(left) {
 
 /* Tên hai bản in: [đầu trang dòng 1, đầu trang dòng 2, chân trang] */
 var DOC_TITLES = {
+  ky: ["BÁO CÁO KẾT QUẢ KIỂM TRA TÌNH TRẠNG TÀU",
+       "XN VẬN TẢI BIỂN & CÔNG TÁC LẶN · VIETSOVPETRO", "Kiểm tra tình trạng tàu"],
   bc: ["BÁO CÁO KẾT QUẢ KIỂM TRA TÌNH TRẠNG TÀU",
        "XN VẬN TẢI BIỂN & CÔNG TÁC LẶN · VIETSOVPETRO",
        "Kiểm tra tình trạng tàu"],
@@ -4135,6 +4145,8 @@ var DOC_TITLES = {
 };
 /* Bản đang xem: bc = báo cáo tình trạng tàu, c3 = biên bản cấp III */
 var docMode = "bc";
+var kyKemKP = false;      /* bản in ký có kèm cột khắc phục & chống tái diễn không */
+var kyDaHoi = false;      /* đã hỏi lần nào trong lượt mở này chưa */
 
 /* --- Tiện ích dùng chung cho cả bản in lẫn file Word --- */
 function dmY(iso) {
@@ -4185,6 +4197,20 @@ function khacPhucText(r) {
   if (!a.length) a.push("Ngay lập tức");
   return a.join("\n");
 }
+/* Cột "Biện pháp khắc phục & chống tái diễn" — CHỈ có ở bản kèm ảnh */
+function kpCtdText(r) {
+  var a = [];
+  if ((r.kp || "").trim()) a.push(r.kp.trim());
+  if ((r.ctd || "").trim()) a.push("Chống tái diễn: " + r.ctd.trim());
+  return a.join("\n");
+}
+function coKpCtd() {
+  for (var i = 0; i < bb.viPham.length; i++) {
+    if ((bb.viPham[i].kp || "").trim() || (bb.viPham[i].ctd || "").trim()) return true;
+  }
+  return false;
+}
+
 /* Cột "Ý kiến của tàu" */
 function yKienText(r) {
   var a = [];
@@ -4228,11 +4254,13 @@ function tongHopHTML() {
 }
 
 function buildDocHTML(withPhotos) {
-  return docMode === "c3" ? buildC3HTML() : buildBaoCaoHTML(withPhotos);
+  if (docMode === "c3") return buildC3HTML();
+  if (docMode === "ky") return buildBaoCaoHTML(false, kyKemKP);
+  return buildBaoCaoHTML(withPhotos, true);
 }
 
 /* ---------- BẢN 1: BÁO CÁO KẾT QUẢ KIỂM TRA TÌNH TRẠNG TÀU (công văn) ---------- */
-function buildBaoCaoHTML(withPhotos) {
+function buildBaoCaoHTML(withPhotos, kemKP) {
   var ten = tenTau();
   var vp = vpMain(), kn = vpKN(), kc = kcAll();
   var h = '<div class="page">';
@@ -4268,12 +4296,18 @@ function buildBaoCaoHTML(withPhotos) {
   h += '<p class="j" style="margin-top:4pt">Đoàn kiểm tra ghi nhận một số điểm như sau:</p>';
 
   h += '<table class="g"><tr>' +
-       '<th style="width:6%">TT</th>' +
-       '<th style="width:50%">Những công việc phải làm</th>' +
-       '<th style="width:20%">Khắc phục / thời hạn</th>' +
-       '<th style="width:24%">Ý kiến của tàu</th></tr>';
+       '<th style="width:5%">TT</th>' +
+       (kemKP
+         ? '<th style="width:37%">Những công việc phải làm</th>' +
+           '<th style="width:26%">Biện pháp khắc phục &amp; chống tái diễn</th>' +
+           '<th style="width:14%">Thời hạn</th>' +
+           '<th style="width:18%">Ý kiến của tàu</th></tr>'
+         : '<th style="width:51%">Những công việc phải làm</th>' +
+           '<th style="width:20%">Khắc phục / thời hạn</th>' +
+           '<th style="width:24%">Ý kiến của tàu</th></tr>');
   if (!vp.length) {
-    h += '<tr><td class="c h">1</td><td>Không phát hiện</td><td></td><td></td></tr>';
+    h += '<tr><td class="c h">1</td><td>Không phát hiện</td><td></td><td></td>' +
+         (kemKP ? "<td></td>" : "") + "</tr>";
   } else {
     vp.forEach(function (r, i) {
       var ph = (withPhotos && r.photos && r.photos.length)
@@ -4281,9 +4315,11 @@ function buildBaoCaoHTML(withPhotos) {
             r.photos.map(function (p) { return '<img src="' + p + '">'; }).join("") +
             '<div class="cap">Ảnh bằng chứng (' + r.photos.length + ')</div></div>'
         : "";
+      var nang = (r.muc === "1" || r.muc === "2") ? " h" : "";
       h += '<tr><td class="c h">' + (i + 1) + '</td>' +
            '<td>' + nl(ndText(r)) + ph + '</td>' +
-           '<td class="c' + (r.muc === "1" || r.muc === "2" ? " h" : "") + '">' + nl(khacPhucText(r)) + '</td>' +
+           (kemKP ? "<td>" + nl(kpCtdText(r)) + "</td>" : "") +
+           '<td class="c' + nang + '">' + nl(khacPhucText(r)) + '</td>' +
            '<td>' + nl(yKienText(r)) + '</td></tr>';
     });
   }
@@ -4458,7 +4494,8 @@ function f002FileName(ext) {
   var c3 = docMode === "c3";
   var so = (c3 ? (bb.soc3 || bb.so) : bb.so);
   so = so ? String(so).replace(/[^\w\-]+/g, "_") : "chuaso";
-  var pre = c3 ? "Bien-ban-danh-gia-kiem-tra-cap-III" : "Bao-cao-ket-qua-kiem-tra-tinh-trang-tau";
+  var pre = c3 ? "Bien-ban-danh-gia-kiem-tra-cap-III"
+    : (docMode === "ky" ? "Bao-cao-ban-in-ky" : "Bao-cao-kem-anh");
   return pre + "_" + nt + "_" + so + "_" + ng + ext;
 }
 
@@ -4930,7 +4967,7 @@ function docxPackage(makeBody, hdr1, hdr2, ftrLeft) {
 }
 
 /* ---------- Thân bài 1: BÁO CÁO KẾT QUẢ KIỂM TRA TÌNH TRẠNG TÀU ---------- */
-function bodyBaoCao(ctx, withPhotos) {
+function bodyBaoCao(ctx, withPhotos, kemKP) {
   var ten = tenTau();
   var vp = vpMain(), kn = vpKN(), kc = kcAll();
   var b = "", i;
@@ -4965,12 +5002,16 @@ function bodyBaoCao(ctx, withPhotos) {
 
   b += dxPara(dxRun("Đoàn kiểm tra ghi nhận một số điểm như sau:"), { before: 80, after: 60 });
 
-  var G = [652, 5100, 2000, 2453];
-  var rows = dxRow(thTop("TT", "No.", G[0]) + thTop("Những công việc phải làm", "", G[1]) +
-    thTop("Khắc phục / thời hạn", "", G[2]) + thTop("Ý kiến của tàu", "", G[3]));
+  var G = kemKP ? [560, 3740, 2600, 1350, 1955] : [652, 5100, 2000, 2453];
+  var rows = kemKP
+    ? dxRow(thTop("TT", "No.", G[0]) + thTop("Những công việc phải làm", "", G[1]) +
+        thTop("Biện pháp khắc phục & chống tái diễn", "", G[2]) +
+        thTop("Thời hạn", "", G[3]) + thTop("Ý kiến của tàu", "", G[4]))
+    : dxRow(thTop("TT", "No.", G[0]) + thTop("Những công việc phải làm", "", G[1]) +
+        thTop("Khắc phục / thời hạn", "", G[2]) + thTop("Ý kiến của tàu", "", G[3]));
   if (!vp.length) {
     rows += dxRow(tdC(G[0], "1", { align: "center" }) + tdC(G[1], "Không phát hiện") +
-      tdC(G[2], "") + tdC(G[3], ""));
+      tdC(G[2], "") + tdC(G[3], "") + (kemKP ? tdC(G[4], "") : ""));
   } else {
     for (i = 0; i < vp.length; i++) {
       var r = vp[i];
@@ -4986,11 +5027,13 @@ function bodyBaoCao(ctx, withPhotos) {
         cellND += dxPara(dxRun("Ảnh bằng chứng (" + r.photos.length + ")", { i: true, sz: 18 }),
           { align: "center", after: 0 });
       }
+      var nang = (r.muc === "1" || r.muc === "2");
       rows += dxRow(
         tdC(G[0], String(i + 1), { align: "center" }) +
         dxCell(G[1], cellND) +
-        tdC(G[2], khacPhucText(r), { align: "center", b: (r.muc === "1" || r.muc === "2") }) +
-        tdC(G[3], yKienText(r)), 400);
+        (kemKP ? tdC(G[2], kpCtdText(r), { sz: 22 }) : "") +
+        tdC(kemKP ? G[3] : G[2], khacPhucText(r), { align: "center", b: nang }) +
+        tdC(kemKP ? G[4] : G[3], yKienText(r)), 400);
     }
   }
   b += dxTable(G, rows) + dxPara("", { after: 80 });
@@ -5145,8 +5188,8 @@ function bodyC3(ctx) {
   return b;
 }
 
-function buildDocxBytes(withPhotos) {
-  return docxPackage(function (ctx) { return bodyBaoCao(ctx, withPhotos); },
+function buildDocxBytes(withPhotos, kemKP) {
+  return docxPackage(function (ctx) { return bodyBaoCao(ctx, withPhotos, kemKP); },
     DOC_TITLES.bc[0], DOC_TITLES.bc[1], DOC_TITLES.bc[2]);
 }
 function buildC3Bytes() {
@@ -5164,11 +5207,25 @@ function closeDoc() {
 }
 function drawDoc() {
   document.getElementById("doc-tab-bc").className = docMode === "bc" ? "on" : "";
+  document.getElementById("doc-tab-ky").className = docMode === "ky" ? "on" : "";
   document.getElementById("doc-tab-c3").className = docMode === "c3" ? "on" : "";
   document.getElementById("docOut").innerHTML = '<div class="f002">' + buildDocHTML(true) + '</div>';
   document.getElementById("docOut").scrollTop = 0;
 }
 document.getElementById("doc-tab-bc").onclick = function () { docMode = "bc"; drawDoc(); };
+document.getElementById("doc-tab-ky").onclick = function () {
+  docMode = "ky";
+  /* Bản in để ký mặc định KHÔNG có cột khắc phục và chống tái diễn.
+     Chỉ đưa vào khi anh chọn — hỏi một lần cho mỗi lần mở. */
+  if (!kyDaHoi && coKpCtd()) {
+    kyDaHoi = true;
+    kyKemKP = confirm(
+      "Bản in để ký: có đưa cột “Biện pháp khắc phục & chống tái diễn” vào không?\\n\\n" +
+      "• Bấm Hủy — bản in chỉ ghi lỗi, thời hạn và ý kiến tàu (mặc định, gọn để ký).\\n" +
+      "• Bấm OK — in kèm cả cột khắc phục và chống tái diễn.");
+  }
+  drawDoc();
+};
 document.getElementById("doc-tab-c3").onclick = function () {
   docMode = "c3";
   if (!c3Main().length && !c3KN().length && !kcAll().length)
@@ -5177,6 +5234,7 @@ document.getElementById("doc-tab-c3").onclick = function () {
   drawDoc();
 };
 document.getElementById("bb-preview").onclick = function () {
+  kyDaHoi = false; kyKemKP = false;
   drawDoc();
   document.getElementById("sheetBB").hidden = true;
   document.getElementById("sheetDoc").hidden = false;
@@ -5210,7 +5268,9 @@ document.getElementById("doc-print").onclick = function () {
 /* Tải Word (.docx) — file Word thật, mở được bằng Word trên iPhone/iPad/máy tính */
 document.getElementById("doc-download").onclick = function () {
   try {
-    var bytes = docMode === "c3" ? buildC3Bytes() : buildDocxBytes(true);
+    var bytes = docMode === "c3" ? buildC3Bytes()
+      : docMode === "ky" ? buildDocxBytes(false, kyKemKP)
+      : buildDocxBytes(true, true);
     f002SaveBlob(new Blob([bytes], { type: DOCX_MIME }), f002FileName(".docx"), DOCX_MIME);
   } catch (e) {
     /* Trình duyệt quá cũ (không có TextEncoder/Blob nhị phân) — quay về bản .doc dạng HTML */
