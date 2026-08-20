@@ -214,6 +214,28 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
 .vp-photo-del{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;border:1px solid var(--line);
   background:var(--ng);color:#fff;font-size:11px;font-weight:800;line-height:18px;text-align:center;cursor:pointer;padding:0}
 .vp-photo-note{font-size:11.5px;color:var(--ink2);line-height:1.35;margin-bottom:6px}
+/* Thanh tìm kiếm trong checklist */
+.tk-bar{display:flex;gap:7px;align-items:center;padding:0 11px 9px}
+.tk-bar input{flex:1;min-width:0;border:1px solid rgba(255,255,255,.28);border-radius:8px;
+  padding:9px 11px;font-family:inherit;font-size:14px;background:rgba(255,255,255,.12);color:#fff}
+.tk-bar input::placeholder{color:#A9BDCC}
+.tk-bar button{flex:0 0 auto;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.12);
+  color:#fff;border-radius:8px;padding:9px 12px;font-size:13px;cursor:pointer}
+.tk-bar[hidden]{display:none!important}
+.tk-info{background:#FFF6F4;border:1px solid var(--acc);border-radius:8px;padding:9px 11px;
+  margin-bottom:10px;font-size:12.5px;color:var(--ink2);line-height:1.5}
+.tk-tab{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  color:#fff;background:var(--ink2);border-radius:4px;padding:2px 6px;margin-right:6px;vertical-align:2px}
+/* Ảnh gắn thẳng vào một mục checklist khi đang đi kiểm tra */
+.it-photo{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:7px 0 2px}
+.it-photo .th{position:relative;width:46px;height:46px;border-radius:6px;overflow:hidden;
+  border:1px solid var(--line)}
+.it-photo .th img{width:100%;height:100%;object-fit:cover;display:block}
+.it-photo .th button{position:absolute;top:-6px;right:-6px;width:19px;height:19px;border-radius:50%;
+  border:1px solid var(--line);background:#fff;color:var(--ng);font-size:11px;line-height:1;padding:0;
+  cursor:pointer}
+.it-photo .add{padding:8px 11px;border-radius:6px;border:1px dashed var(--acc);background:#FFF6F4;
+  color:var(--acc);font-size:12.5px;font-weight:700;cursor:pointer}
 .vp-del{width:100%;margin-top:6px;padding:6px;border-radius:6px;border:1px solid var(--line);background:#FFF6F4;
   color:var(--ng);font-family:inherit;font-size:11.5px;font-weight:700;cursor:pointer}
 .vp-actions{display:flex;gap:6px;margin-bottom:4px}
@@ -500,6 +522,11 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
   <div class="sub" id="sub">
     <div class="chips" id="chips"></div>
     <select class="jump" id="jump" title="Nhảy tới nhóm"></select>
+  </div>
+  <div class="tk-bar" id="tk-bar" hidden>
+    <input id="tk-o" type="search" placeholder="Gõ tên lỗi, thiết bị, quy định… tìm trong cả 572 mục"
+           autocomplete="off" enterkeyhint="search">
+    <button id="tk-xoa" title="Đóng tìm kiếm">✕</button>
   </div>
 </header>
 
@@ -2786,7 +2813,7 @@ function drawSub(cur) {
   var left = its.length - ok - ng - na;
   var C = [["all", "Tất cả", its.length, ""], ["left", "Chưa xét", left, ""],
            ["ng", "Không đạt", ng, "f-ng"], ["ok", "Đạt", ok, "f-ok"]];
-  var s = "";
+  var s = '<button class="chip' + (tkMo ? " on" : "") + '" data-tkmo="1">🔍 Tìm</button>';
   C.forEach(function (c) {
     s += '<button class="chip ' + c[3] + (filt === c[0] ? " on" : "") + '" data-filt="' + c[0] + '">' +
       c[1] + "<b>" + c[2] + "</b></button>";
@@ -2800,6 +2827,7 @@ function drawSub(cur) {
   document.getElementById("jump").innerHTML = o;
 }
 document.getElementById("chips").addEventListener("click", function (e) {
+  if (e.target.closest("[data-tkmo]")) { tkBat(!tkMo); return; }
   var b = e.target.closest("[data-filt]");
   if (!b) return;
   filt = b.getAttribute("data-filt");
@@ -2863,6 +2891,9 @@ function draw() {
 
   drawSub(cur);
 
+  /* Đang tìm kiếm thì danh sách hiện kết quả của cả 5 tab, không phải tab hiện tại */
+  if (tkMo) { drawTimKiem(); return; }
+
   var html = "";
   cur.groups.forEach(function (g, gi) {
     var vis = g.items.filter(passFilter);
@@ -2891,6 +2922,7 @@ function draw() {
         html += '<textarea class="note" data-note="' + it.id +
           '" placeholder="Mô tả điểm chưa phù hợp, thời hạn khắc phục, người chịu trách nhiệm…">' +
           esc(nt) + "</textarea>";
+        html += anhMucHtml(it.id);
       }
       html += "</article>";
     });
@@ -2902,6 +2934,220 @@ function draw() {
   document.getElementById("list").innerHTML = html;
 }
 
+/* ═══════════════ TÌM KIẾM TRONG TOÀN BỘ CHECKLIST ═══════════════
+   Thấy lỗi ngoài hiện trường thì gõ vài chữ là ra đúng mục, chấm điểm và
+   chụp ảnh ngay tại đó, không phải lật từng tab đi tìm. */
+
+var tkMo = false, tkTu = "";
+
+/* Danh mục phẳng của cả 5 tab, dựng một lần rồi dùng lại */
+var CK_INDEX = null;
+function ckIndex() {
+  if (CK_INDEX) return CK_INDEX;
+  CK_INDEX = [];
+  DATA.forEach(function (d) {
+    d.groups.forEach(function (gr) {
+      gr.items.forEach(function (it) {
+        if (it.refOnly) return;
+        CK_INDEX.push({
+          id: it.id, t: it.t, ref: it.ref, d: it.d || "",
+          tab: d.tab, tabId: d.id, g: gr.g,
+          /* Bản không dấu, tách thành từ rời và bọc dấu cách hai đầu, để so
+             khớp theo TỪ chứ không theo chuỗi con — nếu không thì "canh" sẽ
+             trúng "cánh gà", "set" trúng "dẫn sét". */
+          kt: ckChuan(it.t + " " + it.ref),
+          kd: ckChuan(gr.g + " " + (it.d || "")),
+          /* Bản GIỮ NGUYÊN DẤU — bỏ dấu xong thì "bảo ôn" trùng "báo ổn",
+             "cáp cẩu" trùng "cấp cầu". Ai gõ có dấu thì phải được ưu tiên. */
+          dt: ckChuanD(it.t + " " + it.ref),
+          dd: ckChuanD(gr.g + " " + (it.d || ""))
+        });
+      });
+    });
+  });
+  return CK_INDEX;
+}
+
+/* Bỏ dấu, bỏ ký tự lạ, bọc dấu cách hai đầu — để tìm được theo từ trọn vẹn */
+function ckChuan(s) {
+  return " " + noDia(s).replace(/[^a-z0-9]+/g, " ").replace(/^\s+|\s+$/g, "") + " ";
+}
+/* Như trên nhưng GIỮ DẤU tiếng Việt */
+function ckChuanD(s) {
+  return " " + String(s == null ? "" : s).toLowerCase()
+    .replace(/[^0-9a-zà-ỹ]+/g, " ").replace(/^\s+|\s+$/g, "") + " ";
+}
+function ckCoTu(kho, w) { return kho.indexOf(" " + w + " ") >= 0; }
+/* Mọi từ có nằm gần nhau trong cùng một đoạn không — "cáp … cẩu" ở hai đầu
+   câu thì không tính là khớp cụm. */
+function ckGan(kho, tu, cua) {
+  if (tu.length < 2) return false;
+  var vt = [], i;
+  for (i = 0; i < tu.length; i++) {
+    var p = kho.indexOf(" " + tu[i] + " ");
+    if (p < 0) return false;
+    vt.push(p);
+  }
+  var mn = vt[0], mx = vt[0];
+  for (i = 1; i < vt.length; i++) { if (vt[i] < mn) mn = vt[i]; if (vt[i] > mx) mx = vt[i]; }
+  return (mx - mn) <= cua;
+}
+
+/* Chấm điểm một mục với câu tìm.
+   dayDu = true: bắt buộc trúng MỌI từ. Chỉ khi không mục nào đạt mới nới ra
+   thành trúng một từ cũng được, và báo cho người dùng biết là kết quả gần đúng. */
+function ckDiem(Q, it, dayDu) {
+  var i, diem = 0, trung = 0;
+  for (i = 0; i < Q.tu.length; i++) {
+    var w = Q.tu[i];
+    if (ckCoTu(it.kt, w)) { diem += 6; trung++; }
+    else if (ckCoTu(it.kd, w)) { diem += 2; trung++; }
+  }
+  if (!trung) return 0;
+  if (dayDu && trung < Q.tu.length) return 0;
+
+  /* Trúng nguyên cụm từ mới là thứ người ta thực sự muốn tìm */
+  if (Q.cum.length > 3) {
+    if (it.kt.indexOf(Q.cum) >= 0) diem += 100;
+    else if (it.kd.indexOf(Q.cum) >= 0) diem += 30;
+  }
+  /* Các từ nằm gần nhau — phân biệt "cáp cẩu" với "cấp … cầu" ở hai đầu câu */
+  if (ckGan(it.kt, Q.tu, 60)) diem += 25;
+  else if (ckGan(it.kd, Q.tu, 60)) diem += 8;
+
+  /* Gõ CÓ DẤU thì khớp đúng dấu ăn điểm áp đảo — đây là cách duy nhất tách
+     "bảo ôn" khỏi "thông báo ổn định" sau khi bỏ dấu. */
+  if (Q.coDau) {
+    if (Q.cumD.length > 3 && it.dt.indexOf(Q.cumD) >= 0) diem += 220;
+    else if (Q.cumD.length > 3 && it.dd.indexOf(Q.cumD) >= 0) diem += 90;
+    else {
+      for (i = 0; i < Q.tuD.length; i++) {
+        if (ckCoTu(it.dt, Q.tuD[i])) diem += 14;
+        else if (ckCoTu(it.dd, Q.tuD[i])) diem += 5;
+      }
+    }
+  }
+  /* Tiêu đề ngắn mà trúng thì sát hơn tiêu đề dài lan man */
+  diem += Math.max(0, 8 - Math.floor(it.kt.length / 25));
+  return diem;
+}
+
+function ckTim(q, gioiHan) {
+  var L = ckIndex(), i;
+  var s = String(q || "");
+  var cum = ckChuan(s).replace(/^\s+|\s+$/g, "");
+  var tu = cum ? cum.split(" ").filter(function (w) { return w.length >= 2; }) : [];
+  if (!tu.length) return [];
+  var cumD = ckChuanD(s).replace(/^\s+|\s+$/g, "");
+  var Q = {
+    tu: tu, cum: cum,
+    tuD: cumD ? cumD.split(" ").filter(function (w) { return w.length >= 2; }) : [],
+    cumD: cumD,
+    coDau: noDia(s) !== s.toLowerCase()
+  };
+
+  function quet(dayDu) {
+    var r = [];
+    for (i = 0; i < L.length; i++) {
+      var d = ckDiem(Q, L[i], dayDu);
+      if (d > 0) r.push({ it: L[i], d: d, gan: !dayDu });
+    }
+    r.sort(function (a, b) { return b.d - a.d; });
+    return r;
+  }
+  var out = quet(true);
+  if (!out.length && tu.length > 1) out = quet(false);
+  return gioiHan ? out.slice(0, gioiHan) : out;
+}
+
+function tkBat(bat) {
+  tkMo = !!bat;
+  document.getElementById("tk-bar").hidden = !tkMo;
+  if (!tkMo) { tkTu = ""; document.getElementById("tk-o").value = ""; }
+  draw();
+  if (tkMo) { try { document.getElementById("tk-o").focus(); } catch (e) {} }
+}
+
+/* Vẽ danh sách kết quả — mỗi kết quả chấm điểm và chụp ảnh được ngay */
+function drawTimKiem() {
+  var tatCa = ckTim(tkTu), kq = tatCa.slice(0, 60), html = "", i;
+  html += '<div class="tk-info">';
+  if (!tkTu) {
+    html += 'Đang tìm trong <b>cả ' + ckIndex().length + ' mục</b> của 5 tab. ' +
+      '<b>Gõ có dấu</b> cho ra đúng hơn — bỏ dấu thì “cáp cẩu” lẫn với “cấp cầu”. ';
+  } else {
+    html += '<b>' + tatCa.length + ' mục</b> khớp “' + esc(tkTu) + '”' +
+      (tatCa.length > 60 ? " — hiện 60 mục sát nhất" : "") + ". ";
+    if (tatCa.length && tatCa[0].gan) {
+      html += 'Không mục nào chứa đủ mọi từ, đây là kết quả <b>gần đúng</b>. ';
+    }
+  }
+  html += 'Chấm điểm và chụp ảnh ngay tại đây — mục sẽ tự vào biên bản khi bấm ' +
+    '<b>Lập biên bản → Nạp từ checklist</b>.</div>';
+  if (!tkTu) {
+    html += '<div class="viol-empty">Gõ vài chữ để tìm. Ví dụ: <b>bình chữa cháy</b>, ' +
+      '<b>la canh</b>, <b>EPIRB</b>, <b>cáp cẩu</b>, <b>MARPOL</b>, <b>lối thoát</b>.</div>';
+    document.getElementById("list").innerHTML = html;
+    return;
+  }
+  if (!kq.length) {
+    html += '<div class="viol-empty">Không tìm thấy mục nào khớp “' + esc(tkTu) + '”.<br>' +
+      'Thử từ khác, hoặc bỏ bớt chữ. Nếu đúng là lỗi ngoài checklist thì ghi thẳng vào biên bản ' +
+      'bằng nút <b>Lập biên bản → Thêm dòng trống</b>.</div>';
+    document.getElementById("list").innerHTML = html;
+    return;
+  }
+  for (i = 0; i < kq.length; i++) {
+    var it = kq[i].it;
+    var st = (state[it.id] || {}).s || "";
+    var nt = (state[it.id] || {}).n || "";
+    var isOpen = !!open[it.id];
+    html += '<article class="item ' + st + '">';
+    html += '<div class="row">';
+    html += '<button class="ttl" data-open="' + it.id + '">' +
+      '<h4><span class="tk-tab">' + esc(it.tab) + "</span>" + glMark(esc(it.t)) + "</h4>" +
+      "<small>" + esc(it.g) + " · " + glMark(esc(it.ref)) + "</small><em>" +
+      (isOpen ? "▲ thu gọn" : "▼ xem lưu ý") + "</em></button>";
+    html += '<div class="btns">' +
+      '<button class="b ' + (st === "ok" ? "s-ok" : "") + '" data-set="' + it.id + '" data-v="ok"><u>✓</u>Đạt</button>' +
+      '<button class="b ' + (st === "ng" ? "s-ng" : "") + '" data-set="' + it.id + '" data-v="ng"><u>✕</u>Không đạt</button>' +
+      '<button class="b na ' + (st === "na" ? "s-na" : "") + '" data-set="' + it.id + '" data-v="na">Không áp dụng</button>' +
+      "</div></div>";
+    if (isOpen) html += '<div class="det">' + glMark(esc(it.d)) + "</div>";
+    if (st === "ng") {
+      html += mucSelect("data-muc", it.id, (state[it.id] || {}).m, "muc");
+      html += '<textarea class="note" data-note="' + it.id +
+        '" placeholder="Mô tả điểm chưa phù hợp, thời hạn khắc phục, người chịu trách nhiệm…">' +
+        esc(nt) + "</textarea>";
+      html += anhMucHtml(it.id);
+    }
+    html += "</article>";
+  }
+  document.getElementById("list").innerHTML = html;
+}
+
+document.getElementById("tk-o").addEventListener("input", function (e) {
+  tkTu = e.target.value;
+  drawTimKiem();
+}, false);
+document.getElementById("tk-xoa").addEventListener("click", function () { tkBat(false); }, false);
+
+/* Ảnh chụp ngay tại mục checklist — đi thẳng sang biên bản khi bấm "Nạp từ checklist" */
+function anhMucHtml(id) {
+  var ph = (state[id] || {}).ph || [];
+  var s = '<div class="it-photo">';
+  for (var k = 0; k < ph.length; k++) {
+    s += '<div class="th"><img src="' + ph[k] + '">' +
+      '<button data-itphotodel="' + id + '" data-k="' + k + '">✕</button></div>';
+  }
+  if (ph.length < MAX_PHOTO) {
+    s += '<label class="add">📷 Chụp / chọn ảnh' +
+      '<input type="file" accept="image/*" multiple data-itphoto="' + id + '" style="display:none"></label>';
+  }
+  s += "</div>";
+  return s;
+}
+
 /* ===================== DANH SÁCH VI PHẠM (dùng chung cho báo cáo + biên bản) ===================== */
 function allViolations() {
   var out = [];
@@ -2910,8 +3156,9 @@ function allViolations() {
       gr.items.forEach(function (i) {
         if (i.refOnly) return;
         if (state[i.id] && state[i.id].s === "ng") {
-          out.push({ tab: d.tab, g: gr.g, t: i.t, ref: i.ref,
-            n: (state[i.id].n || "").trim(), m: state[i.id].m || "" });
+          out.push({ id: i.id, tab: d.tab, g: gr.g, t: i.t, ref: i.ref,
+            n: (state[i.id].n || "").trim(), m: state[i.id].m || "",
+            ph: (state[i.id].ph || []).slice() });
         }
       });
     });
@@ -3005,6 +3252,12 @@ function drawViPham() {
         '<input placeholder="Căn cứ (ISM 10.1, SOLAS III/20…)" data-vp="' + i + '" data-f="cc" value="' + esc(r.cc || "") + '">' +
         '<input placeholder="Ý kiến của tàu" data-vp="' + i + '" data-f="ykien" value="' + esc(r.ykien || "") + '">' +
       '</div>' +
+      '<div class="vp-two" style="margin-top:6px">' +
+        '<textarea placeholder="Biện pháp khắc phục — làm gì, ai làm" data-vp="' + i + '" data-f="kp">' + esc(r.kp || "") + '</textarea>' +
+        '<textarea placeholder="Chống tái diễn — sửa vào đâu trong hệ thống" data-vp="' + i + '" data-f="ctd">' + esc(r.ctd || "") + '</textarea>' +
+      '</div>' +
+      '<div class="vp-photo-note" style="margin:5px 0 0">Hai ô này CHỈ in ở bản báo cáo kèm ảnh. ' +
+        'Bản in để ký không có, trừ khi anh chọn khác lúc xuất file.</div>' +
       '<label class="vp-c3' + (r.c3 ? "" : " off") + '">' +
         '<input type="checkbox" data-vpc3="' + i + '"' + (r.c3 ? " checked" : "") + '>' +
         '<span>Đưa mục này vào <b>Biên bản đánh giá kiểm tra cấp III</b></span></label>' +
@@ -3127,7 +3380,8 @@ document.getElementById("bb-doan").addEventListener("click", function (e) {
 /* --- Bảng vi phạm --- */
 document.getElementById("bb-add-vipham").onclick = function () {
   bb.viPham.push({ noidung: "", thoihan: "", trachnhiem: "", lsr: "", muc: "",
-    bp: "khac", pl: "nc", c3: true, cc: "", ykien: "", photos: [] });
+    bp: "khac", pl: "nc", c3: true, cc: "", ykien: "", kp: "", ctd: "",
+    mucId: "", photos: [] });
   drawViPham(); save();
 };
 document.getElementById("bb-nap-vipham").onclick = function () {
@@ -3141,10 +3395,19 @@ document.getElementById("bb-nap-vipham").onclick = function () {
       if (!cu.muc && x.m) cu.muc = x.m;
       if (!cu.cc) cu.cc = x.ref || "";
       if (!cu.bp || cu.bp === "khac") cu.bp = guessBP(x.g, x.t);
+      if (!cu.mucId) cu.mucId = x.id || "";
+      /* Ảnh chụp ở mục checklist chuyển sang, bỏ ảnh đã có để khỏi trùng */
+      if (x.ph && x.ph.length) {
+        if (!cu.photos) cu.photos = [];
+        for (var q = 0; q < x.ph.length; q++) {
+          if (cu.photos.indexOf(x.ph[q]) < 0 && cu.photos.length < MAX_PHOTO) cu.photos.push(x.ph[q]);
+        }
+      }
     } else bb.viPham.push({ noidung: text, thoihan: "", trachnhiem: "",
       lsr: "", muc: x.m || "", bp: guessBP(x.g, x.t),
       pl: (x.m === "4" ? "obs" : "nc"), c3: true,
-      cc: x.ref || "", ykien: "", photos: [] });
+      cc: x.ref || "", ykien: "", kp: "", ctd: "",
+      mucId: x.id || "", photos: (x.ph || []).slice(0, MAX_PHOTO) });
   });
   /* Xếp lại toàn bảng theo mức độ: dừng ngay lên đầu */
   bb.viPham.forEach(function (r, k) { r._k = k; });
@@ -3231,6 +3494,36 @@ document.getElementById("bb-vipham").addEventListener("change", function (e) {
       tiep();
     });
   })();
+});
+
+/* Đính ảnh vào một mục checklist */
+document.getElementById("list").addEventListener("change", function (e) {
+  var t = e.target.closest("[data-itphoto]");
+  if (!t || !t.files || !t.files.length) return;
+  var id = t.getAttribute("data-itphoto");
+  if (!state[id]) state[id] = {};
+  if (!state[id].ph) state[id].ph = [];
+  var ph = state[id].ph;
+  var list = [].slice.call(t.files);
+  var boQua = Math.max(0, list.length - (MAX_PHOTO - ph.length));
+  t.value = "";
+  (function tiep() {
+    if (!list.length || ph.length >= MAX_PHOTO) {
+      save(); draw();
+      if (boQua) alert("Mỗi mục chỉ đính tối đa " + MAX_PHOTO + " ảnh. Đã bỏ qua " + boQua + " ảnh.");
+      return;
+    }
+    var f = list.shift();
+    if (!f.type || f.type.indexOf("image/") !== 0) { tiep(); return; }
+    compressImage(f, 700, 0.6, function (du) { ph.push(du); tiep(); });
+  })();
+});
+document.getElementById("list").addEventListener("click", function (e) {
+  var t = e.target.closest("[data-itphotodel]");
+  if (!t) return;
+  var id = t.getAttribute("data-itphotodel");
+  if (state[id] && state[id].ph) state[id].ph.splice(+t.getAttribute("data-k"), 1);
+  save(); draw();
 });
 
 /* --- Bảng khuyến cáo --- */
@@ -7567,10 +7860,12 @@ document.getElementById("lv-open").addEventListener("click", function () {
 function themViPhamTuAI(o) {
   bb.viPham.push({
     noidung: String(o.nd || ""),
-    thoihan: o.han || "", trachnhiem: "",
+    thoihan: o.han || "", trachnhiem: o.tn || "",
     lsr: "", muc: o.muc || "",
     bp: o.bp || "khac", pl: o.pl || "nc", c3: true,
     cc: o.cc || "", ykien: "",
+    kp: o.kp || "", ctd: o.ctd || "",
+    mucId: o.mucId || "",
     photos: o.anh ? [o.anh] : []
   });
   save();
@@ -7592,6 +7887,7 @@ function setMode(m) {
   document.getElementById("lv-open").hidden = !isKT;
   document.getElementById("pt-tabs").hidden = isKT;
   document.getElementById("sub").hidden = !isKT;
+  document.getElementById("tk-bar").hidden = !isKT || !tkMo;
   var bs = document.getElementById("mode").getElementsByTagName("button");
   for (var i = 0; i < bs.length; i++) {
     bs[i].className = bs[i].getAttribute("data-mode") === m ? "on" : "";
