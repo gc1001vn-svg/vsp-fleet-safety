@@ -214,6 +214,26 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
 .vp-photo-del{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;border:1px solid var(--line);
   background:var(--ng);color:#fff;font-size:11px;font-weight:800;line-height:18px;text-align:center;cursor:pointer;padding:0}
 .vp-photo-note{font-size:11.5px;color:var(--ink2);line-height:1.35;margin-bottom:6px}
+/* Sổ ghi nhận chuyến đi */
+.so-r{border:1px solid var(--line);border-left:4px solid var(--ng);border-radius:9px;
+  padding:11px 12px;margin-bottom:9px;background:#fff}
+.so-r.bo{opacity:.45;border-left-color:var(--na)}
+.so-r.ngoai{border-left-color:var(--warn)}
+.so-h{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--ink2);margin-bottom:4px}
+.so-nd{font-size:13.5px;font-weight:700;line-height:1.45}
+.so-k{margin-top:5px;font-size:12.5px;color:var(--ink2);line-height:1.5}
+.so-muc{margin-top:6px;font-size:12px;background:var(--paper);border-radius:6px;padding:7px 9px;
+  color:var(--ink2);line-height:1.45}
+.so-muc b{color:var(--ink)}
+.so-act{display:flex;gap:7px;margin-top:9px;align-items:center;flex-wrap:wrap}
+.so-act img{width:44px;height:44px;object-fit:cover;border-radius:6px;border:1px solid var(--line)}
+.so-act button{flex:1;min-width:96px;border:1px solid var(--line);background:#fff;color:var(--ink);
+  border-radius:7px;padding:8px 9px;font-size:12.5px;font-weight:700;cursor:pointer}
+.so-act button.bo{background:var(--ink);border-color:var(--ink);color:#fff}
+.so-act button.them{background:var(--acc);border-color:var(--acc);color:#fff}
+.so-dem{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 11px;
+  margin-bottom:11px;font-size:12.5px;color:var(--ink2);line-height:1.5}
 /* Thanh tìm kiếm trong checklist */
 .tk-bar{display:flex;gap:7px;align-items:center;padding:0 11px 9px}
 .tk-bar input{flex:1;min-width:0;border:1px solid rgba(255,255,255,.28);border-radius:8px;
@@ -549,10 +569,24 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
 </div>
 
 <div class="bar" id="barKT"><div class="bar-in">
-  <button id="btn-bb">📋 Lập biên bản</button>
-  <button id="btn-rep">Xem báo cáo</button>
+  <button id="btn-so">📓 Sổ</button>
+  <button id="btn-bb">📋 Biên bản</button>
+  <button id="btn-rep">Báo cáo</button>
   <button id="btn-new" class="p">Phiếu mới</button>
 </div></div>
+
+<!-- SỔ GHI NHẬN CHUYẾN ĐI -->
+<div class="sheet" id="sheetSo" hidden>
+  <div class="sheet-in">
+    <h3>📓 Sổ ghi nhận chuyến đi</h3>
+    <div id="so-out"></div>
+    <div class="sheet-act">
+      <button id="so-dua" class="acc">➜ Đưa các mục đã giữ vào biên bản</button>
+      <button id="so-xoahet">🗑 Xóa sổ</button>
+      <button id="so-close" class="p">Đóng</button>
+    </div>
+  </div>
+</div>
 
 <!-- FORM NHẬP BIÊN BẢN KIỂM TRA AN TOÀN TÀU -->
 <div class="sheet" id="sheetBB" hidden>
@@ -2309,6 +2343,17 @@ function guessBP(groupName, title) {
   }
   return "khac";
 }
+function nhanCua(list, k) {
+  for (var i = 0; i < list.length; i++) if (list[i][0] === k) return list[i][1];
+  return k || "";
+}
+var TIN_CAY_N = [["cao", "Cao"], ["vua", "Vừa"], ["thap", "Thấp"]];
+function tinCayN(v) { return v ? nhanCua(TIN_CAY_N, v) : ""; }
+function homNay() {
+  var d = new Date(), m = d.getMonth() + 1, n = d.getDate();
+  return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (n < 10 ? "0" : "") + n;
+}
+
 function bpSelect(i, val) {
   return '<select class="vp-sel" data-vp="' + i + '" data-f="bp">' +
     BO_PHAN.map(function (o) {
@@ -3109,6 +3154,7 @@ function ckIndex() {
           /* Bản không dấu, tách thành từ rời và bọc dấu cách hai đầu, để so
              khớp theo TỪ chứ không theo chuỗi con — nếu không thì "canh" sẽ
              trúng "cánh gà", "set" trúng "dẫn sét". */
+          bp: guessBP(gr.g, it.t),
           kt: ckChuan(it.t + " " + it.ref),
           kd: ckChuan(gr.g + " " + (it.d || "")),
           /* Bản GIỮ NGUYÊN DẤU — bỏ dấu xong thì "bảo ôn" trùng "báo ổn",
@@ -3285,6 +3331,185 @@ document.getElementById("tk-o").addEventListener("input", function (e) {
   drawTimKiem();
 }, false);
 document.getElementById("tk-xoa").addEventListener("click", function () { tkBat(false); }, false);
+
+/* ═══════════ SO KHỚP MỘT LỖI VỚI MỤC CHECKLIST ═══════════
+   Trợ lý mô tả lỗi bằng lời, phần này tìm xem lỗi đó ứng với mục nào trong
+   637 mục. Chạy hoàn toàn trong máy, không tốn thêm lượt gọi API nào. */
+
+function khopMuc(nd, bp) {
+  var r = ckTim(nd, 15), out = [], i;
+  for (i = 0; i < r.length; i++) {
+    var d = r[i].d;
+    if (bp && r[i].it.bp === bp) d += 20;          /* cùng bộ phận thì sát hơn */
+    out.push({ it: r[i].it, d: d });
+  }
+  out.sort(function (a, b) { return b.d - a.d; });
+  return out.slice(0, 5);
+}
+/* ── Có dám tự đánh dấu mục đó là Không đạt không ──
+   Gán nhầm còn tệ hơn không gán: nó đánh dấu sai một mục và nhét sai căn cứ
+   vào báo cáo. Nên ngoài điểm số còn đòi thêm hai điều kiện:
+
+   1. Phải có ít nhất một CẶP TỪ LIỀN NHAU của câu mô tả xuất hiện trong tiêu
+      đề mục. Đây là thứ tách được "lan can boong sau lỏng chốt" (đúng, có cặp
+      "lan can") khỏi "con mèo nằm trên nắp két dầu boong mũi" (sai, tuy trúng
+      lẻ tẻ các từ nắp/két/mũi nhưng không cặp nào liền nhau).
+   2. Mục đứng đầu phải hơn mục thứ hai một khoảng rõ rệt. Sát nút nghĩa là
+      máy đang phân vân, thà để anh tự chọn. */
+var KHOP_CHAC = 60;
+var KHOP_HON = 10;
+
+function capTuLienNhau(s) {
+  var t = ckChuan(s).replace(/^\s+|\s+$/g, "").split(" ");
+  var out = [], i;
+  for (i = 0; i + 1 < t.length; i++) {
+    if (t[i].length < 2 || t[i + 1].length < 2) continue;
+    out.push(" " + t[i] + " " + t[i + 1] + " ");
+  }
+  return out;
+}
+function coCapChung(nd, it) {
+  var cap = capTuLienNhau(nd), i;
+  for (i = 0; i < cap.length; i++) if (it.kt.indexOf(cap[i]) >= 0) return true;
+  return false;
+}
+function khopTot(ds, nd) {
+  if (!ds.length) return null;
+  if (ds[0].d < KHOP_CHAC) return null;
+  if (ds.length > 1 && ds[0].d - ds[1].d < KHOP_HON) return null;
+  if (!coCapChung(nd, ds[0].it)) return null;
+  return ds[0];
+}
+
+/* Đánh dấu một mục checklist là không đạt, kèm ghi chú và ảnh */
+function ghiVaoChecklist(mucId, ghiChu, anh, muc) {
+  if (!mucId) return false;
+  if (!state[mucId]) state[mucId] = {};
+  var s = state[mucId];
+  s.s = "ng";
+  if (muc && !s.m) s.m = muc;
+  var t = String(ghiChu || "").replace(/^\s+|\s+$/g, "");
+  if (t) s.n = (s.n ? s.n + "\n" : "") + t;
+  if (anh) {
+    if (!s.ph) s.ph = [];
+    if (s.ph.indexOf(anh) < 0 && s.ph.length < MAX_PHOTO) s.ph.push(anh);
+  }
+  save();
+  return true;
+}
+function tenMuc(mucId) {
+  var L = ckIndex(), i;
+  for (i = 0; i < L.length; i++) if (L[i].id === mucId) return L[i].t;
+  return "";
+}
+
+/* ═══════════ SỔ GHI NHẬN CHUYẾN ĐI ═══════════
+   Đi kiểm tra thì không dừng lại xử lý từng lỗi. Mọi thứ máy thấy hoặc anh
+   chụp đều rơi vào sổ này, im lặng, không báo động. Xong chuyến mở ra soát
+   lại, giữ cái nào bỏ cái nào, rồi đẩy một lượt sang biên bản. */
+
+var SO_KEY = "atskmt-so-ghi-nhan-v1";
+var soGN = [];
+function soLoad() {
+  try { soGN = JSON.parse(localStorage.getItem(SO_KEY) || "[]") || []; } catch (e) { soGN = []; }
+}
+function soSave() {
+  try { localStorage.setItem(SO_KEY, JSON.stringify(soGN.slice(-200))); } catch (e) {}
+}
+function soDem() {
+  var n = 0, i;
+  for (i = 0; i < soGN.length; i++) if (soGN[i].giu !== false && !soGN[i].daDua) n++;
+  return n;
+}
+function soNutNhan() {
+  var n = soDem();
+  var el = document.getElementById("btn-so");
+  if (el) el.textContent = n ? "📓 Sổ (" + n + ")" : "📓 Sổ";
+}
+
+/* Ghi một mục vào sổ. Tự tìm mục checklist tương ứng và tự đánh dấu nếu chắc. */
+function soThem(o) {
+  var nd = String(o.nd || "").replace(/^\s+|\s+$/g, "");
+  if (!nd) return null;
+  var i;
+  /* Trùng với cái đã ghi thì thôi, đừng ghi hai lần */
+  for (i = 0; i < soGN.length; i++) {
+    if (soGN[i].giu !== false && ckGiong(soGN[i].nd, nd)) return null;
+  }
+  var ds = khopMuc(nd, o.bp);
+  var tot = khopTot(ds, nd);
+  var r = {
+    id: "s" + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36),
+    luc: new Date().getTime(),
+    nd: nd, bp: o.bp || "khac", pl: o.pl || "nc", muc: o.muc || "",
+    cc: o.cc || "", kp: o.kp || "", ctd: o.ctd || "", tinCay: o.tinCay || "",
+    anh: o.anh || "", nguon: o.nguon || "ai",
+    mucId: tot ? tot.it.id : "", mucTen: tot ? tot.it.t : "",
+    goiY: ds.slice(0, 3).map(function (x) { return { id: x.it.id, t: x.it.t, tab: x.it.tab }; }),
+    giu: true, daDua: false
+  };
+  if (r.mucId) {
+    if (!r.cc) r.cc = ckRefCua(r.mucId);
+    ghiVaoChecklist(r.mucId, nd, r.anh, r.muc);
+  }
+  soGN.push(r);
+  soSave();
+  soNutNhan();
+  mauThem(r);
+  return r;
+}
+function ckGiong(a, b) {
+  var ta = ckChuan(a).split(" "), tb = ckChuan(b).split(" ");
+  var set = {}, i, hit = 0, na = 0, nb = 0;
+  for (i = 0; i < ta.length; i++) if (ta[i].length > 2) { set[ta[i]] = 1; na++; }
+  for (i = 0; i < tb.length; i++) if (tb[i].length > 2) { nb++; if (set[tb[i]]) hit++; }
+  if (!na || !nb) return false;
+  return hit / Math.min(na, nb) >= 0.62;
+}
+function ckRefCua(mucId) {
+  var L = ckIndex(), i;
+  for (i = 0; i < L.length; i++) if (L[i].id === mucId) return L[i].ref || "";
+  return "";
+}
+
+/* ═══════════ SỔ MẪU LỖI — để lần sau máy tự nhận ra ═══════════
+   Anh chụp một chỗ mà máy không biết là vi phạm, hoặc anh giữ lại một phát
+   hiện, thì nội dung đó được nhớ lại và nhắc cho máy ở những lần quét sau. */
+
+var MAU_KEY = "atskmt-mau-loi-v1";
+var mauLoi = [];
+function mauLoad() {
+  try { mauLoi = JSON.parse(localStorage.getItem(MAU_KEY) || "[]") || []; } catch (e) { mauLoi = []; }
+}
+function mauSave() {
+  try { localStorage.setItem(MAU_KEY, JSON.stringify(mauLoi.slice(-60))); } catch (e) {}
+}
+function mauThem(r) {
+  if (!r || !r.nd) return;
+  var i;
+  for (i = 0; i < mauLoi.length; i++) {
+    if (ckGiong(mauLoi[i].nd, r.nd)) {
+      mauLoi[i].n = (mauLoi[i].n || 1) + 1;
+      if (r.nguon === "tay") mauLoi[i].tay = true;
+      mauSave();
+      return;
+    }
+  }
+  mauLoi.push({ nd: r.nd, bp: r.bp, mucId: r.mucId || "", n: 1, tay: r.nguon === "tay" });
+  mauSave();
+}
+/* Đoạn nhắc gửi kèm cho máy — ưu tiên thứ anh đã từng quan tâm */
+function mauNhac() {
+  if (!mauLoi.length) return "";
+  var ds = mauLoi.slice().sort(function (a, b) {
+    return (b.tay ? 100 : 0) + b.n - ((a.tay ? 100 : 0) + a.n);
+  }).slice(0, 18);
+  var L = [], i;
+  for (i = 0; i < ds.length; i++) L.push("- " + ds[i].nd);
+  return "\n\nNGƯỜI KIỂM TRA NÀY ĐẶC BIỆT QUAN TÂM tới những lỗi sau (đã từng ghi nhận " +
+    "trong các chuyến trước). Nếu khung hình có dấu hiệu của bất kỳ điều nào, hãy nêu ra:\n" +
+    L.join("\n");
+}
 
 /* Ảnh chụp ngay tại mục checklist — đi thẳng sang biên bản khi bấm "Nạp từ checklist" */
 function anhMucHtml(id) {
@@ -3679,6 +3904,182 @@ document.getElementById("list").addEventListener("click", function (e) {
   if (state[id] && state[id].ph) state[id].ph.splice(+t.getAttribute("data-k"), 1);
   save(); draw();
 });
+
+/* ---- Màn hình xem lại sổ ghi nhận ---- */
+function drawSo() {
+  var el = document.getElementById("so-out");
+  var conLai = soDem(), i;
+  var ngoai = 0;
+  for (i = 0; i < soGN.length; i++) if (soGN[i].giu !== false && !soGN[i].mucId) ngoai++;
+
+  var h = '<div class="so-dem">Máy và anh đã ghi <b>' + soGN.length + " mục</b> trong chuyến này, " +
+    "đang giữ <b>" + conLai + "</b>. " +
+    (ngoai ? "Có <b>" + ngoai + " mục nằm ngoài checklist</b> — vẫn vào được biên bản, " +
+      "và bấm được nút bổ sung vào checklist để lần sau có sẵn. " : "") +
+    "Soát lại rồi bấm <b>Đưa vào biên bản</b>. Mục nào không cần thì bấm Bỏ.</div>";
+
+  if (!soGN.length) {
+    h += '<div class="viol-empty">Sổ đang trống.<br>Bật <b>📹 Quét trực tiếp</b> rồi đi một vòng tàu, ' +
+      'hoặc bấm nút chụp trong đó khi thấy chỗ cần ghi lại.</div>';
+    el.innerHTML = h;
+    return;
+  }
+  for (i = soGN.length - 1; i >= 0; i--) {
+    var r = soGN[i];
+    var lop = "so-r" + (r.giu === false ? " bo" : "") + (r.mucId ? "" : " ngoai");
+    var gio = new Date(r.luc);
+    var gioTxt = (gio.getHours() < 10 ? "0" : "") + gio.getHours() + ":" +
+      (gio.getMinutes() < 10 ? "0" : "") + gio.getMinutes();
+    h += '<div class="' + lop + '">' +
+      '<div class="so-h">' + gioTxt + " · " + esc(nhanCua(BO_PHAN, r.bp)) + " · " +
+      (r.nguon === "tay" ? "anh chụp" : "máy thấy") +
+      (r.tinCay ? " · chắc chắn: " + esc(tinCayN(r.tinCay)) : "") +
+      (r.daDua ? " · ĐÃ VÀO BIÊN BẢN" : "") + "</div>" +
+      '<div class="so-nd">' + esc(r.nd) + "</div>" +
+      (r.kp ? '<div class="so-k"><b>Khắc phục:</b> ' + esc(r.kp) + "</div>" : "") +
+      (r.ctd ? '<div class="so-k"><b>Chống tái diễn:</b> ' + esc(r.ctd) + "</div>" : "");
+
+    if (r.mucId) {
+      h += '<div class="so-muc">Đã gắn vào mục checklist: <b>' + esc(r.mucTen) + "</b>" +
+        " — mục này đã được đánh dấu <b>Không đạt</b> kèm ảnh.</div>";
+    } else {
+      h += '<div class="so-muc">⚠ <b>Máy không dám tự gắn vào mục nào.</b> ' +
+        "Vẫn đưa vào biên bản được." +
+        (r.goiY && r.goiY.length ? "<br>Gần nhất theo máy — bấm để gắn nếu đúng:" : "") + "</div>";
+      if (r.goiY && r.goiY.length) {
+        h += '<div class="so-act">';
+        for (var q = 0; q < r.goiY.length; q++) {
+          h += '<button data-sogan="' + r.id + '" data-g="' + q + '">' +
+            esc(r.goiY[q].t.substring(0, 44)) + "</button>";
+        }
+        h += "</div>";
+      }
+    }
+    h += '<div class="so-act">' +
+      (r.anh ? '<img src="' + r.anh + '">' : "") +
+      (r.mucId ? "" : '<button data-sobs="' + r.id + '">＋ Bổ sung vào checklist</button>') +
+      '<button class="' + (r.giu === false ? "them" : "bo") + '" data-sogiu="' + r.id + '">' +
+      (r.giu === false ? "↩ Giữ lại" : "✕ Bỏ") + "</button>" +
+      "</div></div>";
+  }
+  el.innerHTML = h;
+}
+
+function moSo() {
+  drawSo();
+  document.getElementById("sheetSo").hidden = false;
+  syncModalLock();
+}
+document.getElementById("btn-so").onclick = moSo;
+document.getElementById("so-close").onclick = function () {
+  document.getElementById("sheetSo").hidden = true;
+  syncModalLock();
+  draw();
+};
+document.getElementById("so-xoahet").onclick = function () {
+  if (!soGN.length) return;
+  if (!confirm("Xóa toàn bộ sổ ghi nhận của chuyến này?\n\nCác mục đã đưa vào biên bản vẫn còn nguyên " +
+      "trong biên bản, chỉ xóa sổ thôi.")) return;
+  soGN = [];
+  soSave(); soNutNhan(); drawSo();
+};
+document.getElementById("so-dua").onclick = function () {
+  var n = 0, i;
+  for (i = 0; i < soGN.length; i++) {
+    var r = soGN[i];
+    if (r.giu === false || r.daDua) continue;
+    themViPhamTuAI({
+      nd: r.nd, bp: r.bp, pl: r.pl, muc: r.muc, cc: r.cc,
+      kp: r.kp, ctd: r.ctd, mucId: r.mucId, anh: r.anh
+    });
+    r.daDua = true;
+    n++;
+  }
+  soSave(); soNutNhan(); drawSo();
+  alert(n ? "Đã đưa " + n + " mục sang biên bản.\n\nMở 📋 Biên bản để soát lại và điền thời hạn, " +
+    "trách nhiệm." : "Không có mục nào để đưa. Các mục đều đã vào biên bản hoặc đã bị bỏ.");
+};
+document.getElementById("sheetSo").addEventListener("click", function (e) {
+  var t = e.target.closest("[data-sogiu]");
+  if (t) {
+    var id = t.getAttribute("data-sogiu"), i;
+    for (i = 0; i < soGN.length; i++) {
+      if (soGN[i].id === id) { soGN[i].giu = (soGN[i].giu === false); break; }
+    }
+    soSave(); soNutNhan(); drawSo();
+    return;
+  }
+  t = e.target.closest("[data-sogan]");
+  if (t) {
+    var sid = t.getAttribute("data-sogan"), gi = +t.getAttribute("data-g"), k;
+    for (k = 0; k < soGN.length; k++) {
+      if (soGN[k].id !== sid) continue;
+      var g0 = soGN[k].goiY && soGN[k].goiY[gi];
+      if (!g0) return;
+      soGN[k].mucId = g0.id;
+      soGN[k].mucTen = g0.t;
+      if (!soGN[k].cc) soGN[k].cc = ckRefCua(g0.id);
+      ghiVaoChecklist(g0.id, soGN[k].nd, soGN[k].anh, soGN[k].muc);
+      soSave(); drawSo();
+      return;
+    }
+    return;
+  }
+  t = e.target.closest("[data-sobs]");
+  if (t) { boSungVaoChecklist(t.getAttribute("data-sobs")); return; }
+}, false);
+
+/* ---- Bổ sung một lỗi ngoài checklist thành mục checklist thật ---- */
+var TT_KEY = "atskmt-muc-tu-them-v1";
+var mucTuThem = [];
+function ttLoad() {
+  try { mucTuThem = JSON.parse(localStorage.getItem(TT_KEY) || "[]") || []; } catch (e) { mucTuThem = []; }
+}
+function ttSave() { try { localStorage.setItem(TT_KEY, JSON.stringify(mucTuThem)); } catch (e) {} }
+/* Gắn các mục tự thêm vào cuối tab QUAN SÁT để chúng hiện ra và tìm được */
+function ttGan() {
+  var qs = null, i;
+  for (i = 0; i < DATA.length; i++) if (DATA[i].id === "qs") qs = DATA[i];
+  if (!qs) return;
+  var g = null;
+  for (i = 0; i < qs.groups.length; i++) if (qs.groups[i].tuThem) g = qs.groups[i];
+  if (!g) {
+    g = { g: "7. Mục tự thêm — do anh bổ sung khi đi kiểm tra", tuThem: true, items: [] };
+    qs.groups.push(g);
+  }
+  g.items.length = 0;
+  for (i = 0; i < mucTuThem.length; i++) {
+    g.items.push({
+      id: mucTuThem[i].id, t: mucTuThem[i].t, ref: mucTuThem[i].ref || "Tự bổ sung",
+      d: mucTuThem[i].d || ""
+    });
+  }
+  CK_INDEX = null;                 /* buộc dựng lại chỉ mục tìm kiếm */
+}
+function boSungVaoChecklist(soId) {
+  var r = null, i;
+  for (i = 0; i < soGN.length; i++) if (soGN[i].id === soId) r = soGN[i];
+  if (!r) return;
+  var ten = prompt("Tên mục để đưa vào checklist (lần sau tìm và chấm điểm được):", r.nd);
+  if (ten === null) return;
+  ten = String(ten).replace(/^\s+|\s+$/g, "");
+  if (!ten) return;
+  var id = "tt" + Date.now().toString(36);
+  mucTuThem.push({
+    id: id, t: ten, ref: r.cc || "Tự bổ sung",
+    d: "MỤC NÀY DO ANH TỰ BỔ SUNG khi đi kiểm tra ngày " + fmtDate(homNay()) + ".\n\n" +
+       "GHI NHẬN BAN ĐẦU:\n" + r.nd +
+       (r.kp ? "\n\nKHẮC PHỤC:\n" + r.kp : "") +
+       (r.ctd ? "\n\nCHỐNG TÁI DIỄN:\n" + r.ctd : "") +
+       "\n\nSửa lại nội dung mục này cho đầy đủ hơn nếu cần."
+  });
+  ttSave(); ttGan();
+  r.mucId = id; r.mucTen = ten;
+  ghiVaoChecklist(id, r.nd, r.anh, r.muc);
+  soSave(); drawSo();
+  alert("Đã thêm vào tab QUAN SÁT, nhóm “Mục tự thêm”.\n\n" +
+    "Lần sau tìm kiếm là ra, và trợ lý cũng gắn được lỗi vào mục này.");
+}
 
 /* --- Bảng khuyến cáo --- */
 document.getElementById("bb-add-khuyencao").onclick = function () {
@@ -7044,7 +7445,6 @@ var LV_KEY = "atskmt-quet-truc-tiep-v1";
 var lvCfg = {
   giay: 6,          /* nhịp soi, giây */
   nhay: 5,          /* ngưỡng đổi cảnh — nhỏ thì nhạy, gửi nhiều hơn */
-  tuGhi: false,     /* tự ghi thẳng vào biên bản, không cần bấm */
   model: "",        /* rỗng = dùng chung mô hình với trợ lý */
   tranLuot: 60,
   tranTien: 1
@@ -7052,7 +7452,7 @@ var lvCfg = {
 var LV_EP = 5;   /* bỏ qua liên tiếp bấy nhiêu khung thì soi ép một cái */
 var lvOn = false, lvBusy = false, lvStream = null, lvTimer = null, lvWake = null;
 var lvPh = [], lvSeq = 0;
-var lvLuot = 0, lvBoQua = 0, lvGhi = 0, lvBoLien = 0;
+var lvLuot = 0, lvBoQua = 0, lvBoLien = 0;
 var lvTok = { vao: 0, ra: 0 };
 var lvKhungTruoc = null, lvNhan = "", lvMoCai = false;
 
@@ -7081,12 +7481,37 @@ var LV_SYS =
   "tin_cay là cao, vua hoặc thap — ảnh không thật rõ thì để thap. " +
   "cc chỉ ghi khi chắc chắn điều khoản, không chắc thì để rỗng.";
 
+/* Danh mục quan sát trực quan — dựng thẳng từ tab QUAN SÁT nên nội dung trong
+   app và nội dung máy được nhắc luôn khớp nhau, sửa một chỗ là đổi cả hai. */
+var LV_DANHMUC_CACHE = null;
+function lvDanhMuc() {
+  if (LV_DANHMUC_CACHE) return LV_DANHMUC_CACHE;
+  var qs = null, i, j;
+  for (i = 0; i < DATA.length; i++) if (DATA[i].id === "qs") qs = DATA[i];
+  if (!qs) { LV_DANHMUC_CACHE = ""; return ""; }
+  var L = [];
+  for (i = 0; i < qs.groups.length; i++) {
+    var g = qs.groups[i];
+    var ten = [];
+    for (j = 0; j < g.items.length; j++) {
+      if (g.items[j].refOnly) continue;
+      ten.push(g.items[j].t);
+    }
+    if (ten.length) L.push(g.g + ": " + ten.join("; "));
+  }
+  LV_DANHMUC_CACHE = "\n\nDANH MỤC QUAN SÁT TRỰC QUAN — đây là những thứ nhìn là thấy mà " +
+    "người kiểm tra tàu quan tâm nhất. Soi khung hình theo đúng các đầu mục này:\n" +
+    L.join("\n");
+  return LV_DANHMUC_CACHE;
+}
+var LV_DANHMUC = "";
+
 function lvLoad() {
+  LV_DANHMUC = lvDanhMuc();
   try {
     var v = JSON.parse(localStorage.getItem(LV_KEY) || "{}");
     if (v.giay) lvCfg.giay = +v.giay;
     if (v.nhay) lvCfg.nhay = +v.nhay;
-    if (v.tuGhi != null) lvCfg.tuGhi = !!v.tuGhi;
     if (v.model != null) lvCfg.model = v.model;
     if (v.tranLuot) lvCfg.tranLuot = +v.tranLuot;
     if (v.tranTien) lvCfg.tranTien = +v.tranTien;
@@ -7194,7 +7619,7 @@ function lvGoiMot(du) {
   var body = {
     model: lvModel(),
     max_tokens: 2000,
-    system: LV_SYS,
+    system: LV_SYS + LV_DANHMUC + mauNhac(),
     output_config: { effort: "low" },
     messages: [{ role: "user", content: [
       { type: "image", source: { type: "base64", media_type: kieu,
@@ -7266,29 +7691,46 @@ function lvNhanKetQua(list, du) {
     }
     if (trung) continue;
     lvSeq++;
-    var o = { id: "p" + lvSeq, nd: nd, bp: f.bp || "khac", pl: f.pl || "nc",
-              muc: f.muc || "", cc: f.cc || "", tin_cay: f.tin_cay || "",
-              khac_phuc: f.khac_phuc || "", chong_tai_dien: f.chong_tai_dien || "",
-              anh: du, daGhi: false };
-    lvPh.unshift(o);
+    /* Ghi thẳng vào sổ chuyến đi — im lặng, không báo động, không cắt ngang.
+       Sổ tự tìm mục checklist tương ứng và tự đánh dấu Không đạt nếu chắc. */
+    var r = soThem({
+      nd: nd, bp: f.bp || "khac", pl: f.pl || "nc", muc: f.muc || "",
+      cc: f.cc || "", kp: f.khac_phuc || "", ctd: f.chong_tai_dien || "",
+      tinCay: f.tin_cay || "", anh: du, nguon: "ai"
+    });
+    if (!r) continue;                 /* sổ thấy trùng với cái đã ghi thì bỏ qua */
+    lvPh.unshift({ id: "p" + lvSeq, nd: nd, bp: r.bp, pl: r.pl, muc: r.muc,
+      cc: r.cc, tin_cay: r.tinCay, khac_phuc: r.kp, chong_tai_dien: r.ctd,
+      anh: du, mucTen: r.mucTen, soId: r.id });
     them++;
-    if (lvCfg.tuGhi) lvGhiVaoBB(o);
   }
-  if (them) {
-    try { if (navigator.vibrate) navigator.vibrate([130, 70, 130]); } catch (e5) {}
-    lvVeThe();
-  }
+  if (them) lvVeThe();
   return them;
 }
 
-function lvGhiVaoBB(o) {
-  if (o.daGhi) return 0;
-  var noi = o.nd;
-  if (o.khac_phuc) noi += "\nKhắc phục: " + o.khac_phuc;
-  if (o.chong_tai_dien) noi += "\nChống tái diễn: " + o.chong_tai_dien;
-  var n = themViPhamTuAI({ nd: noi, bp: o.bp, pl: o.pl, muc: o.muc, cc: o.cc, anh: o.anh });
-  o.daGhi = true; o.dong = n; lvGhi++;
-  return n;
+/* Chụp tay: chỗ này máy không biết là vi phạm nhưng anh thấy cần ghi lại.
+   Ghi vào sổ ngay, và nhớ lại để lần sau máy tự để ý. */
+function lvChupTay() {
+  var du = lvChup(1400, 0.75);
+  if (!du) { lvTrangThai("Chưa lấy được hình từ camera, đợi một chút…"); return; }
+  var mo = prompt("Ghi lại chỗ này là gì? (để trống thì chỉ lưu ảnh)\n\n" +
+    "Viết như câu sẽ ghi vào biên bản, ví dụ: “Lan can boong sau lỏng chốt, lung lay khi tì tay”.",
+    lvNhan ? lvNhan + ": " : "");
+  if (mo === null) return;
+  mo = String(mo).replace(/^\s+|\s+$/g, "");
+  if (!mo) mo = "Ảnh ghi nhận tại " + (lvNhan || "hiện trường") + " — chưa mô tả";
+  var r = soThem({ nd: mo, bp: lvNhan ? guessBP(lvNhan, mo) : guessBP("", mo),
+    pl: "nc", muc: "", cc: "", kp: "", ctd: "", tinCay: "cao",
+    anh: du, nguon: "tay" });
+  if (!r) { lvTrangThai("Chỗ này đã có trong sổ rồi."); return; }
+  lvSeq++;
+  lvPh.unshift({ id: "p" + lvSeq, nd: r.nd, bp: r.bp, pl: r.pl, muc: r.muc,
+    cc: r.cc, tin_cay: "", khac_phuc: "", chong_tai_dien: "",
+    anh: du, mucTen: r.mucTen, soId: r.id, tay: true });
+  lvVeThe(); lvVeTop();
+  lvTrangThai(r.mucId
+    ? "✓ Đã ghi vào sổ và gắn vào mục “" + r.mucTen + "”."
+    : "✓ Đã ghi vào sổ. Không có mục checklist nào khớp — mở 📓 Sổ để bổ sung vào checklist.");
 }
 
 /* ---- Vẽ ---- */
@@ -7299,9 +7741,9 @@ function lvTrangThai(s) {
 function lvVeTop() {
   var d = document.getElementById("lv-dem");
   if (!d) return;
-  d.textContent = lvLuot + " lượt soi · " + lvBoQua + " khung bỏ qua vì cảnh chưa đổi · " +
-    lvPh.length + " phát hiện · " + lvGhi + " đã ghi biên bản · ~" +
-    lvTien().toFixed(3) + " USD phiên này";
+  d.textContent = lvLuot + " lượt soi · " + lvBoQua + " khung bỏ qua · " +
+    lvPh.length + " ghi trong phiên này · sổ đang giữ " + soDem() + " mục · ~" +
+    lvTien().toFixed(3) + " USD";
 }
 function lvVeThe() {
   var m = document.getElementById("lv-mid");
@@ -7315,28 +7757,27 @@ function lvVeThe() {
     var f = lvPh[i];
     s += '<div class="lv-c' + (f.tin_cay === "thap" ? " tc-thap" : "") + '">' +
       '<div class="lv-c-h">' + esc(nameOf(BO_PHAN, f.bp)) + " · " +
-      (f.pl === "kn" ? "Khuyến nghị" : (f.pl === "obs" ? "Ghi nhận" : "Không phù hợp")) +
+      (f.tay ? "anh chụp" : "máy thấy") +
       (f.muc ? " · mức " + esc(f.muc) : "") +
       (f.tin_cay ? " · chắc chắn: " + esc(tinCayChu(f.tin_cay)) : "") + "</div>" +
       "<b>" + esc(f.nd) + "</b>" +
       (f.khac_phuc ? '<div class="lv-c-k"><b>Khắc phục:</b> ' + esc(f.khac_phuc) + "</div>" : "") +
-      (f.chong_tai_dien ? '<div class="lv-c-k"><b>Chống tái diễn:</b> ' +
-        esc(f.chong_tai_dien) + "</div>" : "") +
       '<div class="lv-c-r"><img src="' + f.anh + '">' +
-      '<button data-lvadd="' + f.id + '"' + (f.daGhi ? ' class="xong"' : "") + ">" +
-      (f.daGhi ? "✓ Đã vào biên bản (dòng " + f.dong + ")" : "＋ Ghi vào biên bản") +
-      "</button></div></div>";
+      '<div style="flex:1;font-size:12px;color:#9FB4C4;line-height:1.45">' +
+      (f.mucTen ? "✓ Đã vào sổ, gắn mục “" + esc(f.mucTen) + "”"
+                : "✓ Đã vào sổ — không có mục checklist nào khớp") +
+      "</div></div></div>";
   }
   m.innerHTML = s;
 }
 function lvVeNut() {
   var b = document.getElementById("lv-btn");
   if (!b) return;
-  b.innerHTML = lvOn
-    ? '<button class="stop" id="lv-stop">⏸ Dừng quét</button>' +
-      '<button class="sm" id="lv-ngay" title="Soi khung hình này ngay">📸</button>'
-    : '<button class="go" id="lv-start">▶ Bắt đầu quét</button>' +
-      '<button class="sm" id="lv-ngay" title="Soi khung hình này ngay">📸</button>';
+  b.innerHTML = (lvOn
+    ? '<button class="stop" id="lv-stop">⏸ Dừng quét</button>'
+    : '<button class="go" id="lv-start">▶ Bắt đầu quét</button>') +
+    '<button class="sm" id="lv-ngay" title="Cho máy soi khung hình này ngay">🔎</button>' +
+    '<button class="sm" id="lv-tay" title="Tự chụp và ghi vào sổ">📸</button>';
 }
 function lvVeCaiDat() {
   var el = document.getElementById("lv-cai");
@@ -7375,10 +7816,9 @@ function lvVeCaiDat() {
   }
   s += "</select>";
 
-  s += '<div class="ck"><input type="checkbox" id="lv-tughi"' + (lvCfg.tuGhi ? " checked" : "") +
-    '><label for="lv-tughi" style="margin:0;color:#DCE6EE;font-size:12.5px">' +
-    '<b>Tự ghi thẳng vào biên bản</b> — không phải bấm từng cái. Nhanh nhưng sẽ có dòng thừa, ' +
-    'phải rà lại trước khi xuất công văn.</label></div>';
+  s += '<div class="no" style="margin-top:10px"><b>Mọi thứ máy thấy đều rơi vào 📓 Sổ ghi nhận</b>, ' +
+    'im lặng, không báo động, không cắt ngang anh. Máy tự tìm mục checklist tương ứng và đánh dấu ' +
+    'Không đạt kèm ảnh. Xong chuyến mở sổ ra soát lại rồi đưa sang biên bản một lượt.</div>';
 
   s += '<div class="no"><b>Máy nhìn có thể sai.</b> Đây là để nhắc anh khỏi bỏ sót, ' +
     'không thay được mắt người. Mọi dòng đều phải tự xác minh tại chỗ trước khi ký biên bản.<br>' +
@@ -7437,7 +7877,8 @@ function lvChay() {
   /* Bấm chạy là soi ngay khung đầu tiên, đừng bắt người ta lắc máy mới chịu chạy */
   lvKhungTruoc = null; lvBoLien = 0;
   lvOn = true; lvVeNut(); lvGiuMan(true);
-  lvTrangThai("Đang quét. Giơ máy quét chậm qua từng khu vực, dừng lại 1–2 giây ở chỗ nghi ngờ.");
+  lvTrangThai("Đang quét im lặng. Giơ máy chậm qua từng khu vực, dừng 1–2 giây ở chỗ nghi ngờ. " +
+    "Thấy gì máy tự ghi vào sổ, không cắt ngang anh.");
   lvNhip();
 }
 function lvDung(vi) {
@@ -7453,14 +7894,15 @@ function lvMo() {
   lvLoad();
   var el = document.getElementById("lv");
   el.hidden = false;
-  lvPh = []; lvLuot = 0; lvBoQua = 0; lvGhi = 0;
+  lvPh = []; lvLuot = 0; lvBoQua = 0;
   lvTok = { vao: 0, ra: 0 };
   lvKhungTruoc = null; lvBoLien = 0; lvBusy = false; lvMoCai = false;
   lvVeNut(); lvVeThe(); lvVeTop(); lvVeCaiDat();
   lvTrangThai("Đang mở camera…");
   lvMoCam(function (loi) {
     if (loi) { lvTrangThai("✕ " + loi); return; }
-    lvTrangThai("Camera đã sẵn sàng. Bấm ▶ Bắt đầu quét, hoặc 📸 để soi một khung ngay.");
+    lvTrangThai("Camera sẵn sàng. ▶ để quét liên tục · 🔎 cho máy soi khung này · " +
+      "📸 tự chụp ghi vào sổ. Máy ghi im lặng, không báo động — xong chuyến mở 📓 Sổ soát lại.");
   });
 }
 function lvDong() {
@@ -7468,8 +7910,12 @@ function lvDong() {
   lvDongCam();
   var el = document.getElementById("lv");
   if (el) el.hidden = true;
-  /* Ghi được dòng nào thì vẽ lại biên bản cho thấy ngay */
-  if (lvGhi) { try { drawViPham(); } catch (e) {} }
+  try { soNutNhan(); draw(); } catch (e) {}
+  if (lvPh.length) {
+    alert("Đã ghi " + lvPh.length + " mục vào sổ chuyến đi.\n\n" +
+      "Xong chuyến thì bấm 📓 Sổ ở thanh dưới để soát lại, bỏ cái không cần, " +
+      "rồi đưa một lượt sang biên bản.");
+  }
 }
 
 /* Cắm nút bấm cho lớp phủ — nó nằm ngoài #pt nên phải nghe riêng */
@@ -7483,26 +7929,13 @@ function lvDong() {
     if (t.id === "lv-start") { lvChay(); return; }
     if (t.id === "lv-stop") { lvDung("Đã dừng. Bấm ▶ để quét tiếp."); return; }
     if (t.id === "lv-ngay") { lvSoiNgay(null); return; }
-    var b = t.closest ? t.closest("[data-lvadd]") : null;
-    if (b) {
-      var id = b.getAttribute("data-lvadd"), i;
-      for (i = 0; i < lvPh.length; i++) {
-        if (lvPh[i].id === id) {
-          if (lvPh[i].daGhi) return;
-          var n = lvGhiVaoBB(lvPh[i]);
-          b.className = "xong";
-          b.textContent = "✓ Đã vào biên bản (dòng " + n + ")";
-          lvVeTop();
-          return;
-        }
-      }
-    }
+    if (t.id === "lv-tay") { lvChupTay(); return; }
   }, false);
   el.addEventListener("change", function (e) {
     var t = e.target;
     if (t.id === "lv-giay") { lvCfg.giay = +t.value; lvSave(); return; }
     if (t.id === "lv-model") { lvCfg.model = t.value; lvSave(); lvVeTop(); return; }
-    if (t.id === "lv-tughi") { lvCfg.tuGhi = !!t.checked; lvSave(); return; }
+
     if (t.id === "lv-nhan") { lvNhan = t.value; return; }
     if (t.id === "lv-tran") {
       var tr = [[20, 0.3], [60, 1], [150, 2.5], [400, 6]][+t.value] || [60, 1];
@@ -8119,6 +8552,7 @@ moDauSoKy();
 try {
   var m0 = localStorage.getItem(MODE_KEY);
   setMode(m0 === "pt" ? "pt" : "kt");
+  soLoad(); mauLoad(); ttLoad(); ttGan(); soNutNhan();
 } catch (e) {}
 </script>
 </body>
