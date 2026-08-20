@@ -205,7 +205,35 @@ Xong chuyến bấm **📓 Sổ**, soát lại, bỏ cái không cần, đưa m�
 - **Sổ mẫu lỗi** nhớ lại mọi thứ đã ghi nhận và nhắc cho máy ở các lần quét sau,
   ưu tiên thứ do anh tự chụp.
 
-### 📄 Hai file báo cáo riêng biệt
+### 📄 Hai file báo cáo — bám đúng mẫu công văn của đơn vị
+
+Bảng vi phạm theo đúng mẫu thật: **TT/No. · Những công việc phải làm ·
+Khắc phục / thời hạn · Ghi chú**. Các dòng song ngữ Việt–Nga (Кас, Кому,
+Рекомендации, С уважением, Рассылка) giữ đúng như công văn gốc.
+
+**Cột "Khắc phục / thời hạn" app tự đề xuất** theo đúng quy ước đang dùng:
+
+| Trạng thái dòng | In ra |
+|---|---|
+| Đã khắc phục | `Đã khắc phục` |
+| Chưa được cấp | `Chưa được cấp` |
+| Phát hiện mới, mức ① | `Ngay lập tức(mới)` |
+| Phát hiện mới, mức ② | `Trước khi rời bến(mới)` |
+| Phát hiện mới, mức ③ | `09/2026(mới)` — hẹn tháng sau |
+| Phát hiện mới, mức ④ | `Lên kế hoạch(mới)` |
+| Tồn đọng kỳ trước | như trên, bỏ đuôi `(mới)` |
+
+Nút **⏱ Đề xuất thời hạn** bù cho mọi dòng còn trống; sửa lại từng dòng được.
+
+**Cột "Ghi chú"** (trước là *Ý kiến của tàu*) là chỗ ghi cách khắc phục gửi
+xuống tàu để tàu tự ghi ý kiến thêm. Để trống thì tự lấy phần *Biện pháp khắc
+phục* đã soạn.
+
+Điền ô **Đánh giá lại — theo biên bản ngày** thì câu mở đầu tự chuyển sang thể
+đánh giá lại: *"Theo Biên bản kiểm tra ngày …, ngày … đoàn kiểm tra đã tiến
+hành đánh giá lại tàu … tại …"*.
+
+### Ba bản xuất
 
 - **📷 Bản kèm ảnh** — 5 cột, có cột *Biện pháp khắc phục & chống tái diễn* ngay
   cạnh cột nội dung, in kèm ảnh bằng chứng.

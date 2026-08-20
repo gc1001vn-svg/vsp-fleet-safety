@@ -14,7 +14,10 @@
 <meta name="apple-mobile-web-app-title" content="ATSKMT VTB&CTL">
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;padding:0}
+/* Thu gọn đầu trang làm phần nội dung phía trên ngắn đi; Chrome sẽ tự kéo bù
+   vị trí cuộn cho khỏi nhảy hình (scroll anchoring), và chính cú kéo bù đó
+   kích hoạt lại bộ đo cuộn — thành vòng lặp giựt giựt. Tắt hẳn tính năng đó. */
+html,body{margin:0;padding:0;overflow-anchor:none}
 body{
   --ink:#0A2540; --ink2:#3C5A73; --line:#D3DCE4; --paper:#EEF2F5;
   --card:#FFFFFF; --acc:#E05A00; --ok:#0F7A4A; --ng:#C42B1C; --na:#7A8A99;
@@ -214,6 +217,8 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
 .vp-photo-del{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;border:1px solid var(--line);
   background:var(--ng);color:#fff;font-size:11px;font-weight:800;line-height:18px;text-align:center;cursor:pointer;padding:0}
 .vp-photo-note{font-size:11.5px;color:var(--ink2);line-height:1.35;margin-bottom:6px}
+.vp-hint{font-size:11.5px;color:var(--ink2);line-height:1.4;align-self:center}
+.vp-hint b{color:var(--acc)}
 /* Hướng dẫn làm đúng, hiện trong phần chi tiết của mỗi mục */
 .hd{border-top:1px dashed var(--line);margin-top:9px;padding-top:9px}
 .hd-h{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
@@ -625,6 +630,7 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
     <div class="bb-grid">
       <div class="bb-field"><label>Địa điểm / vị trí tàu khi kiểm tra</label><input id="bb-diadiem" placeholder="VD: Cảng Dầu khí Vietsovpetro / đang neo đậu..."></div>
       <div class="bb-field"><label>Đơn vị quản lý tàu</label><input id="bb-donvi" placeholder="VD: XN VTB&CTL"></div>
+      <div class="bb-field"><label>Đánh giá lại — theo biên bản ngày</label><input id="bb-theobb" type="date"></div>
     </div>
 
     <div class="bb-sec">1. Thành phần đoàn kiểm tra</div>
@@ -651,6 +657,7 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
     <div class="vp-actions">
       <button id="bb-nap-vipham" class="acc2">↓ Nạp từ checklist (mục ✕)</button>
       <button id="bb-add-vipham">+ Thêm dòng trống</button>
+      <button id="bb-de-han">⏱ Đề xuất thời hạn</button>
     </div>
     <div id="bb-vipham"></div>
 
@@ -2364,6 +2371,13 @@ function homNay() {
   return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (n < 10 ? "0" : "") + n;
 }
 
+function ttSelect(i, val) {
+  return '<select class="vp-sel" data-vp="' + i + '" data-f="tt">' +
+    TT_DONG.map(function (o) {
+      return '<option value="' + o[0] + '"' + (o[0] === (val || "moi") ? " selected" : "") +
+        ">" + esc(o[1]) + "</option>";
+    }).join("") + "</select>";
+}
 function bpSelect(i, val) {
   return '<select class="vp-sel" data-vp="' + i + '" data-f="bp">' +
     BO_PHAN.map(function (o) {
@@ -2931,8 +2945,10 @@ function blankBB() {
     doan: [{ ten: "", chuc: "", donvi: "" }],
     coso: "", truongdoan: "",
     thuyentruong: "", soc3: "",
-    kinhgui: "- Giám đốc XN VTB&CTL;\n- Trưởng phòng TCNS XN VTB&CTL;\n" +
-             "- Trưởng phòng KH-KTT;\n- Trưởng phòng BDKT&SC XN VTB&CTL.",
+    kinhgui: "- Giám đốc XN VTB&CTL;\n- Trưởng phòng AT-MT XN VTB&CTL;\n" +
+             "- Trưởng phòng BDKT&SC XN VTB&CTL;\n- Trưởng phòng TC-NS XN VTB&CTL;\n" +
+             "- Trưởng phòng KH-KTT XN VTB&CTL.",
+    theobb: "",
     viPham: [],
     khuyenCao: []
   };
@@ -2950,7 +2966,15 @@ function load() {
       if (!bb.viPham) bb.viPham = [];
       if (!bb.khuyenCao) bb.khuyenCao = [];
       /* Dữ liệu cũ chỉ có 1 ảnh (photo) — chuyển sang danh sách ảnh (photos) */
+      /* Dữ liệu cũ dùng ô "Ý kiến của tàu"; nay cột đó là "Ghi chú" */
+      (bb.viPham || []).forEach(function (r) {
+        if (r.ghichu == null) r.ghichu = r.ykien || "";
+        if (r.tt == null) r.tt = "moi";
+        if (r.kp == null) r.kp = "";
+        if (r.ctd == null) r.ctd = "";
+      });
       if (bb.thuyentruong == null) bb.thuyentruong = "";
+      if (bb.theobb == null) bb.theobb = "";
       if (bb.soc3 == null) bb.soc3 = "";
       if (!bb.kinhgui) bb.kinhgui = blankBB().kinhgui;
       bb.viPham.forEach(function (r) {
@@ -3057,26 +3081,52 @@ document.getElementById("jump").addEventListener("change", function () {
    Thu gọn làm trang NGẮN ĐI khoảng 120 px, nên nếu chỉ xét chiều cao hiện tại thì
    trang ngắn sẽ nhấp nháy: thu gọn → hết chỗ cuộn → bung ra → lại thu gọn.
    Vì vậy cộng bù phần đã giấu trước khi xét, và chỉ thu gọn khi trang đủ dài. */
-var scTick = false;
+/* ══════ THU GỌN ĐẦU TRANG KHI CUỘN ══════
+   Thu gọn làm trang NGẮN ĐI khoảng 110 px. Nếu đang ở gần cuối trang, trình
+   duyệt kéo tụt vị trí cuộn lại cho vừa — vị trí mới có thể rơi xuống dưới
+   ngưỡng mở ra, thế là mở ra, trang dài lại, cuộn trả về, lại thu gọn. Đó
+   chính là cái giựt giựt.
+
+   Chặn bằng ba lớp:
+   1. Đổi trạng thái xong thì KHÓA 400 ms, để cú xê dịch do chính nó gây ra
+      không kích hoạt lần nữa.
+   2. Chỉ thu gọn khi đang cuộn XUỐNG, chỉ mở khi cuộn NGƯỢC LÊN quá 24 px —
+      vùng chết ở giữa nên rung tay vài pixel không làm gì cả.
+   3. Trang ngắn thì không thu gọn. */
+var scTick = false, scKhoa = 0, scY = 0, scDay = 0;
 function scDangThuGon() { return document.body.className.indexOf("sc") >= 0; }
 function scDatThuGon(bat) {
   if (bat === scDangThuGon()) return;
   document.body.className = bat
     ? document.body.className + " sc"
     : document.body.className.replace(/\s*\bsc\b/g, "");
+  scKhoa = new Date().getTime() + 400;
+  scDay = 0;
 }
 window.addEventListener("scroll", function () {
   if (scTick || !window.requestAnimationFrame) return;
   scTick = true;
   window.requestAnimationFrame(function () {
+    scTick = false;
     var y = window.scrollY || window.pageYOffset || 0;
+    var dy = y - scY;
+    scY = y;
+
+    if (new Date().getTime() < scKhoa) return;
+
     var de = document.documentElement;
     var thua = de.scrollHeight - window.innerHeight;
-    if (scDangThuGon()) thua += 120;          /* cộng lại phần đầu trang đang bị giấu */
-    if (thua < 420) scDatThuGon(false);       /* trang ngắn thì để nguyên, khỏi nhấp nháy */
-    else if (y > 90) scDatThuGon(true);
-    else if (y < 40) scDatThuGon(false);
-    scTick = false;
+    if (scDangThuGon()) thua += 120;       /* cộng lại phần đầu trang đang bị giấu */
+    if (thua < 480) { scDatThuGon(false); return; }
+
+    if (y < 24) { scDatThuGon(false); return; }
+
+    /* cộng dồn quãng cuộn cùng chiều, đổi chiều thì đếm lại từ đầu */
+    if ((dy > 0) !== (scDay > 0)) scDay = 0;
+    scDay += dy;
+
+    if (scDay > 40 && y > 110) scDatThuGon(true);
+    else if (scDay < -24) scDatThuGon(false);
   });
 }, false);
 
@@ -3276,7 +3326,7 @@ var HD_MAU = [
     chuan:"Mọi cửa và nắp đóng kín được, gioăng đàn hồi liên tục, đủ chốt, thử kín theo chu kỳ có ghi chép, cửa kín nước tự động thao tác được cả tại chỗ và từ xa.",
     huong:"Thử kín bằng phấn hoặc tờ giấy quanh chu vi ngay trước mặt. Thao tác cửa kín nước tự động từ buồng lái và tại chỗ.",
     loi:"Gioăng bị ép lún không đàn hồi; chốt thiếu; cửa tự động lâu không thao tác nên kẹt." },
-  { k:"neo", ten:"Neo & thiết bị buộc tàu", tu:"neo tau,anchor,xich neo,ham xich,toi neo,windlass,day buoc tau,mooring,coc bich,chan xich,stopper,sung ban day,line throwing",
+  { k:"neo", ten:"Neo & thiết bị buộc tàu", tu:"neo tau,anchor,xich neo,ham xich,toi neo,windlass,day buoc tau,mooring,coc bich,chan xich,stopper,to day buoc",
     chuan:"Tời neo và tời buộc hoạt động, phanh ăn, xích được đánh dấu độ dài, dây buộc còn tốt không mòn không xoắn, có kế hoạch buộc tàu và ai cũng biết vùng nguy hiểm của dây.",
     huong:"Cho thao tác thả và kéo neo một lần. Chỉ cho thuyền viên vùng bật dây (snap-back zone) ngay trên boong — nhiều người chưa từng được chỉ.",
     loi:"Phanh tời trượt; dây buộc mòn vẫn dùng; không ai biết vùng bật dây nên đứng sai chỗ." },
@@ -3340,6 +3390,14 @@ var HD_MAU = [
     chuan:"Nắm được trọng điểm kiểm tra đang áp dụng, tự kiểm trước theo danh mục đó, mọi khiếm khuyết kỳ trước đã đóng có bằng chứng, hồ sơ sẵn sàng lấy ra ngay.",
     huong:"Tự chạy trước một lượt theo đúng danh mục PSC đang tập trung, nghiêm khắc như người ngoài. Chỗ nào mình còn lăn tăn thì họ cũng sẽ hỏi.",
     loi:"Chỉ chuẩn bị khi biết sắp bị kiểm tra; khiếm khuyết kỳ trước đóng bằng lời nói; hồ sơ tìm cả buổi không thấy." },
+  { k:"sungbanday", ten:"Súng bắn dây & pháo hiệu cấp cứu", tu:"sung ban day,line throwing,phao hieu cap cuu,phao du,phao khoi,distress signal,rocket,phao sang",
+    chuan:"Đủ số theo Fire control plan và Record of Equipment, còn hạn dùng, để trong hộp kín nước tại vị trí ghi trên sơ đồ, thuyền viên biết lấy và biết bắn.",
+    huong:"Mở hộp ra đếm thật và đọc hạn trên từng ống trước mặt thuyền viên. Hỏi ai được phép bắn và bắn theo hướng nào. Nhắc rằng hết hạn phải giao bờ tiêu hủy, tuyệt đối không vứt xuống biển.",
+    loi:"Thiếu so với Fire control plan mà bảng kê vẫn ghi đủ; quá hạn vẫn để trong hộp; hộp han gỉ không mở được; không ai từng cầm thử." },
+  { k:"nkbd", ten:"Nhật ký bảo dưỡng & sổ thử thiết bị", tu:"nhat ky bao duong,so bao duong,so thu thiet bi,bao tri tot,thiet bi dinh vi,so ghi thu,ket qua thu,bien ban thu,so theo doi thiet bi",
+    chuan:"Mỗi lần bảo dưỡng hoặc thử đều có một dòng riêng, ghi ngay sau khi làm xong, khớp với chu kỳ trong PMS.",
+    huong:"Cách ghi một dòng cho đúng — bắt buộc đủ SÁU thứ, thiếu một là dòng đó vô giá trị:\n1. NGÀY GIỜ thực hiện.\n2. TÊN và SỐ HIỆU thiết bị (ghi rõ máy nào, đừng ghi chung là “radar”).\n3. LÀM GÌ — bảo dưỡng theo hạng mục nào của PMS, hay thử chức năng gì.\n4. KẾT QUẢ ĐO ĐƯỢC bằng con số, không ghi “tốt”. Ví dụ: điện trở cách điện 12 MΩ; áp lực 5,2 bar; sai số GPS 8 m; ắc quy 25,8 V.\n5. PHÁT HIỆN gì bất thường và ĐÃ XỬ LÝ ra sao; chưa xử lý được thì ghi rõ chờ gì.\n6. HỌ TÊN và CHỮ KÝ người làm, sỹ quan phụ trách ký xác nhận.\nSửa sai thì gạch một nét, ghi lại bên cạnh và ký nháy — không tẩy, không bút xóa, không xé trang.\nLàm mẫu một dòng trước mặt họ rồi bắt họ tự ghi dòng tiếp theo, xem có đủ sáu thứ không.",
+    loi:"Ghi “tốt”, “bình thường”, “OK” thay cho số đo — dòng như vậy không chứng minh được gì khi PSC hỏi; ghi dồn cả tháng vào một buổi; chỉ ghi thiết bị chạy tốt, thiết bị hỏng thì bỏ trống; không ai ký xác nhận." },
 ];
 var HD_CHUNG = {
   k: "chung", ten: "Nguyên tắc chung",
@@ -3380,6 +3438,9 @@ function hdChon(it, groupName) {
   return HD_CACHE[it.id];
 }
 
+/* Vài mẫu có nhiều dòng (ví dụ cách ghi một dòng nhật ký cho đủ) */
+function hdD(s) { return esc(s).replace(/\n/g, "<br>"); }
+
 function hdHtml(it, groupName) {
   /* Tab QUAN SÁT đã viết sẵn đủ sáu phần trong phần mô tả, không cần mẫu */
   if (String(it.id).indexOf("qs-") === 0 || String(it.id).indexOf("tt") === 0) return "";
@@ -3388,9 +3449,9 @@ function hdHtml(it, groupName) {
   return '<div class="hd"><div class="hd-h">Làm đúng thì phải thế nào' +
     (chung ? "" : " — " + esc(m.ten)) + "</div>" +
     '<div class="hd-b">' +
-    "<p><b>Chuẩn đúng:</b> " + esc(m.chuan) + "</p>" +
-    "<p><b>Cách chỉ lại cho thuyền viên:</b> " + esc(m.huong) + "</p>" +
-    "<p><b>Lỗi hay gặp:</b> " + esc(m.loi) + "</p>" +
+    "<p><b>Chuẩn đúng:</b> " + hdD(m.chuan) + "</p>" +
+    "<p><b>Cách chỉ lại cho thuyền viên:</b> " + hdD(m.huong) + "</p>" +
+    "<p><b>Lỗi hay gặp:</b> " + hdD(m.loi) + "</p>" +
     "</div>" +
     '<div class="hd-n">' + (chung
       ? "Mục này chưa có hướng dẫn riêng theo chủ đề nên đang dùng nguyên tắc chung."
@@ -3886,22 +3947,28 @@ function drawViPham() {
       lsrSelect(i, r.lsr) +
       '<textarea placeholder="Nội dung vi phạm / điểm chưa phù hợp – tài liệu liên quan" data-vp="' + i + '" data-f="noidung">' + esc(r.noidung) + '</textarea>' +
       '<div class="vp-two">' +
-        '<input placeholder="Thời hạn hoàn thành" data-vp="' + i + '" data-f="thoihan" value="' + esc(r.thoihan) + '">' +
+        '<input placeholder="Thời hạn — app tự đề xuất, sửa được" data-vp="' + i + '" data-f="thoihan" value="' + esc(r.thoihan) + '">' +
         '<input placeholder="Trách nhiệm thực hiện" data-vp="' + i + '" data-f="trachnhiem" value="' + esc(r.trachnhiem) + '">' +
+      '</div>' +
+      '<div class="vp-two" style="margin-top:6px">' +
+        ttSelect(i, r.tt) +
+        '<div class="vp-hint">Cột <b>Khắc phục / thời hạn</b> sẽ in ra: <b>' +
+          esc(khacPhucText(r)) + '</b></div>' +
       '</div>' +
       '<div class="vp-two" style="margin-top:6px">' +
         bpSelect(i, r.bp) + plSelect(i, r.pl) +
       '</div>' +
       '<div class="vp-two" style="margin-top:6px">' +
         '<input placeholder="Căn cứ (ISM 10.1, SOLAS III/20…)" data-vp="' + i + '" data-f="cc" value="' + esc(r.cc || "") + '">' +
-        '<input placeholder="Ý kiến của tàu" data-vp="' + i + '" data-f="ykien" value="' + esc(r.ykien || "") + '">' +
+        '<input placeholder="Ghi chú gửi tàu — để trống thì lấy Biện pháp khắc phục" data-vp="' + i + '" data-f="ghichu" value="' + esc(r.ghichu || "") + '">' +
       '</div>' +
       '<div class="vp-two" style="margin-top:6px">' +
         '<textarea placeholder="Biện pháp khắc phục — làm gì, ai làm" data-vp="' + i + '" data-f="kp">' + esc(r.kp || "") + '</textarea>' +
         '<textarea placeholder="Chống tái diễn — sửa vào đâu trong hệ thống" data-vp="' + i + '" data-f="ctd">' + esc(r.ctd || "") + '</textarea>' +
       '</div>' +
       '<div class="vp-photo-note" style="margin:5px 0 0">Hai ô này CHỈ in ở bản báo cáo kèm ảnh. ' +
-        'Bản in để ký không có, trừ khi anh chọn khác lúc xuất file.</div>' +
+        'Bản in để ký không có, trừ khi anh chọn khác lúc xuất file. ' +
+        'Cột <b>Ghi chú</b> có ở cả hai bản — đó là chỗ gửi xuống tàu để tàu ghi ý kiến thêm.</div>' +
       '<label class="vp-c3' + (r.c3 ? "" : " off") + '">' +
         '<input type="checkbox" data-vpc3="' + i + '"' + (r.c3 ? " checked" : "") + '>' +
         '<span>Đưa mục này vào <b>Biên bản đánh giá kiểm tra cấp III</b></span></label>' +
@@ -3975,6 +4042,7 @@ function openBB() {
   document.getElementById("bb-truongdoan").value = bb.truongdoan;
   document.getElementById("bb-thuyentruong").value = bb.thuyentruong || "";
   document.getElementById("bb-kinhgui").value = bb.kinhgui || "";
+  document.getElementById("bb-theobb").value = bb.theobb || "";
   document.getElementById("bb-soc3").value = bb.soc3 || "";
   var radio = document.querySelector('input[name="gd"][value="' + bb.giaidoan + '"]');
   if (radio) radio.checked = true;
@@ -3986,13 +4054,14 @@ function openBB() {
 }
 
 ["bb-so","bb-tungay","bb-denngay","bb-nhathau","bb-diadiem","bb-donvi","bb-coso","bb-truongdoan",
- "bb-thuyentruong","bb-kinhgui","bb-soc3"]
+ "bb-thuyentruong","bb-kinhgui","bb-soc3","bb-theobb"]
 .forEach(function (id) {
   document.getElementById(id).addEventListener("input", function () {
     var map = { "bb-so":"so","bb-tungay":"tuNgay","bb-denngay":"denNgay",
       "bb-nhathau":"nhathau","bb-diadiem":"diadiem","bb-donvi":"donvi",
       "bb-coso":"coso","bb-truongdoan":"truongdoan",
-      "bb-thuyentruong":"thuyentruong","bb-kinhgui":"kinhgui","bb-soc3":"soc3" };
+      "bb-thuyentruong":"thuyentruong","bb-kinhgui":"kinhgui","bb-soc3":"soc3",
+      "bb-theobb":"theobb" };
     bb[map[id]] = this.value;
     save();
   });
@@ -4022,10 +4091,18 @@ document.getElementById("bb-doan").addEventListener("click", function (e) {
 });
 
 /* --- Bảng vi phạm --- */
+document.getElementById("bb-de-han").onclick = function () {
+  var n = buThoiHan();
+  drawViPham(); save();
+  alert(n ? "Đã đề xuất thời hạn cho " + n + " dòng còn trống.\n\n" +
+    "Quy ước: mức ① Ngay lập tức · ② Trước khi rời bến · ③ hẹn tháng sau · ④ Lên kế hoạch.\n" +
+    "Sửa lại từng dòng theo thực tế trước khi xuất file."
+    : "Mọi dòng đều đã có thời hạn hoặc đã đánh dấu Đã khắc phục / Chưa được cấp.");
+};
 document.getElementById("bb-add-vipham").onclick = function () {
   bb.viPham.push({ noidung: "", thoihan: "", trachnhiem: "", lsr: "", muc: "",
-    bp: "khac", pl: "nc", c3: true, cc: "", ykien: "", kp: "", ctd: "",
-    mucId: "", photos: [] });
+    bp: "khac", pl: "nc", c3: true, cc: "", ghichu: "", kp: "", ctd: "",
+    tt: "moi", mucId: "", photos: [] });
   drawViPham(); save();
 };
 document.getElementById("bb-nap-vipham").onclick = function () {
@@ -4054,11 +4131,11 @@ document.getElementById("bb-nap-vipham").onclick = function () {
           if (cu.photos.indexOf(x.ph[q]) < 0 && cu.photos.length < MAX_PHOTO) cu.photos.push(x.ph[q]);
         }
       }
-    } else bb.viPham.push({ noidung: text, thoihan: "", trachnhiem: "",
+    } else bb.viPham.push({ noidung: text, thoihan: deXuatHan(x.m), trachnhiem: "",
       lsr: "", muc: x.m || "", bp: guessBP(x.g, x.t),
       pl: (x.m === "4" ? "obs" : "nc"), c3: true,
-      cc: x.ref || "", ykien: "", kp: "", ctd: "",
-      mucId: x.id || "", photos: (x.ph || []).slice(0, MAX_PHOTO) });
+      cc: x.ref || "", ghichu: "", kp: "", ctd: "",
+      tt: "moi", mucId: x.id || "", photos: (x.ph || []).slice(0, MAX_PHOTO) });
   });
   /* Xếp lại toàn bảng theo mức độ: dừng ngay lên đầu */
   bb.viPham.forEach(function (r, k) { r._k = k; });
@@ -4418,6 +4495,22 @@ function dmY(iso) {
   if (p.length !== 3 || !p[0]) return "…… tháng …… năm ……";
   return (+p[2]) + " tháng " + (+p[1]) + " năm " + p[0];
 }
+/* Câu mở đầu. Có ngày biên bản kỳ trước thì viết theo kiểu ĐÁNH GIÁ LẠI, đúng
+   như mẫu báo cáo thật của đơn vị; không có thì viết theo kiểu kiểm tra thường. */
+function moDauText() {
+  var ten = tenTau();
+  var noi = (bb.diadiem || "").replace(/^\s+|\s+$/g, "");
+  if ((bb.theobb || "").replace(/\s/g, "")) {
+    return "Theo Biên bản kiểm tra ngày " + fmtDate(bb.theobb) + ", ngày " +
+      fmtDate(bb.denNgay || bb.tuNgay) + " đoàn kiểm tra đã tiến hành đánh giá lại tàu " + ten +
+      (noi ? " tại " + noi : "") + ".";
+  }
+  return "Thực hiện kế hoạch kiểm tra an toàn tàu (" + loaiKTText() + "), từ ngày " +
+    fmtDate(bb.tuNgay) + " đến ngày " + fmtDate(bb.denNgay) +
+    " đoàn kiểm tra đã tiến hành kiểm tra tình trạng kỹ thuật và đánh giá nội bộ tàu " + ten +
+    (noi ? " tại " + noi : "") + ".";
+}
+
 function kinhGuiLines() {
   var out = [];
   String(bb.kinhgui || "").split("\n").forEach(function (x) {
@@ -4453,13 +4546,44 @@ function kcAll()  {
 function c3Main() { return vpMain().filter(function (r) { return r.c3; }); }
 function c3KN()   { return vpKN().filter(function (r) { return r.c3; }); }
 
-/* Cột "Khắc phục / thời hạn" của báo cáo */
+/* ── Cột "Khắc phục / thời hạn" ──
+   Viết theo đúng quy ước trong báo cáo thật của đơn vị:
+     Đã khắc phục · Chưa được cấp · Ngay lập tức(mới) · 09/2026(mới) · Lên kế hoạch(mới)
+   Đuôi "(mới)" đánh dấu phát hiện của chính kỳ này, phân biệt với tồn đọng kỳ trước. */
+var TT_DONG = [
+  ["moi",     "Phát hiện mới kỳ này"],
+  ["ton",     "Tồn đọng kỳ trước"],
+  ["xong",    "Đã khắc phục"],
+  ["chuacap", "Chưa được cấp"]
+];
+/* App tự đề xuất, anh sửa lại sau */
+function deXuatHan(muc) {
+  if (muc === "1") return "Ngay lập tức";
+  if (muc === "2") return "Trước khi rời bến";
+  if (muc === "4") return "Lên kế hoạch";
+  /* Mức 3 hoặc chưa chọn mức: hẹn sang tháng sau, ghi theo kiểu MM/YYYY */
+  var d = new Date();
+  d.setMonth(d.getMonth() + 1);
+  var m = d.getMonth() + 1;
+  return (m < 10 ? "0" : "") + m + "/" + d.getFullYear();
+}
+/* Bù thời hạn cho mọi dòng còn trống; trả về số dòng đã bù */
+function buThoiHan() {
+  var n = 0, i;
+  for (i = 0; i < bb.viPham.length; i++) {
+    var r = bb.viPham[i];
+    if (r.tt === "xong" || r.tt === "chuacap") continue;
+    if ((r.thoihan || "").replace(/\s/g, "")) continue;
+    r.thoihan = deXuatHan(r.muc);
+    n++;
+  }
+  return n;
+}
 function khacPhucText(r) {
-  var a = [];
-  if (r.muc) a.push(MUC_SHORT[r.muc]);
-  if ((r.thoihan || "").trim()) a.push(r.thoihan.trim());
-  if (!a.length) a.push("Ngay lập tức");
-  return a.join("\n");
+  if (r.tt === "xong") return "Đã khắc phục";
+  if (r.tt === "chuacap") return "Chưa được cấp";
+  var s = (r.thoihan || "").replace(/^\s+|\s+$/g, "") || deXuatHan(r.muc);
+  return s + (r.tt === "ton" ? "" : "(mới)");
 }
 /* Cột "Biện pháp khắc phục & chống tái diễn" — CHỈ có ở bản kèm ảnh */
 function kpCtdText(r) {
@@ -4475,11 +4599,15 @@ function coKpCtd() {
   return false;
 }
 
-/* Cột "Ý kiến của tàu" */
-function yKienText(r) {
+/* ── Cột "Ghi chú" ──
+   Trong mẫu thật, cột này là chỗ ghi CÁCH KHẮC PHỤC gửi xuống tàu, rồi tàu tự
+   ghi ý kiến thêm vào. Trống thì lấy tạm phần Biện pháp khắc phục đã soạn. */
+function ghiChuText(r) {
   var a = [];
-  if ((r.ykien || "").trim()) a.push(r.ykien.trim());
-  if ((r.trachnhiem || "").trim()) a.push("Phụ trách: " + r.trachnhiem.trim());
+  var g = (r.ghichu || "").replace(/^\s+|\s+$/g, "");
+  if (!g) g = (r.kp || "").replace(/^\s+|\s+$/g, "");
+  if (g) a.push(g);
+  if ((r.trachnhiem || "").replace(/^\s+|\s+$/g, "")) a.push("Phụ trách: " + r.trachnhiem.replace(/^\s+|\s+$/g, ""));
   return a.join("\n");
 }
 /* Nội dung một phát hiện: nhãn LSR + căn cứ đi kèm */
@@ -4537,17 +4665,16 @@ function buildBaoCaoHTML(withPhotos, kemKP) {
 
   h += '<div class="t1" style="margin-top:6pt">BÁO CÁO<br>ДОКЛАД</div>';
   h += '<p style="text-align:center;font-style:italic">V/v: “Kết quả kiểm tra tình trạng kỹ thuật ' +
-       'và đánh giá nội bộ tàu ' + esc(ten) + '”</p>';
+       'và đánh giá nội bộ tàu ' + esc(ten) + '”.</p>';
+  h += '<p style="text-align:center;font-style:italic">Кас: «Отчёт о результатах технического ' +
+       'осмотра и внутреннего анализа состояния судна ' + esc(ten) + '».</p>';
 
-  h += '<p style="margin-top:6pt"><b>Kính gửi:</b></p>';
+  h += '<p style="margin-top:6pt"><b>Kính gửi:</b> <i>Кому:</i></p>';
   kinhGuiLines().forEach(function (x) {
     h += '<p style="padding-left:8mm">' + esc(x) + '</p>';
   });
 
-  h += '<p class="j" style="margin-top:6pt">Thực hiện kế hoạch kiểm tra an toàn tàu (' +
-       esc(loaiKTText()) + '), từ ngày ' + fmtDate(bb.tuNgay) + ' đến ngày ' + fmtDate(bb.denNgay) +
-       ' đoàn kiểm tra đã tiến hành kiểm tra tình trạng kỹ thuật và đánh giá nội bộ tàu ' + esc(ten) +
-       ((bb.diadiem || "").trim() ? ' tại ' + esc(bb.diadiem.trim()) : '') + '.</p>';
+  h += '<p class="j" style="margin-top:6pt">' + esc(moDauText()) + '</p>';
 
   h += '<p style="margin-top:3pt">Thành viên đoàn kiểm tra:</p>';
   var dl = doanLines();
@@ -4564,11 +4691,11 @@ function buildBaoCaoHTML(withPhotos, kemKP) {
        (kemKP
          ? '<th style="width:37%">Những công việc phải làm</th>' +
            '<th style="width:26%">Biện pháp khắc phục &amp; chống tái diễn</th>' +
-           '<th style="width:14%">Thời hạn</th>' +
-           '<th style="width:18%">Ý kiến của tàu</th></tr>'
+           '<th style="width:14%">Khắc phục / thời hạn</th>' +
+           '<th style="width:18%">Ghi chú</th></tr>'
          : '<th style="width:51%">Những công việc phải làm</th>' +
            '<th style="width:20%">Khắc phục / thời hạn</th>' +
-           '<th style="width:24%">Ý kiến của tàu</th></tr>');
+           '<th style="width:24%">Ghi chú</th></tr>');
   if (!vp.length) {
     h += '<tr><td class="c h">1</td><td>Không phát hiện</td><td></td><td></td>' +
          (kemKP ? "<td></td>" : "") + "</tr>";
@@ -4584,14 +4711,15 @@ function buildBaoCaoHTML(withPhotos, kemKP) {
            '<td>' + nl(ndText(r)) + ph + '</td>' +
            (kemKP ? "<td>" + nl(kpCtdText(r)) + "</td>" : "") +
            '<td class="c' + nang + '">' + nl(khacPhucText(r)) + '</td>' +
-           '<td>' + nl(yKienText(r)) + '</td></tr>';
+           '<td>' + nl(ghiChuText(r)) + '</td></tr>';
     });
   }
   h += '</table>';
 
   h += tongHopHTML();
 
-  h += '<p style="margin-top:5pt"><b>Kiến nghị đề xuất:</b></p>';
+  h += '<p style="margin-top:5pt"><b>Kiến nghị đề xuất:</b> ' +
+       '<i>Рекомендации для рассмотрения:</i></p>';
   if (!kn.length && !kc.length) {
     h += '<p style="padding-left:8mm">- Không</p>';
   } else {
@@ -4603,7 +4731,7 @@ function buildBaoCaoHTML(withPhotos, kemKP) {
     });
   }
 
-  h += '<p style="margin-top:6pt"><b>Kính báo cáo.</b></p>';
+  h += '<p style="margin-top:6pt"><b>Kính báo cáo!</b> <i>С уважением!</i></p>';
 
   h += '<table class="gd" style="width:100%;margin-top:10pt"><tr>' +
        '<td style="width:50%;text-align:center"><b>THÀNH VIÊN ĐOÀN KIỂM TRA</b><br><br><br>' +
@@ -4611,11 +4739,10 @@ function buildBaoCaoHTML(withPhotos, kemKP) {
        '<td style="width:50%;text-align:center"><b>THUYỀN TRƯỞNG TÀU ' + esc(ten.toUpperCase()) +
        '</b><br><br><br>' + esc((bb.thuyentruong || "").trim()) + '</td></tr></table>';
 
-  h += '<div class="recv"><div class="h">Nơi nhận:</div><div class="li">' +
-       '<div>- Như trên;</div>' +
-       '<div>- Phòng ATSKMT LD Việt-Nga Vietsovpetro;</div>' +
+  h += '<div class="recv"><div class="h">Nơi nhận/Рассылка:</div><div class="li">' +
+       '<div>- Như trên/Как указано выше;</div>' +
        '<div>- Tàu ' + esc(ten) + ' — lưu trên tàu;</div>' +
-       '<div>- Lưu: XN VTB&amp;CTL.</div></div></div>';
+       '<div>- Lưu: XN VTB&amp;CTL/В архив: ПМТиВР.</div></div></div>';
 
   h += f002Footer(DOC_TITLES.bc[2]);
   h += '</div>';
@@ -4662,7 +4789,7 @@ function buildC3HTML() {
            '<td class="c">' + (r.pl === "obs" ? "Obs" : "NC") + '</td>' +
            '<td class="c">' + esc(r.cc || "") + '</td>' +
            '<td class="c">' + nl(khacPhucText(r)) + '</td>' +
-           '<td>' + nl(yKienText(r)) + '</td></tr>';
+           '<td>' + nl(ghiChuText(r)) + '</td></tr>';
     });
   });
   if (!nsec) h += '<tr><td class="c h">1</td><td>Không phát hiện / None</td>' +
@@ -4676,7 +4803,7 @@ function buildC3HTML() {
     k++;
     h += '<tr><td class="c h">' + k + '</td><td>' + nl(r.noidung || "") + '</td><td></td>' +
          '<td class="c">' + esc(r.cc || "") + '</td>' +
-         '<td class="c">' + nl(khacPhucText(r)) + '</td><td>' + nl(yKienText(r)) + '</td></tr>';
+         '<td class="c">' + nl(khacPhucText(r)) + '</td><td>' + nl(ghiChuText(r)) + '</td></tr>';
   });
   kc.forEach(function (r) {
     k++;
@@ -5244,17 +5371,15 @@ function bodyBaoCao(ctx, withPhotos, kemKP) {
 
   b += dxPara(dxRun("BÁO CÁO", { b: true, sz: 30 }), { align: "center", before: 120, after: 20 });
   b += dxPara(dxRun("ДОКЛАД", { b: true, sz: 24 }), { align: "center", after: 40 });
-  b += dxPara(dxRun("V/v: “Kết quả kiểm tra tình trạng kỹ thuật và đánh giá nội bộ tàu " + ten + "”",
-    { i: true }), { align: "center", after: 140 });
+  b += dxPara(dxRun("V/v: “Kết quả kiểm tra tình trạng kỹ thuật và đánh giá nội bộ tàu " + ten + "”.",
+    { i: true }), { align: "center", after: 20 });
+  b += dxPara(dxRun("Кас: «Отчёт о результатах технического осмотра и внутреннего анализа " +
+    "состояния судна " + ten + "».", { i: true, sz: 23 }), { align: "center", after: 140 });
 
-  b += dxPara(dxRun("Kính gửi:", { b: true }));
+  b += dxPara(dxRun("Kính gửi:", { b: true }) + dxRun("  Кому:", { i: true, sz: 23 }));
   kinhGuiLines().forEach(function (x) { b += dxPara(dxRun(x), { ind: 460 }); });
 
-  b += dxPara(dxRun("Thực hiện kế hoạch kiểm tra an toàn tàu (" + loaiKTText() + "), từ ngày " +
-    fmtDate(bb.tuNgay) + " đến ngày " + fmtDate(bb.denNgay) + " đoàn kiểm tra đã tiến hành kiểm tra " +
-    "tình trạng kỹ thuật và đánh giá nội bộ tàu " + ten +
-    ((bb.diadiem || "").trim() ? " tại " + bb.diadiem.trim() : "") + "."),
-    { align: "both", before: 120, after: 40 });
+  b += dxPara(dxRun(moDauText()), { align: "both", before: 120, after: 40 });
 
   b += dxPara(dxRun("Thành viên đoàn kiểm tra:"));
   var dl = doanLines();
@@ -5270,9 +5395,9 @@ function bodyBaoCao(ctx, withPhotos, kemKP) {
   var rows = kemKP
     ? dxRow(thTop("TT", "No.", G[0]) + thTop("Những công việc phải làm", "", G[1]) +
         thTop("Biện pháp khắc phục & chống tái diễn", "", G[2]) +
-        thTop("Thời hạn", "", G[3]) + thTop("Ý kiến của tàu", "", G[4]))
+        thTop("Khắc phục / thời hạn", "", G[3]) + thTop("Ghi chú", "", G[4]))
     : dxRow(thTop("TT", "No.", G[0]) + thTop("Những công việc phải làm", "", G[1]) +
-        thTop("Khắc phục / thời hạn", "", G[2]) + thTop("Ý kiến của tàu", "", G[3]));
+        thTop("Khắc phục / thời hạn", "", G[2]) + thTop("Ghi chú", "", G[3]));
   if (!vp.length) {
     rows += dxRow(tdC(G[0], "1", { align: "center" }) + tdC(G[1], "Không phát hiện") +
       tdC(G[2], "") + tdC(G[3], "") + (kemKP ? tdC(G[4], "") : ""));
@@ -5297,7 +5422,7 @@ function bodyBaoCao(ctx, withPhotos, kemKP) {
         dxCell(G[1], cellND) +
         (kemKP ? tdC(G[2], kpCtdText(r), { sz: 22 }) : "") +
         tdC(kemKP ? G[3] : G[2], khacPhucText(r), { align: "center", b: nang }) +
-        tdC(kemKP ? G[4] : G[3], yKienText(r)), 400);
+        tdC(kemKP ? G[4] : G[3], ghiChuText(r)), 400);
     }
   }
   b += dxTable(G, rows) + dxPara("", { after: 80 });
@@ -5317,7 +5442,8 @@ function bodyBaoCao(ctx, withPhotos, kemKP) {
     cellTH("③ Có thời hạn", S.m3) + cellTH("④ Ghi nhận cải tiến", S.m4));
   b += dxTable(G4, rowsT) + dxPara("", { after: 100 });
 
-  b += dxPara(dxRun("Kiến nghị đề xuất:", { b: true }), { after: 40 });
+  b += dxPara(dxRun("Kiến nghị đề xuất:", { b: true }) +
+    dxRun("  Рекомендации для рассмотрения:", { i: true, sz: 23 }), { after: 40 });
   if (!kn.length && !kc.length) {
     b += dxPara(dxRun("- Không"), { ind: 460 });
   } else {
@@ -5330,7 +5456,8 @@ function bodyBaoCao(ctx, withPhotos, kemKP) {
     }
   }
 
-  b += dxPara(dxRun("Kính báo cáo.", { b: true }), { before: 140, after: 240 });
+  b += dxPara(dxRun("Kính báo cáo!", { b: true }) +
+    dxRun("  С уважением!", { i: true, sz: 23 }), { before: 140, after: 240 });
 
   var GS = [5102, 5103];
   b += dxTable(GS, dxRow(
@@ -5342,12 +5469,11 @@ function bodyBaoCao(ctx, withPhotos, kemKP) {
       dxPara(dxRun((bb.thuyentruong || "").trim(), { sz: 23 }), { align: "center", after: 0 }))
   ), "none");
 
-  b += dxPara(dxRun("Nơi nhận:", { i: true, u: true, sz: 22 }), { before: 160, after: 0 });
+  b += dxPara(dxRun("Nơi nhận/Рассылка:", { i: true, u: true, sz: 22 }), { before: 160, after: 0 });
   [
-    "- Như trên;",
-    "- Phòng ATSKMT LD Việt-Nga Vietsovpetro;",
+    "- Như trên/Как указано выше;",
     "- Tàu " + ten + " — lưu trên tàu;",
-    "- Lưu: XN VTB&CTL."
+    "- Lưu: XN VTB&CTL/В архив: ПМТиВР."
   ].forEach(function (t) { b += dxPara(dxRun(t, { sz: 22 }), { ind: 340, after: 0 }); });
 
   return b;
@@ -8771,12 +8897,12 @@ document.getElementById("lv-open").addEventListener("click", function () {
 function themViPhamTuAI(o) {
   bb.viPham.push({
     noidung: String(o.nd || ""),
-    thoihan: o.han || "", trachnhiem: o.tn || "",
+    thoihan: o.han || deXuatHan(o.muc), trachnhiem: o.tn || "",
     lsr: "", muc: o.muc || "",
     bp: o.bp || "khac", pl: o.pl || "nc", c3: true,
-    cc: o.cc || "", ykien: "",
+    cc: o.cc || "", ghichu: "",
     kp: o.kp || "", ctd: o.ctd || "",
-    mucId: o.mucId || "",
+    tt: "moi", mucId: o.mucId || "",
     photos: o.anh ? [o.anh] : []
   });
   save();
@@ -8866,7 +8992,7 @@ document.getElementById("bb-sync").onclick = function () {
 /* ===================== KHỞI ĐỘNG =====================
    APP_VER hiện ở góc phải đầu trang. Nếu số này không đổi sau khi cập nhật,
    nghĩa là trình duyệt còn giữ bản cũ trong bộ nhớ đệm — tải lại trang. */
-var APP_VER = "b\u1ea3n 2026-08-20/14";
+var APP_VER = "b\u1ea3n 2026-08-20/15";
 document.getElementById("ver").textContent = APP_VER;
 load();
 drawTabs();
