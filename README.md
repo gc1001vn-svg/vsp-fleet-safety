@@ -74,7 +74,7 @@ trên điện thoại (Add to Home Screen). Đây là **app dùng chung**, gồm
 
 ### 🚢 Đi kiểm tra — dùng tại tàu
 
-- **570 mục checklist**, chia 5 tab, xếp theo đúng **Phiếu đi tuyến kiểm tra
+- **637 mục checklist**, chia 6 tab, xếp theo đúng **Phiếu đi tuyến kiểm tra
   tàu** của Phòng An toàn & Môi trường (tổng ≈ 7 giờ làm việc):
   - **Hồ sơ** (144 mục / 14 nhóm) — Bước 0 chuẩn bị tại phòng, Bước 1 họp mở
     đầu, rồi **ngồi tại cabin** kiểm tra hồ sơ gộp theo loại: đăng kiểm, cứu sinh,
@@ -108,7 +108,7 @@ trên điện thoại (Add to Home Screen). Đây là **app dùng chung**, gồm
   BNWAS, máy lái tự động, đèn hành hải, còi, đo gió, thử máy lái 12 giờ.
 - Tiêu đề mục ngắn gọn; bấm vào mục để mở **hướng dẫn kiểm tra thực tế**: các
   bước làm, chỗ cần soi đèn, con số cần đọc trên thiết bị, cách đối chiếu chéo
-  giữa các hồ sơ và lỗi hay gặp. **Cả 570 mục đều đã có hướng dẫn**
+  giữa các hồ sơ và lỗi hay gặp. **Cả 637 mục đều đã có hướng dẫn**
   (trung bình ~300 ký tự/mục).
 - **Từ điển chú thích 206 mục** cho người chưa học hàng hải: mọi từ viết tắt và
   thuật ngữ có trong từ điển đều được **gạch chân chấm** ngay trong tiêu đề, dòng
@@ -151,6 +151,67 @@ trên điện thoại (Add to Home Screen). Đây là **app dùng chung**, gồm
 - **Xuất file Word thật** theo 4 mẫu: báo cáo điểm mạnh – điểm yếu; biên bản
   kiểm tra cấp IV (VSP-000-ATMT-452/F-001); danh mục sự ghi nhận và sự không
   phù hợp (VTB07-02-04A); báo cáo kết quả kiểm tra tình trạng tàu.
+
+### 🔍 Tìm kiếm trong checklist
+
+Nút **🔍 Tìm** trong dải lọc mở ô tìm kiếm gộp cả 6 tab. Thấy lỗi ngoài hiện
+trường thì gõ vài chữ là ra đúng mục, chấm điểm và **chụp ảnh ngay tại kết
+quả**; ảnh và mã mục theo sang biên bản khi bấm *Nạp từ checklist*.
+
+Chấm điểm theo **từ trọn vẹn** chứ không theo chuỗi con, cộng điểm khi trúng
+nguyên cụm và khi các từ nằm gần nhau. Gõ **có dấu** thì khớp đúng dấu ăn điểm
+áp đảo — đây là cách duy nhất tách "bảo ôn" khỏi "thông báo ổn định" sau khi bỏ
+dấu. Mặc định bắt buộc trúng mọi từ; không mục nào đạt mới nới ra và báo rõ là
+kết quả gần đúng.
+
+### 👁 Tab QUAN SÁT — 65 mục nhìn là thấy
+
+Bốn tab cũ kiểm tra theo hồ sơ và theo thiết bị, không có mục nào bắt phải xem
+rỉ sét, dầu mỡ, nước la canh, ngăn nắp, vật để sai chỗ. Sáu nhóm bổ sung:
+
+1. Ăn mòn, sơn & bảo dưỡng kết cấu (14) · 2. Vệ sinh, rò rỉ & môi trường (13)
+3. Ngăn nắp & chằng buộc (8) · 4. Vật để sai chỗ & vật cấm (12)
+5. Lối đi, chống ngã & bảo hộ (10) · 6. Biển báo, nhận biết & thiết bị (8)
+
+Mỗi mục ghi đủ sáu phần: dấu hiệu nhìn thấy, vị trí hay gặp, chuẩn đúng là thế
+nào, cách hướng dẫn thuyền viên, khắc phục, chống tái diễn.
+
+### 📖 Hướng dẫn làm đúng cho từng mục
+
+Phần *xem lưu ý* sẵn có nói **cách kiểm tra**. Phần này nói **chuẩn đúng là gì**
+và **cách chỉ lại cho thuyền viên** khi thấy họ làm sai, kèm lỗi hay gặp.
+
+Thư viện 49 mẫu theo chủ đề, gắn vào mục bằng **khớp cụm từ** — tách thành từ
+rời thì "thử", "van", "quản lý" khớp lung tung (bản thử đầu tiên gắn nhầm
+"Radar — thử vận hành" vào mẫu máy đo khí). Bắt buộc trúng ở **tiêu đề** mục
+mới tính là đúng chủ đề. Kết quả: **384 mục có mẫu chủ đề riêng, 188 mục dùng
+nguyên tắc chung** (app ghi rõ mục nào đang dùng mẫu chung), 65 mục tab QUAN
+SÁT đã có hướng dẫn viết riêng.
+
+### 📓 Sổ ghi nhận chuyến đi
+
+Quét trực tiếp **không báo động, không cắt ngang**. Mọi thứ máy thấy rơi vào sổ.
+Xong chuyến bấm **📓 Sổ**, soát lại, bỏ cái không cần, đưa một lượt sang biên bản.
+
+- **So khớp cục bộ** gắn lỗi máy mô tả vào 1 trong 637 mục, không tốn thêm lượt
+  gọi API. Gắn được thì tự đánh dấu mục đó *Không đạt* kèm ảnh và điền căn cứ.
+- Gán nhầm tệ hơn không gán, nên ngoài điểm số còn đòi: một **cặp từ liền nhau**
+  của câu mô tả phải nằm trong tiêu đề mục, và mục đầu phải hơn mục nhì một
+  khoảng rõ rệt. Thử 10 tình huống thật: 8 tự gắn đúng, 2 ca máy tự nhận không
+  chắc và đưa 3 mục gợi ý để bấm chọn.
+- Lỗi **không mục nào khớp** vẫn vào biên bản, kèm nút bổ sung thẳng vào
+  checklist (nhóm *Mục tự thêm* trong tab QUAN SÁT).
+- Nút **📸 chụp tay** cho chỗ máy không biết là vi phạm.
+- **Sổ mẫu lỗi** nhớ lại mọi thứ đã ghi nhận và nhắc cho máy ở các lần quét sau,
+  ưu tiên thứ do anh tự chụp.
+
+### 📄 Hai file báo cáo riêng biệt
+
+- **📷 Bản kèm ảnh** — 5 cột, có cột *Biện pháp khắc phục & chống tái diễn* ngay
+  cạnh cột nội dung, in kèm ảnh bằng chứng.
+- **🖊 Bản in để ký** — 4 cột, không ảnh, **không** có hai cột đó. Muốn đưa vào
+  thì app hỏi một câu, mặc định là không.
+- **📋 Biên bản cấp III** — giữ nguyên.
 
 ### 📈 Báo cáo tổng hợp theo thời gian (tab BÁO CÁO)
 

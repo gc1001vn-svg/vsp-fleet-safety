@@ -214,6 +214,15 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
 .vp-photo-del{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;border:1px solid var(--line);
   background:var(--ng);color:#fff;font-size:11px;font-weight:800;line-height:18px;text-align:center;cursor:pointer;padding:0}
 .vp-photo-note{font-size:11.5px;color:var(--ink2);line-height:1.35;margin-bottom:6px}
+/* Hướng dẫn làm đúng, hiện trong phần chi tiết của mỗi mục */
+.hd{border-top:1px dashed var(--line);margin-top:9px;padding-top:9px}
+.hd-h{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:5px}
+.hd-b{font-size:13px;line-height:1.55;color:var(--ink)}
+.hd-b b{color:var(--ink)}
+.hd-b p{margin:0 0 7px}
+.hd-b p:last-child{margin-bottom:0}
+.hd-n{margin-top:7px;font-size:11.5px;color:var(--na);line-height:1.45}
 /* Sổ ghi nhận chuyến đi */
 .so-r{border:1px solid var(--line);border-left:4px solid var(--ng);border-radius:9px;
   padding:11px 12px;margin-bottom:9px;background:#fff}
@@ -3116,7 +3125,7 @@ function draw() {
           "</div>";
       }
       html += "</div>";
-      if (isOpen) html += '<div class="det">' + glMark(esc(it.d)) + "</div>";
+      if (isOpen) html += '<div class="det">' + glMark(esc(it.d)) + hdHtml(it, g.g) + "</div>";
       if (st === "ng") {
         html += mucSelect("data-muc", it.id, (state[it.id] || {}).m, "muc");
         html += '<textarea class="note" data-note="' + it.id +
@@ -3132,6 +3141,261 @@ function draw() {
       'Bấm “Tất cả” ở thanh trên để xem lại toàn bộ.</div>';
   }
   document.getElementById("list").innerHTML = html;
+}
+
+var HD_MAU = [
+  { k:"gcn", ten:"Giấy chứng nhận & hồ sơ đăng kiểm", tu:"giay chung nhan,gcn,dang kiem,chung chi,certificate,co quan phan cap,ho so phap ly,giay quoc tich,dung tich,man kho,xac nhan hang nam,endorsement",
+    chuan:"Bản GỐC còn hiệu lực, có xác nhận (endorsement) đúng hạn của đăng kiểm, tên tàu và số IMO khớp nhau giữa các giấy, treo hoặc lưu nơi lấy ra được ngay.",
+    huong:"Mở đúng giấy ra và cùng thuyền viên đọc ba thứ: ngày hết hạn, ngày xác nhận gần nhất, và hạn xác nhận tiếp theo. Hướng dẫn lập bảng theo dõi hạn treo ở buồng lái, ai trực cũng thấy.",
+    loi:"Photo thay bản gốc; hết hạn xác nhận giữa kỳ mà tưởng còn hạn vì nhìn ngày hết hạn cuối; giấy để trong tủ khóa không ai mở được khi PSC hỏi." },
+  { k:"nk", ten:"Nhật ký (dầu, rác, nước dằn, boong, máy)", tu:"nhat ky,log book,so nhat ky,oil record book,ghi chep nhat ky,nhat ky dau,nhat ky rac,nhat ky boong,nhat ky may",
+    chuan:"Ghi ngay sau khi thao tác, đúng mã việc, đủ chữ ký sỹ quan phụ trách và thuyền trưởng, không tẩy xóa — sai thì gạch một nét, ghi lại và ký nháy bên cạnh.",
+    huong:"Cầm nhật ký đối chiếu với một thao tác thật vừa làm (hút la canh, giao rác, dằn nước). Cho thuyền viên tự ghi một dòng trước mặt để xem họ có làm đúng mã việc và chữ ký không.",
+    loi:"Ghi dồn nhiều ngày một lúc cho đẹp; dùng bút xóa; thiếu chữ ký thuyền trưởng; lượng ghi không khớp với sức chứa két." },
+  { k:"sotay", ten:"Sổ tay, kế hoạch & sơ đồ được phê duyệt", tu:"so tay,manual,ke hoach duoc duyet,duoc phe duyet,approved,sms,sopep,bwmp,seemp,cargo securing manual,ke hoach quan ly rac,so do bo tri",
+    chuan:"Đúng bản đã được phê duyệt, còn hiệu lực, có trang sửa đổi cập nhật, và nội dung khớp với thực tế bố trí thiết bị hiện tại trên tàu.",
+    huong:"Mở kế hoạch ra rồi cùng đi kiểm chứng một mục bất kỳ tại hiện trường. Nếu kế hoạch nói có thiết bị ở đó mà thực tế không có, đó là lỗi hệ thống chứ không phải lỗi giấy tờ.",
+    loi:"Bản chưa phê duyệt dùng như bản chính thức; sửa chữa thay đổi bố trí mà không cập nhật kế hoạch; thuyền viên chưa từng mở ra đọc." },
+  { k:"qd", ten:"Quyết định & phân công trách nhiệm nội bộ", tu:"quyet dinh,phan cong trach nhiem,bo nhiem,chi dinh nguoi,so do to chuc,phan cong nhiem vu",
+    chuan:"Còn hiệu lực, ghi rõ họ tên và chức danh người đang thực sự có mặt trên tàu, được phổ biến cho thuyền viên và niêm yết nơi dễ thấy.",
+    huong:"Hỏi trực tiếp người được phân công xem họ biết mình phụ trách việc gì. Không trả lời được nghĩa là quyết định chỉ nằm trên giấy.",
+    loi:"Tên người đã rời tàu vẫn còn trong quyết định; phân công chồng chéo hoặc bỏ trống một số việc." },
+  { k:"huanluyen", ten:"Huấn luyện & làm quen (familiarization)", tu:"huan luyen,dao tao,familiarization,lam quen,nguoi moi len tau,pho bien,tap huan,nhan thuc an toan",
+    chuan:"Người mới lên tàu được làm quen TRƯỚC khi giao ca đầu tiên, có biểu mẫu ký xác nhận, nội dung bám đúng vị trí và nhiệm vụ của người đó.",
+    huong:"Chọn người mới nhất trên tàu, dẫn ra hiện trường và hỏi vị trí tập trung, lối thoát, phao của mình ở đâu. Đó mới là kiểm tra làm quen thật, không phải nhìn chữ ký.",
+    loi:"Ký gộp cả tổ một lượt cho xong; làm quen sau nhiều ngày mới ký lùi ngày; nội dung chung chung không gắn với công việc thật." },
+  { k:"dientap", ten:"Diễn tập & thực tập", tu:"dien tap,drill,thuc tap,bao dong chung,abandon ship,roi tau,nguoi roi xuong bien,ung pho su co,thuc tap cuu sinh,thuc tap chua chay",
+    chuan:"Đúng chu kỳ quy định, làm THẬT với thiết bị thật, có tình huống cụ thể, ghi biên bản nêu rõ điểm chưa đạt và hành động khắc phục.",
+    huong:"Yêu cầu làm một tình huống bất ngờ ngay tại chỗ, đừng báo trước. Sau đó ngồi lại chỉ ra chỗ chậm và chỗ sai, rồi bắt làm lại một lần cho đúng.",
+    loi:"Biên bản ghi 'tốt' mọi lần, không bao giờ có điểm phải sửa; diễn tập trên giấy; hạ xuồng chỉ hạ tới mép mạn cho có." },
+  { k:"cuusinh", ten:"Thiết bị cứu sinh — phao, áo phao, bè", tu:"cuu sinh,lsa,phao tron,ao phao,be cuu sinh,phao bo,phao hieu,quan ao boi,immersion suit,lifebuoy,lifejacket,liferaft,bang phan quang,day phao",
+    chuan:"Đủ số lượng theo Record of Equipment, đúng vị trí trên sơ đồ, còn hạn kiểm định, đèn và còi hoạt động, dây và băng phản quang nguyên vẹn, không bị chằng buộc quá chặt đến mức khó lấy.",
+    huong:"Đếm thật theo Form E chứ đừng tin bảng kê. Bắt một thuyền viên mặc áo phao trong 60 giây trước mặt anh, thắt đủ dây. Rất nhiều người mặc sai mà không ai từng chỉ.",
+    loi:"Thiếu so với Form E nhưng bảng kê vẫn ghi đủ; đèn hết pin; áo phao chất trong kho khóa; dây phao ngắn hơn quy định." },
+  { k:"davit", ten:"Xuồng, bè, davit & thiết bị hạ", tu:"xuong cuu sinh,davit,thiet bi ha,ha xuong,on load release,tha be,day ha,toi ha,lifeboat,rescue boat,co cau nha",
+    chuan:"Thử vận hành theo chu kỳ, cơ cấu nhả có tải được kiểm tra và cài đặt lại đúng, dây hạ còn hạn, phanh tời ăn, không có vật cản trên đường hạ.",
+    huong:"Cho thuyền viên thao tác từ đầu tới cuối trước mặt anh, kể cả bước cài lại cơ cấu nhả. Đây là chỗ hay sai nhất và cũng là chỗ chết người nhiều nhất.",
+    loi:"Không ai dám thao tác vì lâu không làm; cơ cấu nhả cài sai sau lần thử trước; dây hạ quá hạn thay." },
+  { k:"epirb", ten:"EPIRB, SART, AIS, SSAS", tu:"epirb,sart,ssas,phao vo tuyen,distress beacon,mmsi,dang ky epirb,phao chi bao",
+    chuan:"Còn hạn pin và hạn kiểm định hằng năm, đăng ký đúng tên tàu và MMSI hiện tại, lắp đúng giá tự nổi, không bị chằng hay che, thử tự kiểm tra đạt.",
+    huong:"Bấm nút tự kiểm tra ngay trước mặt (đúng quy trình, không phát tín hiệu thật). Cho thuyền viên đọc to hạn pin ghi trên vỏ.",
+    loi:"Đổi tên tàu hoặc đổi chủ mà quên đăng ký lại; buộc dây giữ EPIRB làm nó không tự nổi được; pin hết hạn nhưng vẫn treo." },
+  { k:"binhchuachay", ten:"Bình chữa cháy xách tay & xe đẩy", tu:"binh chua chay,extinguisher,binh co2,binh bot,binh bot kho,xe day chua chay,niem phong binh",
+    chuan:"Đúng loại cho khu vực đó, đúng vị trí trên sơ đồ, có giá treo, còn niêm phong, kim áp suất trong vùng xanh, tem kiểm định còn hạn, có biển chỉ vị trí.",
+    huong:"Đối chiếu sơ đồ bố trí chữa cháy với thực tế từng bình. Cho thuyền viên đứng tại chỗ làm việc và chỉ nhanh bình gần nhất — ngập ngừng là đã có vấn đề.",
+    loi:"Bình để dưới sàn không giá; sai loại (dùng nước ở khu điện); tem quá hạn cả năm; bị đồ che khuất." },
+  { k:"cocdinh", ten:"Hệ thống chữa cháy cố định (CO2, bọt, phun sương)", tu:"he thong chua chay co dinh,tram co2,ngap chim,sprinkler,phun suong,he thong bot,foam system,bao dong xa",
+    chuan:"Van và đường ống thông, báo động xả hoạt động, cửa buồng CO2 khóa đúng quy định và chìa để nơi quy định, có hướng dẫn thao tác dán tại chỗ, đã thử theo chu kỳ.",
+    huong:"Cho sỹ quan phụ trách đọc to quy trình xả từ bảng hướng dẫn và chỉ tay từng bước trên thiết bị. Không cần xả thật vẫn kiểm tra được họ có biết làm không.",
+    loi:"Chìa khóa buồng CO2 không ai biết ở đâu; báo động xả chưa từng thử; hướng dẫn thao tác mờ hoặc mất." },
+  { k:"baochay", ten:"Hệ thống báo cháy & đầu báo", tu:"bao chay,dau bao khoi,dau bao nhiet,detector,fire alarm,bang bao chay,panel bao chay,he thong phat hien chay",
+    chuan:"Bảng báo cháy không có lỗi treo, mọi vùng đều hoạt động, đầu báo sạch không bị sơn phủ hay che, thử theo chu kỳ có ghi chép từng vùng.",
+    huong:"Yêu cầu thử một vùng bất kỳ ngay tại chỗ và bấm giờ xem bao lâu thì báo. Ghi lại vùng nào đã thử để lần sau thử vùng khác.",
+    loi:"Vùng bị lỗi được tắt (isolate) rồi quên bật lại; đầu báo bị sơn sau đợt sơn; sổ thử ghi 'tất cả tốt' mà không nêu vùng." },
+  { k:"voichuachay", ten:"Vòi, họng & bơm chữa cháy", tu:"voi chua chay,hong chua chay,fire hose,hydrant,lang phun,nozzle,bom chua chay,bom cuu hoa,bom su co,emergency fire pump,lang cuu hoa,monitor",
+    chuan:"Mỗi họng có vòi còn tốt cuộn gọn, đủ lăng phun, khớp nối vặn được; bơm chính và bơm sự cố khởi động được và đạt áp lực với số họng theo quy định.",
+    huong:"Bắt thuyền viên lắp vòi vào họng xa nhất và phun thật, đo áp lực. Rất nhiều lỗi chỉ lộ ra khi phun, không lộ ra khi nhìn.",
+    loi:"Vòi mục nhưng cuộn gọn nên nhìn vẫn đẹp; bơm sự cố không khởi động được vì lâu không chạy; thiếu lăng phun." },
+  { k:"bodochuachay", ten:"Bộ đồ chữa cháy, SCBA & EEBD", tu:"bo do chua chay,fireman outfit,scba,eebd,binh khi tho,mat na tho,quan ao chong chay,den phong no,so do phong chong chay,fire control plan",
+    chuan:"Đủ bộ theo quy định, bình khí nạp đầy trong vùng cho phép, mặt nạ kín, hạn thủy lực của bình còn hiệu lực, đèn phòng nổ sáng, tất cả để đúng vị trí trên sơ đồ.",
+    huong:"Cho một thuyền viên mặc đủ bộ và đeo bình trong thời gian quy định, rồi thử kín mặt nạ. Kiểm tra áp suất bình ngay trước mặt.",
+    loi:"Bình tụt áp dần mà không ai đo; hạn thủy lực bình quá hạn; mặt nạ hở vì gioăng chai cứng; bộ để rải rác mỗi thứ một nơi." },
+  { k:"hanghai", ten:"Thiết bị hàng hải — radar, GPS, ECDIS, AIS, đo sâu", tu:"radar,gps,ecdis,ais,echo sounder,do sau,speed log,toc do ke,thiet bi hang hai,navigation equipment,bnwas,may lai tu dong,thiet bi ghi hanh trinh,vdr",
+    chuan:"Hoạt động đúng chức năng, được thử và ghi kết quả theo chu kỳ, dữ liệu đầu vào (vị trí, hướng, tốc độ) khớp giữa các thiết bị, có hướng dẫn thao tác tại chỗ.",
+    huong:"Yêu cầu sỹ quan trực thao tác từng bước trước mặt: bật, chỉnh, đọc kết quả, so với thiết bị khác. Đừng chấp nhận câu trả lời 'thiết bị vẫn tốt'.",
+    loi:"Chỉ một người biết dùng; thử ghi vào sổ mà chưa từng thao tác; báo lỗi nhỏ để lâu thành hỏng hẳn." },
+  { k:"labank", ten:"La bàn từ & la bàn con quay", tu:"la ban tu,la ban con quay,gyro,magnetic compass,bang do lech,deviation,hieu chinh la ban,repeater",
+    chuan:"Bảng độ lệch còn hiệu lực và do người có thẩm quyền lập, la bàn con quay so sánh với la bàn từ mỗi ca và ghi vào sổ, đèn chiếu sáng mặt la bàn hoạt động.",
+    huong:"Yêu cầu sỹ quan trực so hai la bàn ngay trước mặt và ghi vào sổ. Xem lại sổ ba ca gần nhất — số liệu giống hệt nhau là dấu hiệu chép cho có.",
+    loi:"Bảng độ lệch quá cũ; sổ so la bàn ghi cùng một con số suốt tháng; bọt khí trong bát la bàn từ." },
+  { k:"haido", ten:"Hải đồ & ấn phẩm hàng hải", tu:"hai do,chart,an pham hang hai,nautical publication,notice to mariners,tu chinh,sailing directions,list of lights,tide table,almanac,ke hoach hanh trinh,passage plan",
+    chuan:"Đủ hải đồ và ấn phẩm cho tuyến đang chạy, được tu chỉnh tới thông báo mới nhất, có sổ theo dõi tu chỉnh, ấn phẩm còn phiên bản hiện hành.",
+    huong:"Chọn một hải đồ trên tuyến và một thông báo hàng hải gần đây, yêu cầu chỉ ra chỗ đã tu chỉnh trên hải đồ. Đó là cách duy nhất biết tu chỉnh thật hay ghi cho có.",
+    loi:"Ghi sổ tu chỉnh nhưng không tu chỉnh trên hải đồ; ấn phẩm bản cũ nhiều năm; thiếu hải đồ tỷ lệ lớn cho cảng sắp vào." },
+  { k:"denhanhtrinh", ten:"Đèn hành trình, dấu hiệu & âm hiệu", tu:"den hanh trinh,navigation light,den tin hieu,dau hieu hinh,qua cau den,coi tau,chuong tau,am hieu,sound signal,den su co hang hai",
+    chuan:"Đủ đèn chính và đèn dự phòng, nguồn sự cố hoạt động, báo động đèn hỏng kêu, dấu hiệu hình đủ bộ và để nơi lấy được ngay, còi và chuông kêu đúng.",
+    huong:"Bật thử từng đèn kể cả đèn dự phòng và nghe báo động khi rút cầu chì một đèn. Yêu cầu lấy ra đủ bộ dấu hiệu hình.",
+    loi:"Đèn dự phòng chưa từng thử; báo động đèn hỏng bị tắt tiếng; dấu hiệu hình thiếu hoặc cất trong kho khóa." },
+  { k:"gmdss", ten:"GMDSS — VHF, MF/HF, Inmarsat, NAVTEX", tu:"gmdss,vhf,mf hf,inmarsat,navtex,vo tuyen,dsc,nhat ky vo tuyen,ac quy du phong gmdss,bao dong cap cuu",
+    chuan:"Mọi thiết bị hoạt động, ắc quy dự phòng đủ dung lượng và được thử theo chu kỳ, nhật ký vô tuyến ghi đủ, có bảng hướng dẫn phát báo động cấp cứu dán tại máy.",
+    huong:"Yêu cầu sỹ quan trực chỉ từng bước phát báo động cấp cứu trên bảng hướng dẫn (không phát thật). Kiểm tra điện áp ắc quy dự phòng ngay tại chỗ.",
+    loi:"Ắc quy dự phòng chai mà chưa từng đo; nhật ký vô tuyến ghi thiếu; không ai ngoài đài trưởng biết thao tác." },
+  { k:"nang", ten:"Thiết bị nâng — cẩu, tời, cáp, ma ní, sling", tu:"thiet bi nang,cau tau,cau boong,toi keo,cap nang,ma ni,shackle,sling,swl,crane,winch,wire rope,so dang ky thiet bi nang,kiem dinh thiet bi nang,moc cau,palang",
+    chuan:"Có chứng chỉ kiểm định còn hạn cho từng thiết bị và từng phụ kiện, ghi SWL rõ trên thân, sổ đăng ký thiết bị nâng cập nhật, cáp không đứt sợi quá giới hạn, phanh và công tắc hành trình hoạt động.",
+    huong:"Đối chiếu số hiệu trên ma ní và sling thật với sổ đăng ký. Cho thợ đo và đếm sợi đứt trên một đoạn cáp trước mặt anh, đúng cách đo theo tiêu chuẩn.",
+    loi:"Phụ kiện mua ngoài không có chứng chỉ; sổ đăng ký chép lại từ năm trước; cáp đứt sợi nhưng chỉ nhìn qua nên không phát hiện." },
+  { k:"kgkin", ten:"Không gian kín — giấy phép, đo khí, thông gió", tu:"khong gian kin,enclosed space,giay phep vao,entry permit,do khi truoc khi vao,thong gio ket,cuu nan khong gian kin,vao ket,vao ham",
+    chuan:"Có giấy phép vào cho từng lần, đo khí đủ bốn chỉ tiêu bằng thiết bị còn hiệu chuẩn, thông gió liên tục, người cảnh giới ngoài cửa, phương án cứu hộ sẵn sàng trước khi ai bước vào.",
+    huong:"Yêu cầu diễn lại quy trình vào két một lần đầy đủ, kể cả bước cứu người bên trong. Hỏi người cảnh giới xem anh ta sẽ làm gì nếu người bên trong ngã.",
+    loi:"Vào 'chỉ một lát' nên bỏ giấy phép; máy đo chưa hiệu chuẩn; không có phương án cứu hộ nên người cứu cũng chết theo." },
+  { k:"giayphep", ten:"Giấy phép làm việc — hàn, trên cao, ngoài mạn", tu:"giay phep lam viec,permit to work,hot work,han cat,lam viec tren cao,lam viec ngoai man,danh gia rui ro,risk assessment,jsa,toolbox",
+    chuan:"Giấy phép được cấp trước khi bắt đầu, có đánh giá rủi ro kèm theo, họp toolbox trước khi làm, người cấp phép đi kiểm tra hiện trường, đóng giấy phép khi xong.",
+    huong:"Ra hiện trường một công việc đang làm và đối chiếu với giấy phép của chính nó. Hỏi người thợ xem rủi ro chính là gì — trả lời được nghĩa là toolbox có thật.",
+    loi:"Cấp phép ngồi tại phòng không ra xem hiện trường; đánh giá rủi ro sao chép; không ai đóng giấy phép khi xong." },
+  { k:"dien", ten:"An toàn điện — cách điện, tiếp đất, tủ điện, ắc quy", tu:"an toan dien,cach dien,dien tro cach dien,tiep dat,insulation,bang dien,switchboard,tu dien,ac quy,battery,cau dao,aptomat,may phat dien,dien su co,day dan set",
+    chuan:"Điện trở cách điện được đo và ghi định kỳ, tủ điện có che chắn và thảm cách điện phía trước, ắc quy thông gió và không có vết ăn mòn, mọi mạch có nhãn.",
+    huong:"Cho thợ điện đo cách điện một mạch bất kỳ trước mặt anh và ghi vào sổ. So với số liệu tháng trước để thấy xu hướng, không chỉ nhìn con số hôm nay.",
+    loi:"Sổ đo cách điện ghi cùng một con số nhiều tháng; thảm cách điện mục hoặc mất; buồng ắc quy không thông gió." },
+  { k:"may", ten:"Máy chính, máy phụ & hệ thống nhiên liệu", tu:"may chinh,may phu,main engine,auxiliary engine,he thong nhien lieu,bom nhien lieu,bau khi,truc chan vit,noi hoi,boiler,may lai,steering gear,ong mem ap luc",
+    chuan:"Chạy đúng thông số, bảo dưỡng theo PMS có ghi chép, không rò rỉ, hệ thống ngắt và bảo vệ hoạt động, ống mềm áp lực cao có vỏ chống văng.",
+    huong:"Yêu cầu máy trưởng mở PMS và chỉ ra hạng mục gần nhất đã làm, rồi ra xem chính thiết bị đó. Ghi chép và hiện trường phải khớp nhau.",
+    loi:"PMS ghi đã làm nhưng thiết bị còn nguyên bụi; hệ thống ngắt bảo vệ bị vô hiệu vì hay báo nhầm; ống mềm quá hạn." },
+  { k:"phanly", ten:"Máy phân ly 15 ppm & xử lý nước la canh", tu:"phan ly dau nuoc,15 ppm,oily water separator,bao dong 15 ppm,duong ong chui,magic pipe,xu ly nuoc la canh,hut la canh",
+    chuan:"Máy hoạt động đúng, thiết bị báo 15 ppm và van dừng tự động còn niêm phong và thử được, không có đường ống nối tắt, nhật ký dầu khớp với lượng thực tế.",
+    huong:"Đi theo toàn bộ đường ống tìm mặt bích lạ hoặc ống mềm không có trong sơ đồ. Yêu cầu thử báo động 15 ppm ngay tại chỗ.",
+    loi:"Đường ống chui (magic pipe) — lỗi bị xử nặng nhất; niêm phong bị phá; báo động chưa từng thử." },
+  { k:"dangnuoc", ten:"Nước dằn — BWM", tu:"nuoc dang,ballast,bwm,bwms,xu ly nuoc dang,nhat ky nuoc dang,ke hoach quan ly nuoc dang,thay nuoc dang",
+    chuan:"Có kế hoạch quản lý nước dằn được phê duyệt, hệ thống xử lý hoạt động và được bảo dưỡng, nhật ký ghi đủ từng lần, thuyền viên biết vận hành.",
+    huong:"Yêu cầu vận hành hệ thống xử lý một lần và đối chiếu với nhật ký. Hỏi người trực xem làm gì khi hệ thống báo lỗi giữa chừng.",
+    loi:"Hệ thống lắp rồi để đó vì hỏng; nhật ký ghi thay nước ở tọa độ không hợp lý; thuyền viên chưa được huấn luyện." },
+  { k:"khithai", ten:"Khí thải, lưu huỳnh & MARPOL Annex VI", tu:"khi thai,luu huynh,sulphur,marpol annex vi,nox,scr,egcs,scrubber,bunker delivery note,bdn,mau dau,chuyen doi nhien lieu",
+    chuan:"Dùng nhiên liệu đúng giới hạn lưu huỳnh cho vùng đang chạy, có BDN và mẫu dầu niêm phong lưu đủ thời gian, ghi chép chuyển đổi nhiên liệu, thiết bị xử lý hoạt động.",
+    huong:"Đối chiếu BDN với nhật ký chuyển đổi nhiên liệu và với vị trí tàu theo hải trình. Ba thứ đó phải khớp nhau về thời gian.",
+    loi:"Mẫu dầu không niêm phong hoặc thiếu; chuyển đổi nhiên liệu ghi sau; BDN thiếu hàm lượng lưu huỳnh." },
+  { k:"rac", ten:"Quản lý rác", tu:"quan ly rac,garbage,phan loai rac,thung rac,nhat ky rac,bien bao rac,giao rac,rac thai",
+    chuan:"Phân loại đúng theo kế hoạch, thùng có nhãn và nắp đặt đúng sơ đồ, nhật ký rác ghi đủ mỗi lần giao hoặc xả, có biển hướng dẫn cho thuyền viên.",
+    huong:"Hỏi một thuyền viên bất kỳ xem loại rác cụ thể này bỏ thùng nào. Đối chiếu biên nhận giao rác gần nhất với nhật ký.",
+    loi:"Thùng đủ nhưng không ai phân loại; nhật ký ghi thiếu lần giao; biên nhận bờ không lưu." },
+  { k:"sopep", ten:"SOPEP & ứng phó tràn dầu", tu:"sopep,tran dau,oil spill,ung pho tran dau,spill kit,bo dung cu tran dau,nut chan scupper,nhan dau,bunkering",
+    chuan:"Kế hoạch được phê duyệt và cập nhật danh sách liên lạc, bộ dụng cụ ứng phó đủ và để đúng chỗ trên sơ đồ, thuyền viên biết vị trí và cách dùng.",
+    huong:"Báo một tình huống tràn dầu giả định trên boong và xem bao lâu thì bộ dụng cụ tới nơi. Kiểm tra số điện thoại trong kế hoạch còn dùng được không.",
+    loi:"Danh sách liên lạc cũ nhiều năm; bộ dụng cụ thiếu vì đã dùng mà không bổ sung; để trong kho khóa." },
+  { k:"isps", ten:"An ninh tàu — ISPS, SSP, kiểm soát ra vào", tu:"an ninh tau,isps,ssp,cap do an ninh,security level,kiem soat ra vao,the khach,khu vuc han che,tuan tra an ninh,si quan an ninh,thuc tap an ninh",
+    chuan:"Duy trì đúng cấp độ an ninh, sổ ra vào ghi đủ, khu vực hạn chế có biển và được kiểm soát, thiết bị an ninh hoạt động, diễn tập an ninh đúng chu kỳ.",
+    huong:"Thử đi vào một khu vực hạn chế xem có ai hỏi không. Kiểm tra sổ ra vào của chính đoàn mình lúc lên tàu — thiếu tên là đã có vấn đề.",
+    loi:"Sổ ra vào ghi sau cho đủ; khu vực hạn chế không khóa; thuyền viên không biết cấp độ an ninh hiện tại." },
+  { k:"mlc", ten:"MLC 2006 — buồng ở, thực phẩm, giờ làm việc, hợp đồng", tu:"mlc,dieu kien lam viec,cho o thuyen vien,buong o,thuc pham va nuoc,gio lam viec,gio nghi,hop dong lao dong,sea,khieu nai,hoi huong,tien luong",
+    chuan:"Buồng ở sạch và đủ tiện nghi, thực phẩm và nước đủ và bảo quản đúng, giờ nghỉ đủ theo quy định và ghi trung thực, mọi thuyền viên có hợp đồng bản gốc, quy trình khiếu nại được niêm yết.",
+    huong:"Xem bảng giờ làm việc và đối chiếu với nhật ký boong cùng ngày. Hỏi riêng vài thuyền viên xem họ có được nghỉ đủ không — ghi chép và thực tế hay lệch nhau ở đây.",
+    loi:"Bảng giờ nghỉ ghi cho đẹp; thiếu bản hợp đồng cho thuyền viên giữ; nước ngọt không kiểm tra chất lượng." },
+  { k:"yte", ten:"Y tế — tủ thuốc, sơ cứu, cáng", tu:"tu thuoc,medicine chest,so cuu,first aid,cang cuu thuong,stretcher,binh oxy y te,hoi suc,danh muc thuoc,chung chi y te",
+    chuan:"Đủ thuốc theo danh mục, còn hạn, có sổ theo dõi cấp phát, người phụ trách y tế có chứng chỉ còn hạn, cáng và bộ hồi sức để nơi lấy được ngay.",
+    huong:"Rút ngẫu nhiên ba loại thuốc và đọc hạn dùng. Hỏi người phụ trách xem xử trí thế nào với một tình huống cụ thể (bỏng, gãy tay).",
+    loi:"Thuốc hết hạn còn để trong tủ; danh mục kiểm mỗi năm một lần cho có; cáng để trong kho khóa." },
+  { k:"kinnuoc", ten:"Tính kín nước — cửa, nắp hầm, van thông biển", tu:"kin nuoc,watertight,cua kin nuoc,nap ham,van thong bien,sea chest,gioang cua,thu kin nuoc,tinh kin,cua chong chay",
+    chuan:"Mọi cửa và nắp đóng kín được, gioăng đàn hồi liên tục, đủ chốt, thử kín theo chu kỳ có ghi chép, cửa kín nước tự động thao tác được cả tại chỗ và từ xa.",
+    huong:"Thử kín bằng phấn hoặc tờ giấy quanh chu vi ngay trước mặt. Thao tác cửa kín nước tự động từ buồng lái và tại chỗ.",
+    loi:"Gioăng bị ép lún không đàn hồi; chốt thiếu; cửa tự động lâu không thao tác nên kẹt." },
+  { k:"neo", ten:"Neo & thiết bị buộc tàu", tu:"neo tau,anchor,xich neo,ham xich,toi neo,windlass,day buoc tau,mooring,coc bich,chan xich,stopper,sung ban day,line throwing",
+    chuan:"Tời neo và tời buộc hoạt động, phanh ăn, xích được đánh dấu độ dài, dây buộc còn tốt không mòn không xoắn, có kế hoạch buộc tàu và ai cũng biết vùng nguy hiểm của dây.",
+    huong:"Cho thao tác thả và kéo neo một lần. Chỉ cho thuyền viên vùng bật dây (snap-back zone) ngay trên boong — nhiều người chưa từng được chỉ.",
+    loi:"Phanh tời trượt; dây buộc mòn vẫn dùng; không ai biết vùng bật dây nên đứng sai chỗ." },
+  { k:"changbuoc", ten:"Chằng buộc hàng hóa", tu:"chang buoc hang,cargo securing,csm,lashing,chan hang,hang tren boong,diem chang,thiet bi chang",
+    chuan:"Làm đúng Sổ tay chằng buộc được phê duyệt, dùng đúng thiết bị ghi trong sổ tay, thiết bị chằng còn tốt và đủ số, kiểm tra lại sau khi ra biển.",
+    huong:"Mở Sổ tay chằng buộc ra và đối chiếu với một kiện hàng thật trên boong: đúng số dây, đúng góc, đúng điểm chằng không.",
+    loi:"Chằng theo kinh nghiệm không theo sổ tay; dùng thiết bị không có trong sổ tay; không kiểm lại sau khi sóng lớn." },
+  { k:"ondinh", ten:"Ổn định & thông báo ổn định", tu:"on dinh,stability,thong bao on dinh,so tay xep hang,loading manual,may tinh on dinh,mon nuoc,draft,trang thai khai thac",
+    chuan:"Có thông báo ổn định được phê duyệt, mọi trạng thái khai thác được tính và lưu, máy tính ổn định (nếu có) được kiểm chuẩn hằng năm, sỹ quan biết dùng.",
+    huong:"Yêu cầu sỹ quan tính một trạng thái bất kỳ trước mặt anh và giải thích kết quả. Đối chiếu mớn nước thực với trạng thái đã tính.",
+    loi:"Không tính cho trạng thái thật đang chạy; máy tính ổn định chưa kiểm chuẩn; chỉ một người biết dùng." },
+  { k:"pms", ten:"Bảo dưỡng kế hoạch (PMS)", tu:"bao duong ke hoach,pms,planned maintenance,bao tri dinh ky,phu tung du tru,spare part,lich bao duong",
+    chuan:"Mọi thiết bị quan trọng có trong PMS với chu kỳ rõ, việc quá hạn được theo dõi và có lý do, phụ tùng dự trữ đủ theo danh mục, ghi chép khớp với hiện trường.",
+    huong:"Chọn ngẫu nhiên ba hạng mục vừa ghi là đã làm rồi ra xem thiết bị. Đây là cách nhanh nhất phát hiện PMS chỉ tồn tại trên máy tính.",
+    loi:"Đánh dấu đã làm cho hết hạn; hạng mục quá hạn kéo dài không ai xử; phụ tùng ghi có mà kho không có." },
+  { k:"khacphuc", ten:"Khắc phục tồn đọng & hành động khắc phục", tu:"khac phuc,ton dong,ton tai,hanh dong khac phuc,corrective action,nguyen nhan goc,root cause,ky kiem tra truoc,bien ban ky truoc,phat hien lap lai",
+    chuan:"Mỗi tồn đọng có người chịu trách nhiệm, thời hạn và bằng chứng đã làm; hành động khắc phục xử lý NGUYÊN NHÂN chứ không chỉ hiện tượng; được đóng có xác nhận.",
+    huong:"Lấy biên bản kỳ trước, chọn ba mục và đòi bằng chứng đã khắc phục tại hiện trường. Hỏi thêm: đã sửa gì trong hệ thống để không lặp lại.",
+    loi:"Đóng tồn đọng bằng câu 'đã khắc phục' mà không có bằng chứng; sửa hiện tượng nên kỳ sau lại nêu đúng lỗi đó." },
+  { k:"danhgia", ten:"Đánh giá nội bộ & soát xét của lãnh đạo", tu:"danh gia noi bo,internal audit,soat xet cua lanh dao,management review,khong phu hop,nonconformity,ism",
+    chuan:"Đúng chu kỳ, do người độc lập với bộ phận được đánh giá thực hiện, nêu được điểm không phù hợp thật, có theo dõi khắc phục tới khi đóng.",
+    huong:"Xem báo cáo đánh giá nội bộ gần nhất: nếu không có điểm nào không phù hợp thì đó chính là điểm không phù hợp.",
+    loi:"Đánh giá hình thức, không nêu gì; người đánh giá tự đánh giá bộ phận mình; không theo dõi tới khi đóng." },
+  { k:"succo", ten:"Báo cáo sự cố & cận nguy", tu:"can nguy,near miss,tai nan lao dong,accident,dieu tra su co,bai hoc kinh nghiem,lesson learned,bao cao su co,thong ke su co",
+    chuan:"Mọi sự cố và cận nguy được báo, có điều tra tìm nguyên nhân gốc, bài học được phổ biến cho thuyền viên và cho các tàu khác trong đội.",
+    huong:"Hỏi thuyền viên xem tháng qua có cận nguy nào không. Nếu ai cũng nói không có thì hệ thống báo cáo đang không chạy, chứ không phải tàu an toàn.",
+    loi:"Sợ bị phạt nên không báo; điều tra dừng ở 'do bất cẩn'; bài học không tới được người làm việc." },
+  { k:"bhld", ten:"Bảo hộ lao động cá nhân", tu:"bao ho lao dong,ppe,mu bao ho,kinh bao ho,gang tay,giay bao ho,day an toan,ao phan quang,chong on,phong ngua vat roi,dropped object",
+    chuan:"Cấp đủ theo công việc, còn tốt và vừa người, được dùng đúng cách, có kho dự trữ để thay khi hỏng.",
+    huong:"Ra hiện trường xem người đang làm việc chứ đừng xem kho. Chỉ đúng người, đúng món thiếu và nói rõ rủi ro của chính việc họ đang làm.",
+    loi:"Cấp phát đủ nhưng không ai đeo; đeo sai cách; hỏng rồi không có để thay nên làm liều." },
+  { k:"dp", ten:"Tàu định vị động lực (DP)", tu:"dp,dinh vi dong luc,dynamic positioning,fmea,capability plot,nhat ky dp,thu dp,chan vit mui,thruster,tham chieu vi tri",
+    chuan:"Có FMEA và biên bản thử hằng năm còn hiệu lực, nhật ký DP ghi đủ, thuyền viên có chứng chỉ DP phù hợp, checklist trước khi vào DP được làm đủ.",
+    huong:"Yêu cầu chạy checklist trước khi vào DP từ đầu tới cuối trước mặt anh, và giải thích phương án khi mất một nguồn điện.",
+    loi:"Checklist ký sẵn; biên bản thử năm quá hạn; người trực DP chưa đủ chứng chỉ cho loại tàu." },
+  { k:"lan", ten:"Tàu lặn & hệ thống lặn", tu:"tau lan,he thong lan,chuong lan,diving bell,buong giai ap,chamber,khi tho lan,thiet bi lan,tho lan,day ron",
+    chuan:"Hệ thống được kiểm định còn hạn, khí thở được phân tích và ghi chép, quy trình cứu hộ thợ lặn sẵn sàng, người vận hành có chứng chỉ phù hợp.",
+    huong:"Yêu cầu diễn lại tình huống cứu thợ lặn khẩn cấp. Kiểm tra giấy phân tích khí thở gần nhất.",
+    loi:"Giấy kiểm định hệ thống quá hạn; khí thở không phân tích định kỳ; quy trình cứu hộ chỉ có trên giấy." },
+  { k:"cyber", ten:"An ninh mạng trong ISM", tu:"an ninh mang,cyber,usb,mang tau,sao luu,backup,mat khau,phan mem hang hai",
+    chuan:"Có đánh giá rủi ro an ninh mạng trong SMS, kiểm soát thiết bị USB, phần mềm được cập nhật, dữ liệu quan trọng có sao lưu, thuyền viên được phổ biến.",
+    huong:"Hỏi xem lần sao lưu gần nhất là khi nào và thử khôi phục một file. Hỏi thuyền viên có cắm USB cá nhân vào máy tính hàng hải không.",
+    loi:"Sao lưu chưa từng thử khôi phục; USB cá nhân cắm thoải mái; mật khẩu dán trên màn hình." },
+  { k:"nangluong", ten:"Hiệu quả năng lượng — EEXI, CII, SEEMP", tu:"hieu qua nang luong,eexi,cii,seemp,tieu thu nhien lieu,data collection,dcs,bao cao nhien lieu",
+    chuan:"Có SEEMP phần III được phê duyệt, thu thập và báo cáo dữ liệu tiêu thụ đúng hạn, biện pháp cải thiện được thực hiện và theo dõi.",
+    huong:"Đối chiếu số liệu tiêu thụ báo cáo với nhật ký máy vài ngày bất kỳ. Hỏi biện pháp cải thiện nào đã làm thật.",
+    loi:"Số liệu báo cáo không khớp nhật ký; SEEMP chỉ là văn bản không có hành động; báo cáo nộp muộn." },
+  { k:"dokhi", ten:"Thiết bị đo khí xách tay", tu:"may do khi,gas detector,do khi xach tay,hieu chuan may do,bump test,khi chuan,da khi,do oxy",
+    chuan:"Đủ số theo quy định mới, còn hiệu chuẩn, thử nhanh (bump test) trước mỗi lần dùng có ghi chép, có khí chuẩn để thử trên tàu.",
+    huong:"Yêu cầu làm bump test một máy trước mặt anh bằng khí chuẩn có sẵn. Không có khí chuẩn thì bump test lâu nay chỉ là ghi vào sổ.",
+    loi:"Hiệu chuẩn quá hạn; không có khí chuẩn trên tàu; ghi bump test hằng ngày mà không có bằng chứng." },
+  { k:"kho", ten:"Kho vật tư, hóa chất & MSDS", tu:"kho vat tu,hoa chat,msds,sds,nhan hoa chat,kho son,kho hoa chat,chat nguy hiem,khoa treo the,loto",
+    chuan:"Hóa chất có nhãn và MSDS bằng ngôn ngữ thuyền viên hiểu, để đúng kho có thông gió, không để chung loại kỵ nhau, có bảo hộ phù hợp ngay tại kho.",
+    huong:"Chọn một can hóa chất bất kỳ và yêu cầu tìm MSDS của nó trong vòng một phút. Hỏi thuyền viên xem đổ vào người thì làm gì.",
+    loi:"MSDS đóng thành tập nhưng không ai tra được; can chiết ra không dán nhãn; kho hóa chất không thông gió." },
+  { k:"bep", ten:"Bếp, thực phẩm & vệ sinh", tu:"bep,nha an,kho luong thuc,cap duong,thuc pham,luu mau,ve sinh thuc pham,nuoc uong,kho lanh,chup hut bep",
+    chuan:"Khu chế biến sạch, thực phẩm bảo quản đúng nhiệt độ và có nhãn ngày, lưu mẫu đúng quy định, cấp dưỡng có chứng chỉ và khám sức khỏe, nước uống được kiểm tra.",
+    huong:"Mở kho lạnh xem nhãn ngày và cách kê hàng. Hỏi cấp dưỡng quy trình lưu mẫu và xem tủ lưu mẫu thật.",
+    loi:"Thực phẩm để sàn kho lạnh; không lưu mẫu hoặc lưu không đủ thời gian; nước uống chưa từng xét nghiệm." },
+  { k:"psc", ten:"Chuẩn bị & xử lý kiểm tra của cảng vụ (PSC)", tu:"psc,port state control,cang vu,chinh quyen cang,luu giu tau,detention,khiem khuyet,deficiency,tokyo mou,kiem tra cua cang",
+    chuan:"Nắm được trọng điểm kiểm tra đang áp dụng, tự kiểm trước theo danh mục đó, mọi khiếm khuyết kỳ trước đã đóng có bằng chứng, hồ sơ sẵn sàng lấy ra ngay.",
+    huong:"Tự chạy trước một lượt theo đúng danh mục PSC đang tập trung, nghiêm khắc như người ngoài. Chỗ nào mình còn lăn tăn thì họ cũng sẽ hỏi.",
+    loi:"Chỉ chuẩn bị khi biết sắp bị kiểm tra; khiếm khuyết kỳ trước đóng bằng lời nói; hồ sơ tìm cả buổi không thấy." },
+];
+var HD_CHUNG = {
+  k: "chung", ten: "Nguyên tắc chung",
+  chuan: "Làm đúng quy trình đã được duyệt trong SMS của tàu, có bằng chứng ghi chép, và người thực hiện hiểu vì sao phải làm chứ không chỉ làm cho có.",
+  huong: "Đừng chỉ nói mục này chưa đạt. Hỏi ba câu: ai chịu trách nhiệm việc này, lần gần nhất làm là khi nào, và ghi ở đâu. Ba câu đó lộ ra ngay vấn đề nằm ở người, ở quy trình, hay ở ghi chép. Rồi làm mẫu một lần cho đúng trước mặt họ.",
+  loi: "Làm nhưng không ghi nên coi như chưa làm; ghi mà không làm; giao chung cho cả bộ phận nên cuối cùng không ai làm."
+};
+
+/* ═══════════ HƯỚNG DẪN LÀM ĐÚNG CHO TỪNG MỤC ═══════════
+   Phần "xem lưu ý" sẵn có nói CÁCH KIỂM TRA. Phần này nói CHUẨN ĐÚNG LÀ GÌ và
+   CÁCH CHỈ LẠI CHO THUYỀN VIÊN khi thấy họ làm sai.
+
+   Gắn mẫu theo CỤM TỪ chứ không theo từ rời — tách từ rời ra thì "thử", "van",
+   "quản lý" khớp lung tung, và "Radar — thử vận hành" từng bị gắn nhầm vào mẫu
+   máy đo khí. Bắt buộc phải trúng ở TIÊU ĐỀ mục mới tính là đúng chủ đề; chỉ
+   trúng trong phần mô tả thì coi như không chắc và dùng mẫu chung. */
+
+var HD_CACHE = {};
+function hdChon(it, groupName) {
+  if (HD_CACHE[it.id]) return HD_CACHE[it.id];
+  var td = ckChuan(it.t + " " + it.ref);
+  var th = ckChuan((groupName || "") + " " + String(it.d || "").substring(0, 400));
+  var best = null, bd = 0, i, j;
+  for (i = 0; i < HD_MAU.length; i++) {
+    var m = HD_MAU[i], dt = 0, db = 0;
+    var ph = m.tu.split(",");
+    for (j = 0; j < ph.length; j++) {
+      var p = ph[j].replace(/^\s+|\s+$/g, "");
+      if (p.length < 2) continue;
+      var so = p.split(" ").length;
+      if (td.indexOf(" " + p + " ") >= 0) dt += 10 + so * 4;
+      else if (th.indexOf(" " + p + " ") >= 0) db += 2 + so;
+    }
+    var d = dt ? dt + Math.min(db, 8) : 0;
+    if (d > bd) { bd = d; best = m; }
+  }
+  HD_CACHE[it.id] = best || HD_CHUNG;
+  return HD_CACHE[it.id];
+}
+
+function hdHtml(it, groupName) {
+  /* Tab QUAN SÁT đã viết sẵn đủ sáu phần trong phần mô tả, không cần mẫu */
+  if (String(it.id).indexOf("qs-") === 0 || String(it.id).indexOf("tt") === 0) return "";
+  var m = hdChon(it, groupName);
+  var chung = m.k === "chung";
+  return '<div class="hd"><div class="hd-h">Làm đúng thì phải thế nào' +
+    (chung ? "" : " — " + esc(m.ten)) + "</div>" +
+    '<div class="hd-b">' +
+    "<p><b>Chuẩn đúng:</b> " + esc(m.chuan) + "</p>" +
+    "<p><b>Cách chỉ lại cho thuyền viên:</b> " + esc(m.huong) + "</p>" +
+    "<p><b>Lỗi hay gặp:</b> " + esc(m.loi) + "</p>" +
+    "</div>" +
+    '<div class="hd-n">' + (chung
+      ? "Mục này chưa có hướng dẫn riêng theo chủ đề nên đang dùng nguyên tắc chung."
+      : "Hướng dẫn ở mức CHỦ ĐỀ “" + esc(m.ten) + "”, không phải viết riêng cho mục này. " +
+        "Vận dụng theo tình huống thật.") + "</div></div>";
 }
 
 /* ═══════════════ TÌM KIẾM TRONG TOÀN BỘ CHECKLIST ═══════════════
@@ -3314,7 +3578,7 @@ function drawTimKiem() {
       '<button class="b ' + (st === "ng" ? "s-ng" : "") + '" data-set="' + it.id + '" data-v="ng"><u>✕</u>Không đạt</button>' +
       '<button class="b na ' + (st === "na" ? "s-na" : "") + '" data-set="' + it.id + '" data-v="na">Không áp dụng</button>' +
       "</div></div>";
-    if (isOpen) html += '<div class="det">' + glMark(esc(it.d)) + "</div>";
+    if (isOpen) html += '<div class="det">' + glMark(esc(it.d)) + hdHtml(it, it.g) + "</div>";
     if (st === "ng") {
       html += mucSelect("data-muc", it.id, (state[it.id] || {}).m, "muc");
       html += '<textarea class="note" data-note="' + it.id +
@@ -8602,7 +8866,7 @@ document.getElementById("bb-sync").onclick = function () {
 /* ===================== KHỞI ĐỘNG =====================
    APP_VER hiện ở góc phải đầu trang. Nếu số này không đổi sau khi cập nhật,
    nghĩa là trình duyệt còn giữ bản cũ trong bộ nhớ đệm — tải lại trang. */
-var APP_VER = "b\u1ea3n 2026-08-20/13";
+var APP_VER = "b\u1ea3n 2026-08-20/14";
 document.getElementById("ver").textContent = APP_VER;
 load();
 drawTabs();
