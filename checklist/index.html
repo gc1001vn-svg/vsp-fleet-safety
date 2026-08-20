@@ -5525,7 +5525,7 @@ function bodyC3(ctx) {
         tdC(G[2], f.pl === "obs" ? "Obs" : "NC", { align: "center", b: f.pl !== "obs" }) +
         tdC(G[3], f.cc || "", { align: "center" }) +
         tdC(G[4], khacPhucText(f), { align: "center" }) +
-        tdC(G[5], yKienText(f)), 400);
+        tdC(G[5], ghiChuText(f)), 400);
     }
   }
   if (!nsec) {
@@ -5541,7 +5541,7 @@ function bodyC3(ctx) {
     k++;
     rows += dxRow(tdC(G[0], String(k), { align: "center" }) + tdC(G[1], kn[i].noidung || "") +
       tdC(G[2], "") + tdC(G[3], kn[i].cc || "", { align: "center" }) +
-      tdC(G[4], khacPhucText(kn[i]), { align: "center" }) + tdC(G[5], yKienText(kn[i])), 400);
+      tdC(G[4], khacPhucText(kn[i]), { align: "center" }) + tdC(G[5], ghiChuText(kn[i])), 400);
   }
   for (i = 0; i < kc.length; i++) {
     k++;
@@ -7892,8 +7892,27 @@ function aiMdHtml(s) {
       không cháy tài khoản. */
 
 var LV_KEY = "atskmt-quet-truc-tiep-v1";
+/* ── Cỡ ảnh và giá token ──
+   Claude tính ảnh theo ô 28×28 điểm ảnh: ⌈rộng/28⌉ × ⌈cao/28⌉ token.
+   Opus 5 và Sonnet 5 ở bậc phân giải cao (cạnh dài tối đa 2576, trần 4784
+   token); Haiku 4.5 ở bậc thường (cạnh dài 1568, trần 1568 token).
+   Ảnh nhỏ đi một nửa cạnh thì token giảm gần bốn lần — đây là đòn bẩy mạnh
+   nhất để giảm tiền. */
+var LV_CANH = [
+  [640,  "640 px — rẻ nhất, chỉ thấy lỗi lớn"],
+  [800,  "800 px — tiết kiệm"],
+  [1024, "1024 px — cân bằng (mặc định)"],
+  [1280, "1280 px — nhìn rõ hơn, tốn hơn"]
+];
+function lvTokenAnh(canh) {
+  /* ảnh điện thoại thường 4:3, ước theo đúng công thức ô 28 px */
+  var w = canh, hh = Math.round(canh * 3 / 4);
+  return Math.ceil(w / 28) * Math.ceil(hh / 28);
+}
+
 var lvCfg = {
   giay: 6,          /* nhịp soi, giây */
+  canh: 1024,       /* cạnh dài ảnh gửi đi */
   nhay: 5,          /* ngưỡng đổi cảnh — nhỏ thì nhạy, gửi nhiều hơn */
   model: "",        /* rỗng = dùng chung mô hình với trợ lý */
   tranLuot: 60,
@@ -7903,7 +7922,7 @@ var LV_EP = 5;   /* bỏ qua liên tiếp bấy nhiêu khung thì soi ép một 
 var lvOn = false, lvBusy = false, lvStream = null, lvTimer = null, lvWake = null;
 var lvPh = [], lvSeq = 0;
 var lvLuot = 0, lvBoQua = 0, lvBoLien = 0;
-var lvTok = { vao: 0, ra: 0 };
+var lvTok = { vao: 0, ra: 0, demTao: 0, demDoc: 0 };
 var lvKhungTruoc = null, lvNhan = "", lvMoCai = false;
 
 var LV_SYS =
@@ -7961,6 +7980,7 @@ function lvLoad() {
   try {
     var v = JSON.parse(localStorage.getItem(LV_KEY) || "{}");
     if (v.giay) lvCfg.giay = +v.giay;
+    if (v.canh) lvCfg.canh = +v.canh;
     if (v.nhay) lvCfg.nhay = +v.nhay;
     if (v.model != null) lvCfg.model = v.model;
     if (v.tranLuot) lvCfg.tranLuot = +v.tranLuot;
@@ -7970,10 +7990,37 @@ function lvLoad() {
 function lvSave() { try { localStorage.setItem(LV_KEY, JSON.stringify(lvCfg)); } catch (e) {} }
 
 function lvModel() { return lvCfg.model || aiCfg.model; }
-function lvTien() {
+/* ── Ngưỡng đệm ──
+   Đệm lời nhắc chỉ chạy khi phần được đánh dấu đủ DÀI. Ngưỡng này khác nhau
+   theo mô hình và KHÔNG tăng dần theo đời máy — Haiku 4.5 đòi tới 4096 token
+   trong khi Opus 5 chỉ cần 512. Dưới ngưỡng thì máy chủ lặng lẽ bỏ qua, không
+   báo lỗi, và mình vẫn trả giá đầy đủ mỗi lượt. */
+var LV_NGUONG = { "claude-opus-5": 512, "claude-sonnet-5": 1024, "claude-haiku-4-5": 4096 };
+/* Ước chừng số token của một đoạn tiếng Việt. Tiếng Việt có dấu tốn token hơn
+   tiếng Anh; lấy khoảng 2,2 ký tự một token. Đây là ƯỚC CHỪNG, không phải số
+   máy chủ đếm — dùng để nhắc chứ đừng coi là chính xác. */
+function lvUocToken(s) { return Math.round(String(s || "").length / 2.2); }
+function lvDemChay() {
+  var can = LV_NGUONG[lvModel()] || 1024;
+  return lvUocToken(LV_SYS + LV_DANHMUC) >= can;
+}
+
+function lvGia() {
   var g = { "claude-opus-5": [5, 25], "claude-sonnet-5": [3, 15], "claude-haiku-4-5": [1, 5] };
-  var p = g[lvModel()] || g["claude-opus-5"];
-  return lvTok.vao / 1e6 * p[0] + lvTok.ra / 1e6 * p[1];
+  return g[lvModel()] || g["claude-opus-5"];
+}
+/* Ghi vào đệm tính khoảng 1,25 lần giá thường; đọc từ đệm khoảng 0,1 lần */
+function lvTien() {
+  var p = lvGia();
+  return lvTok.vao / 1e6 * p[0] +
+         lvTok.demTao / 1e6 * p[0] * 1.25 +
+         lvTok.demDoc / 1e6 * p[0] * 0.1 +
+         lvTok.ra / 1e6 * p[1];
+}
+/* Số tiền LẼ RA phải trả nếu không có đệm — để thấy đệm tiết kiệm bao nhiêu */
+function lvTienKhongDem() {
+  var p = lvGia();
+  return (lvTok.vao + lvTok.demTao + lvTok.demDoc) / 1e6 * p[0] + lvTok.ra / 1e6 * p[1];
 }
 
 /* ---- Lấy hình từ camera ---- */
@@ -8066,10 +8113,20 @@ function lvGoiMot(du) {
   var nhac = lvNhan
     ? "Khu vực đang kiểm tra: " + lvNhan + ". Đây là khung hình hiện tại."
     : "Đây là khung hình hiện tại.";
+  /* ── Lưu đệm lời nhắc (prompt caching) ──
+     Phần LV_SYS + danh mục quan sát y hệt nhau ở MỌI khung hình. Đánh dấu
+     cache_control cho riêng phần đó thì từ lượt thứ hai trở đi nó chỉ tính
+     khoảng một phần mười giá. Phần "lỗi đã học" hay đổi nên để SAU, ngoài
+     vùng đệm — nếu để trước thì mỗi lần anh ghi thêm một lỗi là vỡ cả đệm. */
+  var nhac = mauNhac();
+  var sysBlocks = [{ type: "text", text: LV_SYS + LV_DANHMUC,
+                     cache_control: { type: "ephemeral" } }];
+  if (nhac) sysBlocks.push({ type: "text", text: nhac });
+
   var body = {
     model: lvModel(),
     max_tokens: 2000,
-    system: LV_SYS + LV_DANHMUC + mauNhac(),
+    system: sysBlocks,
     output_config: { effort: "low" },
     messages: [{ role: "user", content: [
       { type: "image", source: { type: "base64", media_type: kieu,
@@ -8105,10 +8162,13 @@ function lvGoiMot(du) {
     try {
       j = JSON.parse(xhr.responseText);
       if (j.usage) {
-        lvTok.vao += j.usage.input_tokens || 0;
-        lvTok.ra += j.usage.output_tokens || 0;
-        aiChiPhi.vao += j.usage.input_tokens || 0;
-        aiChiPhi.ra += j.usage.output_tokens || 0;
+        var u = j.usage;
+        lvTok.vao += u.input_tokens || 0;
+        lvTok.ra += u.output_tokens || 0;
+        lvTok.demTao += u.cache_creation_input_tokens || 0;
+        lvTok.demDoc += u.cache_read_input_tokens || 0;
+        aiChiPhi.vao += u.input_tokens || 0;
+        aiChiPhi.ra += u.output_tokens || 0;
         aiSave();
       }
       if (j.content) {
@@ -8191,9 +8251,11 @@ function lvTrangThai(s) {
 function lvVeTop() {
   var d = document.getElementById("lv-dem");
   if (!d) return;
+  var tiet = lvTienKhongDem() - lvTien();
   d.textContent = lvLuot + " lượt soi · " + lvBoQua + " khung bỏ qua · " +
     lvPh.length + " ghi trong phiên này · sổ đang giữ " + soDem() + " mục · ~" +
-    lvTien().toFixed(3) + " USD";
+    lvTien().toFixed(3) + " USD" +
+    (tiet > 0.0005 ? " (đệm lời nhắc đã tiết kiệm " + tiet.toFixed(3) + " USD)" : "");
 }
 function lvVeThe() {
   var m = document.getElementById("lv-mid");
@@ -8244,6 +8306,14 @@ function lvVeCaiDat() {
   }
   s += "</select>";
 
+  s += '<label>Cỡ ảnh gửi đi — đòn bẩy giảm tiền mạnh nhất</label><select id="lv-canh">';
+  for (i = 0; i < LV_CANH.length; i++) {
+    s += '<option value="' + LV_CANH[i][0] + '"' +
+      (lvCfg.canh === LV_CANH[i][0] ? " selected" : "") + ">" +
+      esc(LV_CANH[i][1]) + " · " + lvTokenAnh(LV_CANH[i][0]) + " token</option>";
+  }
+  s += "</select>";
+
   s += '<label>Mô hình dùng khi quét</label><select id="lv-model">' +
     '<option value=""' + (lvCfg.model === "" ? " selected" : "") +
     ">Dùng chung với trợ lý (" + esc(nameOf(AI_MODELS, aiCfg.model)) + ")</option>";
@@ -8269,6 +8339,31 @@ function lvVeCaiDat() {
   s += '<div class="no" style="margin-top:10px"><b>Mọi thứ máy thấy đều rơi vào 📓 Sổ ghi nhận</b>, ' +
     'im lặng, không báo động, không cắt ngang anh. Máy tự tìm mục checklist tương ứng và đánh dấu ' +
     'Không đạt kèm ảnh. Xong chuyến mở sổ ra soát lại rồi đưa sang biên bản một lượt.</div>';
+
+  var pg = lvGia();
+  var tkAnh = lvTokenAnh(lvCfg.canh);
+  var tkNhac = lvUocToken(LV_SYS + LV_DANHMUC);
+  var demChay = lvDemChay();
+  var tkVao = tkAnh + (demChay ? Math.round(tkNhac * 0.1) : tkNhac);
+  var moiLuot = tkVao / 1e6 * pg[0] + 200 / 1e6 * pg[1];
+  s += '<div class="no" style="margin-top:10px"><b>Một lượt soi tốn bao nhiêu</b><br>' +
+    'Ảnh ' + lvCfg.canh + ' px = <b>' + tkAnh + ' token</b> — Claude tính ảnh theo ô 28×28 ' +
+    'điểm ảnh, nên hạ một nửa cạnh thì token giảm gần bốn lần.<br>' +
+    'Lời nhắc cố định ước chừng ' + tkNhac + ' token. ' +
+    (demChay
+      ? 'Mô hình này lưu đệm được (ngưỡng ' + (LV_NGUONG[lvModel()] || 1024) +
+        ' token), nên từ lượt thứ hai phần đó chỉ còn khoảng ' +
+        Math.round(tkNhac * 0.1) + ' token.'
+      : '<b>Mô hình này KHÔNG lưu đệm được</b> vì ngưỡng của nó là ' +
+        (LV_NGUONG[lvModel()] || 1024) + ' token, cao hơn lời nhắc. Lượt nào cũng trả đủ ' +
+        tkNhac + ' token. Bù lại giá gốc của nó rẻ hơn nhiều, nên tổng vẫn thấp hơn.') +
+    '<br>Cộng câu trả lời ~200 token ra: khoảng <b>' + moiLuot.toFixed(4) +
+    ' USD</b> mỗi lượt với ' + esc(nameOf(AI_MODELS, lvModel())) + '.<br>' +
+    'Quét liên tục ' + lvCfg.giay + ' giây một lượt ⇒ khoảng <b>' +
+    (moiLuot * 3600 / Math.max(2, lvCfg.giay)).toFixed(2) + ' USD một giờ</b> nếu cảnh luôn đổi. ' +
+    'Thực tế thấp hơn vì khung trùng bị bỏ qua.<br>' +
+    '<b>Bốn cách giảm:</b> hạ cỡ ảnh · đổi mô hình rẻ hơn · giãn nhịp soi · ' +
+    'đứng yên ngắm rồi mới quay máy, để bộ lọc khung trùng làm việc.</div>';
 
   s += '<div class="no"><b>Máy nhìn có thể sai.</b> Đây là để nhắc anh khỏi bỏ sót, ' +
     'không thay được mắt người. Mọi dòng đều phải tự xác minh tại chỗ trước khi ký biên bản.<br>' +
@@ -8310,7 +8405,7 @@ function lvNhip() {
 function lvSoiNgay(vt) {
   if (lvBusy) return;
   if (!aiCfg.key) { lvTrangThai("✕ Chưa có chìa khóa API. Vào tab 🤖 TRỢ LÝ nhập trước đã."); return; }
-  var du = lvChup(1024, 0.7);
+  var du = lvChup(lvCfg.canh, 0.7);
   if (!du) { lvTrangThai("Chưa lấy được hình từ camera, đợi một chút…"); lvHen(); return; }
   lvKhungTruoc = vt || lvVanTay();
   lvBusy = true; lvLuot++;
@@ -8345,7 +8440,7 @@ function lvMo() {
   var el = document.getElementById("lv");
   el.hidden = false;
   lvPh = []; lvLuot = 0; lvBoQua = 0;
-  lvTok = { vao: 0, ra: 0 };
+  lvTok = { vao: 0, ra: 0, demTao: 0, demDoc: 0 };
   lvKhungTruoc = null; lvBoLien = 0; lvBusy = false; lvMoCai = false;
   lvVeNut(); lvVeThe(); lvVeTop(); lvVeCaiDat();
   lvTrangThai("Đang mở camera…");
@@ -8384,6 +8479,7 @@ function lvDong() {
   el.addEventListener("change", function (e) {
     var t = e.target;
     if (t.id === "lv-giay") { lvCfg.giay = +t.value; lvSave(); return; }
+    if (t.id === "lv-canh") { lvCfg.canh = +t.value; lvSave(); lvVeCaiDat(); return; }
     if (t.id === "lv-model") { lvCfg.model = t.value; lvSave(); lvVeTop(); return; }
 
     if (t.id === "lv-nhan") { lvNhan = t.value; return; }
@@ -8446,11 +8542,17 @@ function aiGoi(cauHoi, kemAnh) {
     }
   }
 
+  /* Phần AI_SYSTEM cố định được lưu đệm; bối cảnh đội tàu để sau vì nó đổi
+     mỗi khi anh nhập thêm kỳ kiểm tra. */
+  var sysB = [{ type: "text", text: AI_SYSTEM, cache_control: { type: "ephemeral" } }];
+  if (sys.length > AI_SYSTEM.length) {
+    sysB.push({ type: "text", text: sys.substring(AI_SYSTEM.length) });
+  }
   var body = {
     model: aiCfg.model,
     max_tokens: 6000,
     stream: true,
-    system: sys,
+    system: sysB,
     output_config: { effort: "medium" },
     messages: guiMsgs
   };
@@ -8992,7 +9094,7 @@ document.getElementById("bb-sync").onclick = function () {
 /* ===================== KHỞI ĐỘNG =====================
    APP_VER hiện ở góc phải đầu trang. Nếu số này không đổi sau khi cập nhật,
    nghĩa là trình duyệt còn giữ bản cũ trong bộ nhớ đệm — tải lại trang. */
-var APP_VER = "b\u1ea3n 2026-08-20/16";
+var APP_VER = "b\u1ea3n 2026-08-20/17";
 document.getElementById("ver").textContent = APP_VER;
 load();
 drawTabs();
