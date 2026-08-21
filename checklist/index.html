@@ -3156,6 +3156,7 @@ var saveTimer = null;
 function save() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(function () {
+    bb.suaLuc = Date.now();
     khoGhi(KEY, JSON.stringify({ state: state, bb: bb }), function (loi) {
       var el = document.getElementById("save");
       if (!el) return;
@@ -6049,6 +6050,9 @@ var saveTimer = null;
 function save() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(function () {
+    /* Kỳ đang mở là kỳ vừa bị sửa — đóng dấu để lần gộp sau biết bản nào mới */
+    var kMo = curKy ? kyById(curKy) : null;
+    if (kMo) kMo.suaLuc = Date.now();
     khoGhi(KEY, JSON.stringify({ ships: DB.ships, ky: DB.ky, curShip: curShip, tab: tab }),
       function (loi) {
         var el = document.getElementById("pt-save");
@@ -6156,10 +6160,37 @@ function viewTau() {
 }
 
 /* ---------- TAB KỲ KIỂM TRA ---------- */
+/* Thẻ đồng bộ. Tách riêng vì máy MỚI chưa có tàu nào cũng phải bấm Nhập được
+   — không thì thành vòng luẩn quẩn: muốn có dữ liệu phải nhập, muốn nhập phải
+   có dữ liệu trước. */
+function theDongBo() {
+  return '<div class="card"><h3>🔄 Đồng bộ máy tính ↔ điện thoại</h3>' +
+    '<div class="muted">Không có máy chủ nào cả. App gói dữ liệu vào một file, ' +
+    'anh tự gửi file đó cho chính mình — Zalo, email, dây USB — rồi bên kia bấm Nhập.<br>' +
+    '<b>Nhập là GỘP, không đè.</b> Kỳ nào bên này chưa có thì thêm vào, ' +
+    'kỳ nào có rồi thì lấy bản sửa sau; không biết bản nào sửa sau thì hỏi anh, ' +
+    'mặc định giữ bản đang có. Sổ ghi nhận chỉ cộng thêm, không bao giờ xóa.</div>' +
+    '<label class="f" style="margin-top:10px"><b>Tên máy này</b>' +
+    '<input id="db-may" value="' + esc(mayTen()) + '" placeholder="VD Máy tính phòng, iPhone của tôi">' +
+    '<span class="muted">Ghi vào tên file để anh biết file nào của máy nào.</span></label>' +
+    '<div class="btns" style="margin-top:10px">' +
+    '<button class="b" id="db-xuat-hs">📤 Xuất hồ sơ các kỳ (nhẹ)</button>' +
+    '<button class="b" id="db-xuat-tb">📤 Xuất toàn bộ, kèm ảnh</button>' +
+    '<button class="b acc" id="db-nhap">📥 Nhập từ file</button></div>' +
+    '<div class="muted" style="margin-top:8px">' +
+    '<b>Hồ sơ các kỳ</b> — tàu, các kỳ kiểm tra, lỗi đã học. Không ảnh nên nhẹ, ' +
+    'gửi email được. Dùng khi mang kho lịch sử từ máy tính ra điện thoại.<br>' +
+    '<b>Toàn bộ</b> — thêm biên bản đang làm dở và sổ ghi nhận kèm ảnh. Nặng. ' +
+    'Dùng khi mang kết quả chuyến đi từ điện thoại về phòng.</div>' +
+    '<input type="file" id="f-db" accept=".json,application/json" style="display:none">' +
+    '<div id="db-log" class="muted" style="margin-top:9px"></div></div>';
+}
+
 function viewKy() {
   if (!DB.ships.length) {
     document.getElementById("pt-view").innerHTML =
-      '<div class="empty">Chưa có tàu nào.<br>Sang tab <b>TÀU</b> thêm tàu trước đã.</div>';
+      '<div class="empty">Chưa có tàu nào.<br>Thêm tàu ở tab <b>TÀU</b>, ' +
+      'hoặc nhập dữ liệu sẵn có từ máy khác bằng bảng bên dưới.</div>' + theDongBo();
     document.getElementById("pt-bar").innerHTML = '<button class="b pri" data-tab="tau">Sang tab TÀU</button>';
     return;
   }
@@ -6177,6 +6208,8 @@ function viewKy() {
     '<button class="b acc" id="b-bulk">📄 Chọn nhiều file Word</button></div>' +
     '<input type="file" id="f-bulk" accept=".docx" multiple style="display:none">' +
     '<div id="bulk-log" class="muted" style="margin-top:9px"></div></div>';
+
+  h += theDongBo();
 
   var list = curShip ? kyOfShip(curShip) : DB.ky.slice().sort(function (a, b) {
     return (b.ngay || "").localeCompare(a.ngay || "");
@@ -7491,6 +7524,24 @@ PTR.addEventListener("click", function (e) {
   if (e.target.id === "b-docx") { document.getElementById("f-docx").click(); return; }
   if (e.target.id === "b-bulk") { document.getElementById("f-bulk").click(); return; }
 
+  /* --- đồng bộ --- */
+  if (e.target.id === "db-xuat-hs" || e.target.id === "db-xuat-tb") {
+    var toanBo = e.target.id === "db-xuat-tb";
+    var m = document.getElementById("db-may");
+    if (m) mayDat(m.value);
+    var r = dbTaiXuong(toanBo);
+    var lg = document.getElementById("db-log");
+    if (lg) {
+      lg.innerHTML = "Đã tạo <b>" + esc(r.ten) + "</b> — " + dbCo(r.co) + ".<br>" +
+        "Gửi file này cho chính mình rồi bên kia bấm <b>Nhập từ file</b>." +
+        (toanBo && r.co > 20 * 1024 * 1024
+          ? ' <b style="color:#b91c1c">File hơi nặng, email có thể không gửi được — ' +
+            'dùng Zalo, dây USB hoặc thư mục chung.</b>' : "");
+    }
+    return;
+  }
+  if (e.target.id === "db-nhap") { document.getElementById("f-db").click(); return; }
+
   /* --- trợ lý --- */
   if (e.target.id === "ai-caidat") { aiMoCaiDat(); return; }
   if (e.target.id === "ai-quet") { lvMo(); return; }
@@ -7614,6 +7665,16 @@ PTR.addEventListener("change", function (e) {
     });
     return;
   }
+  if (t.id === "f-db") {
+    if (!t.files || !t.files.length) return;
+    var fdb = t.files[0];
+    t.value = "";
+    dbDocFile(fdb, function (g, loi) {
+      if (loi) { alert("✕ " + loi); return; }
+      dbMoXemTruoc(g);
+    });
+    return;
+  }
   if (t.id === "f-bulk") {
     if (!t.files || !t.files.length) return;
     /* Phải sao ra mảng TRƯỚC khi xóa value — t.files là danh sách sống, xóa value là mất */
@@ -7662,6 +7723,95 @@ PTR.addEventListener("input", function (e) {
   }
 });
 
+/* ---------- đồng bộ: xem trước rồi mới gộp ---------- */
+function dbMoXemTruoc(g) {
+  var xt = dbXemTruoc(g);
+  var i;
+  var tong = xt.tauThem.length + xt.kyThem.length + xt.kyMoiHon.length +
+             xt.kyDung.length + xt.soThem + xt.mauThem + xt.ttThem;
+
+  var s = "<h2>Nhập từ file</h2>" +
+    '<div class="card"><div class="muted">File của máy <b>' + esc(g.may || "?") + '</b>, ' +
+    "xuất lúc <b>" + esc(String(g.xuatLuc || "").replace("T", " ").substring(0, 16)) + "</b>. " +
+    (g.toanBo ? "Gói <b>toàn bộ</b>, có ảnh." : "Gói <b>hồ sơ các kỳ</b>, không có ảnh.") +
+    "</div></div>";
+
+  if (!tong && !(g.bb && g.bb.bb)) {
+    s += '<div class="card"><b>Không có gì mới.</b> Mọi thứ trong file này bên máy ' +
+      "đang dùng đã có đủ rồi.</div>" +
+      '<div class="btns"><button class="b" id="db-thoi">Đóng</button></div>';
+    openSheet(s);
+    return;
+  }
+
+  s += '<div class="card"><h3>Sẽ thêm vào</h3><div class="muted">' +
+    (xt.tauThem.length ? "<b>" + xt.tauThem.length + "</b> tàu mới<br>" : "") +
+    (xt.kyThem.length ? "<b>" + xt.kyThem.length + "</b> kỳ kiểm tra mới<br>" : "") +
+    (xt.kyMoiHon.length ? "<b>" + xt.kyMoiHon.length + "</b> kỳ có bản sửa sau trong file — sẽ lấy bản đó<br>" : "") +
+    (xt.soThem ? "<b>" + xt.soThem + "</b> mục sổ ghi nhận<br>" : "") +
+    (xt.mauThem ? "<b>" + xt.mauThem + "</b> lỗi đã học<br>" : "") +
+    (xt.ttThem ? "<b>" + xt.ttThem + "</b> mục checklist tự thêm<br>" : "") +
+    (tong ? "" : "Không có mục nào mới.") +
+    "</div></div>";
+
+  if (xt.kyDung.length) {
+    s += '<div class="card"><h3>Đụng nhau — anh chọn</h3>' +
+      '<div class="muted">Những kỳ này hai bên khác nhau mà không biết bản nào sửa sau ' +
+      "(dữ liệu cũ chưa có dấu thời gian). <b>Không đánh dấu thì giữ bản đang có.</b></div>";
+    for (i = 0; i < xt.kyDung.length; i++) {
+      var c = xt.kyDung[i].cu, m = xt.kyDung[i].moi;
+      var sh = null, j, kho = PT.khoKy();
+      for (j = 0; j < kho.ships.length; j++) if (kho.ships[j].id === c.shipId) sh = kho.ships[j];
+      s += '<label class="f" style="display:block;margin-top:8px">' +
+        '<input type="checkbox" data-dbdung="' + esc(c.id) + '"> ' +
+        "<b>" + esc(nameOf(LOAI_KY, c.loai)) + (c.so ? " — số " + esc(c.so) : "") + "</b> " +
+        (sh ? esc(sh.ten) + " · " : "") + fmtDate(c.ngay) + "<br>" +
+        '<span class="muted">đang có ' + ((c.items || []).length) + " phát hiện · " +
+        "trong file " + ((m.items || []).length) + " phát hiện — đánh dấu để lấy bản trong file" +
+        "</span></label>";
+    }
+    s += "</div>";
+  }
+
+  if (g.bb && g.bb.bb) {
+    var vp = (g.bb.bb.viPham || []).length;
+    var tenT = (g.bb.bb.nhathau || "").replace(/^\s+|\s+$/g, "") || "(chưa đặt tên tàu)";
+    var vpNay = (bb.viPham || []).length;
+    s += '<div class="card"><h3>Biên bản đang làm dở</h3>' +
+      '<div class="muted">Cái này KHÔNG tự gộp được — hai biên bản làm dở nhập vào nhau ' +
+      "thì ra một cái không dùng được. Anh chọn giữ cái nào.<br>" +
+      "<b>Trong file:</b> tàu " + esc(String(tenT)) + ", " + vp + " phát hiện.<br>" +
+      "<b>Đang có bên này:</b> " + vpNay + " phát hiện.</div>" +
+      '<label class="f" style="display:block;margin-top:8px">' +
+      '<input type="checkbox" id="db-laybb"> Lấy biên bản trong file, ' +
+      "<b>bỏ</b> biên bản đang có bên này</label></div>";
+  }
+
+  s += '<div class="btns">' +
+    '<button class="b acc" id="db-gop">Gộp vào</button>' +
+    '<button class="b" id="db-thoi">Thôi</button></div>';
+  openSheet(s);
+
+  document.getElementById("db-thoi").onclick = function () { closeSheet(); };
+  document.getElementById("db-gop").onclick = function () {
+    var chon = { layDung: {}, layBB: false };
+    var os = document.querySelectorAll("[data-dbdung]");
+    for (var q = 0; q < os.length; q++) {
+      if (os[q].checked) chon.layDung[os[q].getAttribute("data-dbdung")] = true;
+    }
+    var cb = document.getElementById("db-laybb");
+    chon.layBB = !!(cb && cb.checked);
+    if (chon.layBB && !confirm("Biên bản đang làm dở bên máy này sẽ bị bỏ đi và thay bằng bản trong file. Chắc chưa?")) return;
+    var d = dbGop(g, chon);
+    closeSheet();
+    alert("Đã gộp xong.\n\n" +
+      "Thêm: " + d.tau + " tàu, " + d.ky + " kỳ kiểm tra, " + d.so + " mục sổ, " +
+      d.mau + " lỗi đã học, " + d.tt + " mục checklist.\n" +
+      "Cập nhật: " + d.kyDoi + " kỳ.\n" +
+      (d.bb ? "Đã thay biên bản đang làm dở." : "Giữ nguyên biên bản đang làm dở."));
+  };
+}
+
 /* ---------- form tàu ---------- */
 function editShip(id) {
   var s = id ? shipById(id) : { id: "", ten: "", loai: "", imo: "" };
@@ -7676,10 +7826,11 @@ function editShip(id) {
     var ten = document.getElementById("s-ten").value.replace(/^\s+|\s+$/g, "");
     if (!ten) { alert("Nhập tên tàu."); return; }
     if (id) {
-      s.ten = ten; s.loai = document.getElementById("s-loai").value; s.imo = document.getElementById("s-imo").value;
+      s.ten = ten; s.loai = document.getElementById("s-loai").value;
+      s.imo = document.getElementById("s-imo").value; s.suaLuc = Date.now();
     } else {
       DB.ships.push({ id: uid(), ten: ten, loai: document.getElementById("s-loai").value,
-        imo: document.getElementById("s-imo").value });
+        imo: document.getElementById("s-imo").value, suaLuc: Date.now() });
     }
     closeSheet(); save(); draw();
   };
@@ -7758,7 +7909,7 @@ function napNhieuFile(files) {
       var rows = parseRows(txt, loai, ngay);
       if (!rows.length) { loi.push(f.name + " (không tách được dòng nào)"); tiep(); return; }
       DB.ky.push({
-        id: uid(), shipId: sid, loai: loai, ngay: ngay, so: guessSo(txt),
+        id: uid(), suaLuc: Date.now(), shipId: sid, loai: loai, ngay: ngay, so: guessSo(txt),
         doan: "", nguon: f.name, items: rows
       });
       okN++; rowN += rows.length;
@@ -9068,7 +9219,8 @@ function aiMoCaiDat() {
 function addKy() {
   var sid = curShip || (DB.ships[0] && DB.ships[0].id);
   if (!sid) { alert("Thêm tàu trước đã."); return; }
-  var k = { id: uid(), shipId: sid, loai: "c4", ngay: today(), so: "", doan: "", nguon: "", items: [] };
+  var k = { id: uid(), suaLuc: Date.now(), shipId: sid, loai: "c4", ngay: today(),
+            so: "", doan: "", nguon: "", items: [] };
   DB.ky.push(k); curKy = k.id; save(); draw(); window.scrollTo(0, 0);
 }
 function openPaste() {
@@ -9138,13 +9290,15 @@ function napTuChecklist(d) {
   for (i = 0; i < DB.ships.length; i++)
     if (noDia(DB.ships[i].ten) === noDia(d.tenTau)) s = DB.ships[i];
   var tauMoi = false;
-  if (!s) { s = { id: uid(), ten: d.tenTau, loai: "", imo: "" }; DB.ships.push(s); tauMoi = true; }
+  if (!s) { s = { id: uid(), ten: d.tenTau, loai: "", imo: "", suaLuc: Date.now() };
+            DB.ships.push(s); tauMoi = true; }
 
   var k = null;
   for (i = 0; i < DB.ky.length; i++)
     if (DB.ky[i].src === "checklist" && DB.ky[i].srcKey === d.srcKey) k = DB.ky[i];
   var kyMoi = false;
   if (!k) { k = { id: uid(), src: "checklist", srcKey: d.srcKey }; DB.ky.push(k); kyMoi = true; }
+  k.suaLuc = Date.now();
 
   k.shipId = s.id;
   k.loai = d.loai;
@@ -9167,6 +9321,9 @@ aiLoad();
 return {
   draw: function () { draw(); },
   napKho: function () { load(); },
+  /* Trả về chính hai mảng thật (không phải bản sao) để lớp đồng bộ gộp vào */
+  khoKy: function () { return { ships: DB.ships, ky: DB.ky }; },
+  luuKho: function () { save(); },
   napTuChecklist: napTuChecklist,
   soKy: function () { return DB.ky.length; },
   xemPhanTich: function () { tab = "pt"; curKy = ""; save(); draw(); },
@@ -9206,6 +9363,253 @@ function themViPhamTuAI(o) {
 }
 
 /* ===================== CHUYỂN GIỮA HAI CHẾ ĐỘ ===================== */
+/* ═══════════════════ ĐỒNG BỘ GIỮA MÁY TÍNH VÀ ĐIỆN THOẠI ═══════════════════
+   Không có máy chủ. App gói toàn bộ dữ liệu vào MỘT file, anh gửi file đó cho
+   chính mình — Zalo, email, dây USB, thư mục chung — bên kia bấm Nhập.
+   Việc chuyển file thì mấy công cụ anh vẫn dùng hằng ngày đã làm rồi; app chỉ
+   phải lo phần khó là GỘP cho đúng.
+
+   HAI GÓI, theo đúng hai chiều anh làm việc:
+     · "Hồ sơ các kỳ"  — tàu, các kỳ kiểm tra, lỗi đã học, mục tự thêm.
+                         Không có ảnh nên rất nhẹ, gửi email được.
+                         Dùng cho chiều MÁY TÍNH → ĐIỆN THOẠI (mang kho lịch
+                         sử theo người).
+     · "Toàn bộ"       — thêm biên bản đang làm dở và sổ ghi nhận kèm ảnh.
+                         Nặng. Dùng cho chiều ĐIỆN THOẠI → MÁY TÍNH (mang kết
+                         quả chuyến đi về phòng).
+
+   NGUYÊN TẮC XƯƠNG SỐNG: NHẬP LÀ GỘP, KHÔNG BAO GIỜ ĐÈ.
+   Nhập nhầm file cũ mà mất dữ liệu mới là kiểu hỏng tệ nhất, nên mặc định
+   luôn nghiêng về giữ cái đang có:
+     · kỳ chưa có bên này       → thêm vào
+     · có rồi, nội dung y hệt   → bỏ qua
+     · có rồi, khác nhau        → lấy bản SỬA SAU; không biết bản nào sửa sau
+                                  thì HỎI, mặc định giữ bản đang có
+     · sổ ghi nhận              → chỉ cộng thêm, không xóa bao giờ
+     · biên bản đang làm dở     → không tự gộp, để anh chọn
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+var DB_DINHDANG = 1;                     /* số hiệu định dạng file */
+var MAY_KEY = "atskmt-ten-may-v1";
+
+function mayTen() {
+  var t = "";
+  try { t = localStorage.getItem(MAY_KEY) || ""; } catch (e) {}
+  if (t) return t;
+  var ua = navigator.userAgent || "";
+  return /iPhone|iPad|Android|Mobile/i.test(ua) ? "Điện thoại" : "Máy tính";
+}
+function mayDat(t) {
+  try { localStorage.setItem(MAY_KEY, String(t || "").replace(/^\s+|\s+$/g, "").substring(0, 40)); }
+  catch (e) {}
+}
+
+/* ── Gói dữ liệu ── */
+function dbXuat(toanBo) {
+  var kho = PT.khoKy();
+  var goi = {
+    app: "atskmt-vsp-fleet-safety",
+    dinhDang: DB_DINHDANG,
+    xuatLuc: new Date().toISOString(),
+    may: mayTen(),
+    toanBo: !!toanBo,
+    tau: kho.ships,
+    ky: kho.ky,
+    mau: mauLoi,
+    tuThem: mucTuThem
+  };
+  if (toanBo) {
+    goi.bb = { state: state, bb: bb };
+    goi.so = soGN;
+  }
+  return goi;
+}
+
+function slugNgoai(s) {
+  return noDia(s).replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").substring(0, 24) || "may";
+}
+function dbTenFile(toanBo) {
+  var d = new Date();
+  function hai(n) { return (n < 10 ? "0" : "") + n; }
+  return "Du-lieu-doi-tau_" + slugNgoai(mayTen()) + "_" +
+    d.getFullYear() + hai(d.getMonth() + 1) + hai(d.getDate()) + "-" +
+    hai(d.getHours()) + hai(d.getMinutes()) +
+    (toanBo ? "_toan-bo" : "_ho-so") + ".json";
+}
+function dbCo(n) {
+  if (n >= 1024 * 1024) return (n / 1024 / 1024).toFixed(1) + " MB";
+  return Math.round(n / 1024) + " KB";
+}
+function dbTaiXuong(toanBo) {
+  var s = JSON.stringify(dbXuat(toanBo));
+  var ten = dbTenFile(toanBo);
+  f002SaveBlob(new Blob([s], { type: "application/json" }), ten, "application/json");
+  return { ten: ten, co: s.length };
+}
+
+/* ── Đọc file về, kiểm cho chắc rồi mới cho gộp ── */
+function dbDocFile(file, xong) {
+  var fr = new FileReader();
+  fr.onerror = function () { xong(null, "Không đọc được file."); };
+  fr.onload = function () {
+    var g;
+    try { g = JSON.parse(fr.result); }
+    catch (e) { xong(null, "File này không đọc được nội dung. Phải là file .json do chính app xuất ra."); return; }
+    if (!g || g.app !== "atskmt-vsp-fleet-safety") {
+      xong(null, "File này không phải dữ liệu của app. Hãy chọn file .json do chính app xuất ra.");
+      return;
+    }
+    if (+g.dinhDang > DB_DINHDANG) {
+      xong(null, "File do bản app MỚI HƠN bản đang chạy xuất ra. Cập nhật app rồi nhập lại.");
+      return;
+    }
+    xong(g, null);
+  };
+  fr.readAsText(file);
+}
+
+/* So nội dung, bỏ qua dấu thời gian vì nó không phải nội dung */
+function dbChuKy(o) {
+  var c = JSON.parse(JSON.stringify(o));
+  delete c.suaLuc;
+  return JSON.stringify(c);
+}
+
+/* ── Xem trước: file này sẽ thêm gì, đổi gì, đụng gì. KHÔNG động vào dữ liệu ── */
+function dbXemTruoc(g) {
+  var kho = PT.khoKy();
+  var kq = { tauThem: [], kyThem: [], kyMoiHon: [], kyDung: [],
+             soThem: 0, mauThem: 0, ttThem: 0, doiId: {} };
+  var i, t, k;
+
+  /* --- Tàu: khớp theo mã; không có thì khớp theo TÊN --- */
+  var theoId = {}, theoTen = {};
+  for (i = 0; i < kho.ships.length; i++) {
+    theoId[kho.ships[i].id] = kho.ships[i];
+    theoTen[noDia(kho.ships[i].ten || "")] = kho.ships[i];
+  }
+  for (i = 0; i < (g.tau || []).length; i++) {
+    t = g.tau[i];
+    if (theoId[t.id]) continue;
+    var cungTen = theoTen[noDia(t.ten || "")];
+    if (cungTen) {
+      /* Cùng một con tàu mà hai máy tự đặt hai mã khác nhau. Đổi mã bên file
+         về mã bên này, không thì thành hai con tàu trùng tên. */
+      kq.doiId[t.id] = cungTen.id;
+      continue;
+    }
+    kq.tauThem.push(t);
+  }
+
+  /* --- Kỳ kiểm tra --- */
+  function khoaTuNhien(x, sid) {
+    return (sid || x.shipId || "") + "|" + (x.loai || "") + "|" + (x.ngay || "") + "|" +
+      noDia(String(x.so || ""));
+  }
+  var kId = {}, kSrc = {}, kTuNhien = {};
+  for (i = 0; i < kho.ky.length; i++) {
+    k = kho.ky[i];
+    kId[k.id] = k;
+    if (k.src === "checklist" && k.srcKey) kSrc[k.srcKey] = k;
+    kTuNhien[khoaTuNhien(k)] = k;
+  }
+  for (i = 0; i < (g.ky || []).length; i++) {
+    k = g.ky[i];
+    var sid = kq.doiId[k.shipId] || k.shipId;
+    var cu = kId[k.id] ||
+             (k.src === "checklist" && k.srcKey ? kSrc[k.srcKey] : null) ||
+             kTuNhien[khoaTuNhien(k, sid)];
+    if (!cu) { kq.kyThem.push(k); continue; }
+    if (dbChuKy(cu) === dbChuKy(k)) continue;          /* y hệt, khỏi làm gì */
+    var a = +cu.suaLuc || 0, b = +k.suaLuc || 0;
+    if (b > a) kq.kyMoiHon.push({ cu: cu, moi: k });    /* bản trong file sửa sau */
+    else if (a > b) continue;                          /* bản đang có mới hơn */
+    else kq.kyDung.push({ cu: cu, moi: k });            /* không biết bản nào sau */
+  }
+
+  /* --- Sổ ghi nhận: chỉ cộng thêm --- */
+  var soId = {};
+  for (i = 0; i < soGN.length; i++) soId[soGN[i].id] = 1;
+  for (i = 0; i < (g.so || []).length; i++) if (!soId[g.so[i].id]) kq.soThem++;
+
+  /* --- Lỗi đã học --- */
+  var mauCo = {};
+  for (i = 0; i < mauLoi.length; i++) mauCo[noDia(mauLoi[i].nd || "")] = 1;
+  for (i = 0; i < (g.mau || []).length; i++) if (!mauCo[noDia(g.mau[i].nd || "")]) kq.mauThem++;
+
+  /* --- Mục checklist tự thêm --- */
+  var ttCo = {};
+  for (i = 0; i < mucTuThem.length; i++) ttCo[noDia(mucTuThem[i].t || "")] = 1;
+  for (i = 0; i < (g.tuThem || []).length; i++) if (!ttCo[noDia(g.tuThem[i].t || "")]) kq.ttThem++;
+
+  return kq;
+}
+
+/* ── Gộp thật ──
+   chon = { layDung: { <mã kỳ>: true }, layBB: bool } */
+function dbGop(g, chon) {
+  chon = chon || {};
+  var xt = dbXemTruoc(g);
+  var kho = PT.khoKy();
+  var i, dem = { tau: 0, ky: 0, kyDoi: 0, so: 0, mau: 0, tt: 0, bb: false };
+
+  for (i = 0; i < xt.tauThem.length; i++) { kho.ships.push(xt.tauThem[i]); dem.tau++; }
+
+  for (i = 0; i < xt.kyThem.length; i++) {
+    var k = JSON.parse(JSON.stringify(xt.kyThem[i]));
+    if (xt.doiId[k.shipId]) k.shipId = xt.doiId[k.shipId];
+    kho.ky.push(k); dem.ky++;
+  }
+
+  /* Thay nội dung nhưng GIỮ NGUYÊN mã bên này, để những chỗ đang trỏ tới nó
+     không bị đứt. */
+  function thay(cu, moi) {
+    var kh;
+    for (kh in moi) {
+      if (Object.prototype.hasOwnProperty.call(moi, kh) && kh !== "id") cu[kh] = moi[kh];
+    }
+    if (xt.doiId[cu.shipId]) cu.shipId = xt.doiId[cu.shipId];
+  }
+  for (i = 0; i < xt.kyMoiHon.length; i++) { thay(xt.kyMoiHon[i].cu, xt.kyMoiHon[i].moi); dem.kyDoi++; }
+
+  var lay = chon.layDung || {};
+  for (i = 0; i < xt.kyDung.length; i++) {
+    if (lay[xt.kyDung[i].cu.id]) { thay(xt.kyDung[i].cu, xt.kyDung[i].moi); dem.kyDoi++; }
+  }
+
+  var soCo = {};
+  for (i = 0; i < soGN.length; i++) soCo[soGN[i].id] = 1;
+  for (i = 0; i < (g.so || []).length; i++) {
+    if (!soCo[g.so[i].id]) { soGN.push(g.so[i]); dem.so++; }
+  }
+
+  var mauCo = {};
+  for (i = 0; i < mauLoi.length; i++) mauCo[noDia(mauLoi[i].nd || "")] = 1;
+  for (i = 0; i < (g.mau || []).length; i++) {
+    if (!mauCo[noDia(g.mau[i].nd || "")]) { mauLoi.push(g.mau[i]); dem.mau++; }
+  }
+
+  var ttCo = {};
+  for (i = 0; i < mucTuThem.length; i++) ttCo[noDia(mucTuThem[i].t || "")] = 1;
+  for (i = 0; i < (g.tuThem || []).length; i++) {
+    if (!ttCo[noDia(g.tuThem[i].t || "")]) { mucTuThem.push(g.tuThem[i]); dem.tt++; }
+  }
+
+  if (chon.layBB && g.bb && g.bb.bb) {
+    state = g.bb.state || {};
+    bb = g.bb.bb;
+    dem.bb = true;
+  }
+
+  soSave(); mauSave(); ttSave(); ttGan();
+  PT.luuKho();
+  save();
+  CK_INDEX = null;
+  drawTabs(); draw(); soNutNhan(); moDauSoKy();
+  try { PT.draw(); } catch (e) {}
+  return dem;
+}
+
 var MODE_KEY = "atskmt-kiemtratau-mode-v1";
 var appMode = "kt";
 function setMode(m) {
@@ -9287,7 +9691,7 @@ document.getElementById("bb-sync").onclick = function () {
 /* ===================== KHỞI ĐỘNG =====================
    APP_VER hiện ở góc phải đầu trang. Nếu số này không đổi sau khi cập nhật,
    nghĩa là trình duyệt còn giữ bản cũ trong bộ nhớ đệm — tải lại trang. */
-var APP_VER = "b\u1ea3n 2026-08-21/18";
+var APP_VER = "b\u1ea3n 2026-08-21/19";
 document.getElementById("ver").textContent = APP_VER;
 khoBenVung();
 /* Đợi nạp kho xong mới vẽ — IndexedDB đọc bất đồng bộ, vẽ trước thì màn hình
