@@ -735,6 +735,168 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
 </div>
 
 <script>
+/* ═══════════════════════════════════════════════════════════════════════
+   idb-keyval 6.3.0 — Jake Archibald — giấy phép Apache-2.0
+   https://github.com/jakearchibald/idb-keyval
+   Bản UMD đã dịch về cú pháp ES5 nên chạy được trên máy cũ. Nguyên văn giữ
+   trong checklist/vendor/, kèm bản quyền đầy đủ ở idb-keyval-LICENSE.txt.
+   Nhúng thẳng vào đây để app vẫn là MỘT file, mở được khi mất mạng.
+   ═══════════════════════════════════════════════════════════════════════ */
+function _slicedToArray(n,t){return _arrayWithHoles(n)||_iterableToArrayLimit(n,t)||_unsupportedIterableToArray(n,t)||_nonIterableRest()}function _nonIterableRest(){throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}function _unsupportedIterableToArray(n,t){if(n){if("string"==typeof n)return _arrayLikeToArray(n,t);var r={}.toString.call(n).slice(8,-1);return"Object"===r&&n.constructor&&(r=n.constructor.name),"Map"===r||"Set"===r?Array.from(n):"Arguments"===r||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(r)?_arrayLikeToArray(n,t):void 0}}function _arrayLikeToArray(n,t){(null==t||t>n.length)&&(t=n.length);for(var r=0,e=Array(t);r<t;r++)e[r]=n[r];return e}function _iterableToArrayLimit(n,t){var r=null==n?null:"undefined"!=typeof Symbol&&n[Symbol.iterator]||n["@@iterator"];if(null!=r){var e,o,u,i,a=[],c=!0,l=!1;try{if(u=(r=r.call(n)).next,0===t){if(Object(r)!==r)return;c=!1}else for(;!(c=(e=u.call(r)).done)&&(a.push(e.value),a.length!==t);c=!0);}catch(n){l=!0,o=n}finally{try{if(!c&&null!=r.return&&(i=r.return(),Object(i)!==i))return}finally{if(l)throw o}}return a}}function _arrayWithHoles(n){if(Array.isArray(n))return n}function _typeof(n){return _typeof="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(n){return typeof n}:function(n){return n&&"function"==typeof Symbol&&n.constructor===Symbol&&n!==Symbol.prototype?"symbol":typeof n},_typeof(n)}!function(n,t){"object"===("undefined"==typeof exports?"undefined":_typeof(exports))&&"undefined"!=typeof module?t(exports):"function"==typeof define&&define.amd?define(["exports"],t):t((n="undefined"!=typeof globalThis?globalThis:n||self).idbKeyval={})}(this,(function(n){"use strict";function t(n){return new Promise((function(t,r){n.oncomplete=n.onsuccess=function(){return t(n.result)},n.onabort=n.onerror=function(){return r(n.error)}}))}function r(n,r){var e;return function(o,u){return function(){if(e)return e;var o=indexedDB.open(n);return o.onupgradeneeded=function(){return o.result.createObjectStore(r)},(e=t(o)).then((function(n){n.onclose=function(){return e=void 0}}),(function(){e=void 0})),e}().then((function(n){return u(n.transaction(r,o).objectStore(r))}))}}var e;function o(){return e||(e=r("keyval-store","keyval")),e}function u(n,r){return n.openCursor().onsuccess=function(){this.result&&(r(this.result),this.result.continue())},t(n.transaction)}n.clear=function(){return(arguments.length>0&&void 0!==arguments[0]?arguments[0]:o())("readwrite",(function(n){return n.clear(),t(n.transaction)}))},n.createStore=r,n.del=function(n){return(arguments.length>1&&void 0!==arguments[1]?arguments[1]:o())("readwrite",(function(r){return r.delete(n),t(r.transaction)}))},n.delMany=function(n){return(arguments.length>1&&void 0!==arguments[1]?arguments[1]:o())("readwrite",(function(r){return n.forEach((function(n){return r.delete(n)})),t(r.transaction)}))},n.entries=function(){return(arguments.length>0&&void 0!==arguments[0]?arguments[0]:o())("readonly",(function(n){if(n.getAll&&n.getAllKeys)return Promise.all([t(n.getAllKeys()),t(n.getAll())]).then((function(n){var t=_slicedToArray(n,2),r=t[0],e=t[1];return r.map((function(n,t){return[n,e[t]]}))}));var r=[];return u(n,(function(n){return r.push([n.key,n.value])})).then((function(){return r}))}))},n.get=function(n){return(arguments.length>1&&void 0!==arguments[1]?arguments[1]:o())("readonly",(function(r){return t(r.get(n))}))},n.getMany=function(n){return(arguments.length>1&&void 0!==arguments[1]?arguments[1]:o())("readonly",(function(r){return Promise.all(n.map((function(n){return t(r.get(n))})))}))},n.keys=function(){return(arguments.length>0&&void 0!==arguments[0]?arguments[0]:o())("readonly",(function(n){if(n.getAllKeys)return t(n.getAllKeys());var r=[];return u(n,(function(n){return r.push(n.key)})).then((function(){return r}))}))},n.promisifyRequest=t,n.set=function(n,r){return(arguments.length>2&&void 0!==arguments[2]?arguments[2]:o())("readwrite",(function(e){return e.put(r,n),t(e.transaction)}))},n.setMany=function(n){return(arguments.length>1&&void 0!==arguments[1]?arguments[1]:o())("readwrite",(function(r){return n.forEach((function(n){return r.put(n[1],n[0])})),t(r.transaction)}))},n.update=function(n,r){return(arguments.length>2&&void 0!==arguments[2]?arguments[2]:o())("readwrite",(function(e){return new Promise((function(o,u){var i=e.get(n);i.onsuccess=function(){try{e.put(r(i.result),n),o(t(e.transaction))}catch(n){u(n)}},i.onerror=function(){return u(i.error)}}))}))},n.values=function(){return(arguments.length>0&&void 0!==arguments[0]?arguments[0]:o())("readonly",(function(n){if(n.getAll)return t(n.getAll());var r=[];return u(n,(function(n){return r.push(n.value)})).then((function(){return r}))}))}}));
+
+/* ═══════════════════════ KHO LƯU DỮ LIỆU ═══════════════════════
+   Trước đây mọi thứ nằm trong localStorage, mà chỗ đó chỉ được khoảng 5 MB
+   cho cả tên miền. Mỗi tấm ảnh trong sổ chuyến đi nặng chừng 150 KB, nên sổ
+   đầy ở khoảng mục thứ 34 rồi LẶNG LẼ mất dữ liệu — lệnh ghi ném lỗi và bị
+   nuốt mất trong catch rỗng.
+
+   Giờ dữ liệu lớn nằm trong IndexedDB: rộng hơn hàng trăm lần và không có
+   trần cứng 5 MB. Cách làm:
+     · lúc khởi động nạp hết vào bộ nhớ một lần  → đọc vẫn ĐỒNG BỘ như cũ
+     · ghi thì vào bộ nhớ ngay, xuống đĩa sau     → giao diện không khựng
+     · ghi hỏng thì BÁO LÊN MÀN HÌNH, không nuốt lỗi nữa
+     · máy nào không có IndexedDB thì tự lui về localStorage như trước
+   ═════════════════════════════════════════════════════════════════ */
+var KHO_DB = "atskmt", KHO_BAN = "kho";
+/* Những khóa dữ liệu lớn — có ảnh, có thể phình to */
+var KHO_KHOA = [
+  "atskmt-kiemtratau-vtbctl-v1",   /* checklist + biên bản đang làm */
+  "atskmt-phantich-hoso-tau-v1",   /* các kỳ kiểm tra đã lưu */
+  "atskmt-so-ghi-nhan-v1",         /* sổ ghi nhận chuyến đi (nhiều ảnh nhất) */
+  "atskmt-mau-loi-v1",             /* lỗi máy đã học */
+  "atskmt-muc-tu-them-v1"          /* mục checklist tự bổ sung */
+];
+/* Chìa khóa API, cài đặt quét, chế độ màn hình vẫn ở localStorage: rất nhỏ,
+   cần đọc được ngay lập tức lúc mở app, và không bao giờ làm đầy bộ nhớ. */
+
+var khoBan = null;      /* ngăn chứa của idb-keyval */
+var khoDung = false;    /* IndexedDB có dùng được không */
+var khoRam = {};        /* bản sao trong bộ nhớ, để đọc đồng bộ */
+var khoLoi = "";        /* lỗi ghi gần nhất — hiện cho người dùng thấy */
+var khoDaBao = false;   /* đã kêu lên một lần rồi thì thôi, khỏi phiền */
+
+try {
+  if (window.indexedDB && window.idbKeyval) {
+    khoBan = idbKeyval.createStore(KHO_DB, KHO_BAN);
+    khoDung = true;
+  }
+} catch (e) { khoDung = false; }
+
+function khoMoTaLoi(e) {
+  var n = String((e && (e.name || e.code)) || "");
+  if (n.indexOf("Quota") >= 0 || n === "22" || n.indexOf("Full") >= 0) {
+    return "Máy đã hết chỗ trống. Đưa sổ sang biên bản rồi xóa bớt ảnh cũ.";
+  }
+  return "Chưa ghi được xuống máy: " + ((e && e.message) || n || "không rõ nguyên nhân");
+}
+
+/* Đọc — luôn đồng bộ, lấy từ bản sao đã nạp lúc khởi động */
+function khoDoc(k) {
+  if (Object.prototype.hasOwnProperty.call(khoRam, k)) return khoRam[k];
+  try { return localStorage.getItem(k); } catch (e) { return null; }
+}
+
+/* Ghi — vào bộ nhớ ngay, xuống đĩa sau. xong(loi) với loi=null là ổn. */
+function khoGhi(k, v, xong) {
+  khoRam[k] = v;
+  if (!khoDung) {
+    try {
+      localStorage.setItem(k, v);
+      khoLoi = ""; if (xong) xong(null);
+    } catch (e) {
+      khoLoi = khoMoTaLoi(e); khoKeu(); if (xong) xong(e);
+    }
+    return;
+  }
+  idbKeyval.set(k, v, khoBan).then(function () {
+    khoLoi = ""; if (xong) xong(null);
+  }, function (e) {
+    khoLoi = khoMoTaLoi(e); khoKeu(); if (xong) xong(e);
+  });
+}
+
+/* Ghi hỏng thì phải kêu — im lặng mất dữ liệu là điều tệ nhất có thể xảy ra
+   giữa chuyến kiểm tra. Kêu một lần thôi, rồi để dấu ⚠ trên nút Sổ. */
+function khoKeu() {
+  try { if (typeof soNutNhan === "function") soNutNhan(); } catch (e) {}
+  if (khoDaBao) return;
+  khoDaBao = true;
+  try { alert("⚠ " + khoLoi + "\n\nNhững gì ghi thêm từ giờ có thể không giữ được. " +
+    "Nên xuất báo cáo ra file ngay để khỏi mất."); } catch (e) {}
+}
+
+/* Nạp toàn bộ kho lúc khởi động, tiện thể dời dữ liệu cũ từ localStorage sang */
+function khoNap(xong) {
+  if (!khoDung) { xong(); return; }
+  var t = null;
+  try { t = idbKeyval.getMany(KHO_KHOA, khoBan); } catch (e) { khoDung = false; xong(); return; }
+  t.then(function (ds) {
+    var i, k, cu, doi = [];
+    for (i = 0; i < KHO_KHOA.length; i++) {
+      k = KHO_KHOA[i];
+      if (ds[i] != null) { khoRam[k] = ds[i]; continue; }
+      /* Chưa có trong IndexedDB — lấy bản cũ ở localStorage sang, một lần */
+      cu = null;
+      try { cu = localStorage.getItem(k); } catch (e2) {}
+      if (cu != null) { khoRam[k] = cu; doi.push([k, cu]); }
+    }
+    if (!doi.length) { xong(); return; }
+    idbKeyval.setMany(doi, khoBan).then(function () {
+      /* Đọc lại để CHẮC CHẮN đã sang bên kia rồi mới xóa bản cũ. Xóa sớm mà
+         ghi hỏng thì mất trắng — thà để trùng còn hơn mất. */
+      var ks = [];
+      for (var j = 0; j < doi.length; j++) ks.push(doi[j][0]);
+      idbKeyval.getMany(ks, khoBan).then(function (kt) {
+        for (var m = 0; m < doi.length; m++) {
+          if (kt[m] === doi[m][1]) {
+            try { localStorage.removeItem(doi[m][0]); } catch (e3) {}
+          }
+        }
+        xong();
+      }, function () { xong(); });
+    }, function () { xong(); });
+  }, function () { khoDung = false; xong(); });
+}
+
+/* Xin trình duyệt đừng dọn dữ liệu này khi máy chật. Không xin thì dữ liệu
+   có thể bị xóa lúc điện thoại gần hết bộ nhớ — đúng lúc đang đi tàu. */
+function khoBenVung() {
+  try {
+    if (navigator.storage && navigator.storage.persist) {
+      navigator.storage.persist().then(function () {}, function () {});
+    }
+  } catch (e) {}
+}
+
+/* Còn bao nhiêu chỗ. xong({dung, tong}) hoặc xong(null) nếu máy không cho biết */
+function khoDungLuong(xong) {
+  try {
+    if (navigator.storage && navigator.storage.estimate) {
+      navigator.storage.estimate().then(function (o) {
+        xong({ dung: o.usage || 0, tong: o.quota || 0 });
+      }, function () { xong(null); });
+      return;
+    }
+  } catch (e) {}
+  xong(null);
+}
+function khoMB(n) {
+  if (n >= 1024 * 1024 * 1024) return (n / 1024 / 1024 / 1024).toFixed(1) + " GB";
+  if (n >= 1024 * 1024) return (n / 1024 / 1024).toFixed(1) + " MB";
+  return Math.round(n / 1024) + " KB";
+}
+/* Gần đầy thì báo trước, đừng đợi hỏng mới báo */
+function khoCanhBaoDay() {
+  khoDungLuong(function (o) {
+    if (!o || !o.tong) return;
+    if (o.dung / o.tong > 0.85) {
+      khoLoi = "Chỗ trống còn ít (" + khoMB(o.dung) + " / " + khoMB(o.tong) +
+        "). Nên xuất báo cáo rồi xóa bớt ảnh cũ.";
+      khoKeu();
+    }
+  });
+}
+
 const DATA = [
 
 /* ========================= TAB 1 — HỒ SƠ ========================= */
@@ -2957,7 +3119,7 @@ var bb = blankBB();
 
 function load() {
   try {
-    var raw = localStorage.getItem(KEY);
+    var raw = khoDoc(KEY);
     if (raw) {
       var v = JSON.parse(raw);
       state = v.state || {};
@@ -2994,13 +3156,13 @@ var saveTimer = null;
 function save() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(function () {
-    try {
-      localStorage.setItem(KEY, JSON.stringify({ state: state, bb: bb }));
-      document.getElementById("save").textContent =
-        "Đã lưu " + new Date().toLocaleTimeString("vi-VN");
-    } catch (e) {
-      document.getElementById("save").textContent = "Chưa lưu được — kiểm tra dung lượng trình duyệt";
-    }
+    khoGhi(KEY, JSON.stringify({ state: state, bb: bb }), function (loi) {
+      var el = document.getElementById("save");
+      if (!el) return;
+      el.textContent = loi ? ("⚠ " + khoLoi)
+        : ("Đã lưu " + new Date().toLocaleTimeString("vi-VN"));
+      el.style.color = loi ? "#b91c1c" : "";
+    });
   }, 500);
 }
 
@@ -3737,10 +3899,14 @@ function tenMuc(mucId) {
 var SO_KEY = "atskmt-so-ghi-nhan-v1";
 var soGN = [];
 function soLoad() {
-  try { soGN = JSON.parse(localStorage.getItem(SO_KEY) || "[]") || []; } catch (e) { soGN = []; }
+  try { soGN = JSON.parse(khoDoc(SO_KEY) || "[]") || []; } catch (e) { soGN = []; }
 }
+/* Trần cũ 200 mục là do localStorage chỉ chứa nổi khoảng 34 mục có ảnh; nay
+   IndexedDB rộng hơn nhiều nên nâng lên 500 — thừa cho một chuyến. */
+var SO_TRAN = 500;
 function soSave() {
-  try { localStorage.setItem(SO_KEY, JSON.stringify(soGN.slice(-200))); } catch (e) {}
+  if (soGN.length > SO_TRAN) soGN = soGN.slice(-SO_TRAN);
+  khoGhi(SO_KEY, JSON.stringify(soGN));
 }
 function soDem() {
   var n = 0, i;
@@ -3750,7 +3916,11 @@ function soDem() {
 function soNutNhan() {
   var n = soDem();
   var el = document.getElementById("btn-so");
-  if (el) el.textContent = n ? "📓 Sổ (" + n + ")" : "📓 Sổ";
+  if (!el) return;
+  /* Ghi hỏng thì để dấu ⚠ ngay trên nút, đừng để anh yên tâm nhầm */
+  el.textContent = (khoLoi ? "⚠ " : "") + (n ? "📓 Sổ (" + n + ")" : "📓 Sổ");
+  el.style.color = khoLoi ? "#b91c1c" : "";
+  el.title = khoLoi || "";
 }
 
 /* Ghi một mục vào sổ. Tự tìm mục checklist tương ứng và tự đánh dấu nếu chắc. */
@@ -3805,11 +3975,9 @@ function ckRefCua(mucId) {
 var MAU_KEY = "atskmt-mau-loi-v1";
 var mauLoi = [];
 function mauLoad() {
-  try { mauLoi = JSON.parse(localStorage.getItem(MAU_KEY) || "[]") || []; } catch (e) { mauLoi = []; }
+  try { mauLoi = JSON.parse(khoDoc(MAU_KEY) || "[]") || []; } catch (e) { mauLoi = []; }
 }
-function mauSave() {
-  try { localStorage.setItem(MAU_KEY, JSON.stringify(mauLoi.slice(-60))); } catch (e) {}
-}
+function mauSave() { khoGhi(MAU_KEY, JSON.stringify(mauLoi.slice(-60))); }
 function mauThem(r) {
   if (!r || !r.nd) return;
   var i;
@@ -4255,7 +4423,27 @@ document.getElementById("list").addEventListener("click", function (e) {
 });
 
 /* ---- Màn hình xem lại sổ ghi nhận ---- */
+/* Hiện chỗ trống còn lại, để anh biết trước chứ không đợi đầy mới biết */
+function soVeDungLuong() {
+  khoDungLuong(function (o) {
+    var e = document.getElementById("so-dungluong");
+    if (!e) return;
+    if (!o || !o.tong) {
+      e.innerHTML = "Chỗ lưu: <b>" + (khoDung ? "IndexedDB" : "localStorage (chật, chỉ ~5 MB)") +
+        "</b>. Máy này không cho biết còn bao nhiêu chỗ trống.";
+      return;
+    }
+    var pc = Math.round(o.dung / o.tong * 100);
+    e.innerHTML = "Chỗ lưu: <b>" + (khoDung ? "IndexedDB" : "localStorage") + "</b> — đã dùng <b>" +
+      khoMB(o.dung) + "</b> trên <b>" + khoMB(o.tong) + "</b> (" + pc + "%)." +
+      (pc > 85 ? ' <b style="color:#b91c1c">Sắp đầy — nên xuất báo cáo rồi xóa bớt ảnh.</b>' : "") +
+      (khoDung ? "" : ' <b style="color:#b91c1c">Máy này không dùng được IndexedDB, ' +
+        'sổ chỉ chứa được khoảng 30 mục có ảnh.</b>');
+  });
+}
+
 function drawSo() {
+  setTimeout(soVeDungLuong, 0);
   var el = document.getElementById("so-out");
   var conLai = soDem(), i;
   var ngoai = 0;
@@ -4265,7 +4453,8 @@ function drawSo() {
     "đang giữ <b>" + conLai + "</b>. " +
     (ngoai ? "Có <b>" + ngoai + " mục nằm ngoài checklist</b> — vẫn vào được biên bản, " +
       "và bấm được nút bổ sung vào checklist để lần sau có sẵn. " : "") +
-    "Soát lại rồi bấm <b>Đưa vào biên bản</b>. Mục nào không cần thì bấm Bỏ.</div>";
+    "Soát lại rồi bấm <b>Đưa vào biên bản</b>. Mục nào không cần thì bấm Bỏ.</div>" +
+    '<div class="so-dem" id="so-dungluong">Đang xem chỗ trống…</div>';
 
   if (!soGN.length) {
     h += '<div class="viol-empty">Sổ đang trống.<br>Bật <b>📹 Quét trực tiếp</b> rồi đi một vòng tàu, ' +
@@ -4382,9 +4571,9 @@ document.getElementById("sheetSo").addEventListener("click", function (e) {
 var TT_KEY = "atskmt-muc-tu-them-v1";
 var mucTuThem = [];
 function ttLoad() {
-  try { mucTuThem = JSON.parse(localStorage.getItem(TT_KEY) || "[]") || []; } catch (e) { mucTuThem = []; }
+  try { mucTuThem = JSON.parse(khoDoc(TT_KEY) || "[]") || []; } catch (e) { mucTuThem = []; }
 }
-function ttSave() { try { localStorage.setItem(TT_KEY, JSON.stringify(mucTuThem)); } catch (e) {} }
+function ttSave() { khoGhi(TT_KEY, JSON.stringify(mucTuThem)); }
 /* Gắn các mục tự thêm vào cuối tab QUAN SÁT để chúng hiện ra và tìm được */
 function ttGan() {
   var qs = null, i;
@@ -5846,7 +6035,7 @@ function uid() { return "x" + Date.now().toString(36) + Math.floor(Math.random()
 
 function load() {
   try {
-    var raw = localStorage.getItem(KEY);
+    var raw = khoDoc(KEY);
     if (raw) {
       var v = JSON.parse(raw);
       DB.ships = v.ships || [];
@@ -5860,12 +6049,14 @@ var saveTimer = null;
 function save() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(function () {
-    try {
-      localStorage.setItem(KEY, JSON.stringify({ ships: DB.ships, ky: DB.ky, curShip: curShip, tab: tab }));
-      document.getElementById("pt-save").textContent = "Đã lưu " + new Date().toLocaleTimeString("vi-VN");
-    } catch (e) {
-      document.getElementById("pt-save").textContent = "Chưa lưu được — dung lượng trình duyệt đã đầy";
-    }
+    khoGhi(KEY, JSON.stringify({ ships: DB.ships, ky: DB.ky, curShip: curShip, tab: tab }),
+      function (loi) {
+        var el = document.getElementById("pt-save");
+        if (!el) return;
+        el.textContent = loi ? ("⚠ " + khoLoi)
+          : ("Đã lưu " + new Date().toLocaleTimeString("vi-VN"));
+        el.style.color = loi ? "#b91c1c" : "";
+      });
   }, 400);
 }
 
@@ -8970,10 +9161,12 @@ function napTuChecklist(d) {
   return { tauMoi: tauMoi, kyMoi: kyMoi, soMuc: d.items.length, tenTau: s.ten };
 }
 
-load();
+/* Không gọi load() ngay ở đây: lúc này kho IndexedDB chưa nạp xong. Phần
+   khởi động ở cuối file sẽ gọi PT.napKho() khi dữ liệu đã sẵn sàng. */
 aiLoad();
 return {
   draw: function () { draw(); },
+  napKho: function () { load(); },
   napTuChecklist: napTuChecklist,
   soKy: function () { return DB.ky.length; },
   xemPhanTich: function () { tab = "pt"; curKy = ""; save(); draw(); },
@@ -9094,18 +9287,25 @@ document.getElementById("bb-sync").onclick = function () {
 /* ===================== KHỞI ĐỘNG =====================
    APP_VER hiện ở góc phải đầu trang. Nếu số này không đổi sau khi cập nhật,
    nghĩa là trình duyệt còn giữ bản cũ trong bộ nhớ đệm — tải lại trang. */
-var APP_VER = "b\u1ea3n 2026-08-20/17";
+var APP_VER = "b\u1ea3n 2026-08-21/18";
 document.getElementById("ver").textContent = APP_VER;
-load();
-drawTabs();
-draw();
-keoTabVaoTam();
-moDauSoKy();
-try {
-  var m0 = localStorage.getItem(MODE_KEY);
-  setMode(m0 === "pt" ? "pt" : "kt");
-  soLoad(); mauLoad(); ttLoad(); ttGan(); soNutNhan();
-} catch (e) {}
+khoBenVung();
+/* Đợi nạp kho xong mới vẽ — IndexedDB đọc bất đồng bộ, vẽ trước thì màn hình
+   trống một nhịp rồi mới có dữ liệu, trông như mất hết. */
+khoNap(function () {
+  try { PT.napKho(); } catch (e) {}
+  load();
+  drawTabs();
+  draw();
+  keoTabVaoTam();
+  moDauSoKy();
+  try {
+    var m0 = localStorage.getItem(MODE_KEY);
+    setMode(m0 === "pt" ? "pt" : "kt");
+    soLoad(); mauLoad(); ttLoad(); ttGan(); soNutNhan();
+  } catch (e) {}
+  khoCanhBaoDay();
+});
 </script>
 </body>
 </html>
