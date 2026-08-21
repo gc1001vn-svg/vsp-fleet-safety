@@ -64,6 +64,8 @@ với những câu mô tả bằng chữ. Nên với mỗi loại lỗi, tôi ch
 tả chỗ hỏng, một câu tả chỗ tốt — rồi xem nó nghiêng về bên nào. Cách đó cho ra con số có nghĩa,
 chứ chấm một câu đơn lẻ thì cái gì cũng “hơi giống”.</div>
 
+<div id="truoc" hidden></div>
+
 <div class="card" id="c-tai">
   <h2>Bước 1 — Tải mô hình về máy</h2>
   <div class="mo">Chỉ tải một lần rồi trình duyệt giữ lại. Cần có mạng — <b>4G/5G là đủ</b>,
@@ -79,6 +81,16 @@ chứ chấm một câu đơn lẻ thì cái gì cũng “hơi giống”.</div>
   </select>
   <div class="mo" style="margin-top:6px">Nếu một mô hình báo lỗi không tải được thì chọn cái
   khác thử. Tôi không kiểm tra trước được vì máy dựng app không ra được mạng ngoài.</div>
+
+  <label>Cách chạy</label>
+  <select id="cach">
+    <option value="an">An toàn nhất — WASM, nén 8 bit (chậm nhưng ít tốn bộ nhớ)</option>
+    <option value="nhanh">Nhanh — thử card đồ họa trước</option>
+    <option value="tudo">Thử hết mọi cách cho tới khi được</option>
+  </select>
+  <div class="mo" style="margin-top:6px"><b>iPhone giới hạn bộ nhớ cho mỗi tab.</b> Dựng mô hình
+  quá lớn thì Safari lặng lẽ tắt và nạp lại trang — nhìn cứ như chưa bấm gì. Nếu gặp vậy, giữ
+  nguyên “An toàn nhất” và chọn mô hình nhẹ hơn.</div>
 
   <div class="hang" style="margin-top:10px">
     <button class="b pri" id="b-tai">⬇ Tải và khởi động</button>
@@ -197,12 +209,44 @@ const THU_LIB = [
    "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/+esm"]
 ];
 
+/* ── Nhật ký GHI RA ĐĨA ──
+   Khi iPhone hết bộ nhớ, Safari tắt trang rồi nạp lại — mọi thứ trên màn hình
+   biến mất, người dùng chỉ thấy "Chưa tải." như chưa bấm gì. Nên mỗi dòng nhật
+   ký phải ghi ngay xuống đĩa, để mở lại còn biết nó chết ở bước nào. */
+const NK_KEY = "thu-may-nhin-nhat-ky";
 const nhatKy = [];
+function esc(s) {
+  return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function luuNK(xongHan) {
+  try {
+    localStorage.setItem(NK_KEY, JSON.stringify({
+      luc: new Date().toISOString(), xong: !!xongHan, dong: nhatKy }));
+  } catch (e) {}
+}
 function ghiNK(s, xong) {
   nhatKy.push((xong === true ? "✓ " : xong === false ? "✕ " : "· ") + s);
   const el = $("nk");
-  if (el) { el.innerHTML = nhatKy.join("<br>"); el.scrollTop = el.scrollHeight; }
+  if (el) { el.innerHTML = nhatKy.map(esc).join("<br>"); el.scrollTop = el.scrollHeight; }
+  luuNK(false);
 }
+
+/* Mở trang lên mà thấy lần trước bỏ dở giữa chừng thì nói thẳng ra */
+(function xemLanTruoc() {
+  let v = null;
+  try { v = JSON.parse(localStorage.getItem(NK_KEY) || "null"); } catch (e) {}
+  if (!v || v.xong || !v.dong || !v.dong.length) return;
+  const el = $("truoc");
+  if (!el) return;
+  el.hidden = false;
+  el.innerHTML = '<div class="card loi"><h2>⚠ Lần trước bỏ dở giữa chừng</h2>' +
+    '<div class="mo">Trang bị tắt khi đang tải, chưa kịp chạy xong. Hay gặp nhất là ' +
+    '<b>iPhone hết bộ nhớ cho tab</b> lúc dựng mô hình — Safari tắt rồi nạp lại trang, nên nhìn ' +
+    'cứ như chưa bấm gì.<br>Cách chữa: giữ <b>“An toàn nhất”</b> ở ô Cách chạy, đóng bớt tab ' +
+    'khác, chọn mô hình nhẹ hơn.<br><br>Đây là những gì đã làm được lúc ' +
+    esc(String(v.luc).replace("T", " ").substring(0, 16)) + ':</div>' +
+    '<div class="nk" style="margin-top:8px">' + v.dong.map(esc).join("<br>") + "</div></div>";
+})();
 
 $("b-tai").onclick = async () => {
   const id = $("mh").value;
@@ -229,6 +273,7 @@ $("b-tai").onclick = async () => {
     }
   }
   if (!pipeline) {
+    luuNK(true);
     bao("✕ <b>Không nạp được thư viện bằng đường nào.</b><br>" +
       "Nếu đang dùng wifi cơ quan thì thử 4G/5G; đang 4G/5G rồi thì kiểm tra sóng.<br><br>" +
       loiLib.join("<br>"), "loi");
@@ -251,10 +296,21 @@ $("b-tai").onclick = async () => {
   ghiNK("Bộ nhớ chia sẻ (SharedArrayBuffer): " +
     (typeof SharedArrayBuffer !== "undefined" ? "có" : "không — đúng như dự đoán"));
 
-  /* 3. Thử từng cách chạy: card đồ họa trước, không được thì WASM */
-  const thu = [];
-  if (navigator.gpu) { thu.push(["webgpu", "q8"], ["webgpu", "fp32"]); }
-  thu.push(["wasm", "q8"], ["wasm", null]);
+  /* 3. Thử từng cách chạy.
+     BỎ HẲN fp32: mô hình ở dạng đó nặng gấp bốn lần bản nén 8 bit, iPhone dựng
+     lên là hết bộ nhớ ngay. Mặc định đi từ nhẹ nhất lên. */
+  const cach = $("cach").value;
+  let thu;
+  if (cach === "an") {
+    thu = [["wasm", "q8"]];
+  } else if (cach === "nhanh") {
+    thu = navigator.gpu ? [["webgpu", "fp16"], ["webgpu", "q8"], ["wasm", "q8"]] : [["wasm", "q8"]];
+  } else {
+    thu = [["wasm", "q8"]];
+    if (navigator.gpu) thu.push(["webgpu", "fp16"], ["webgpu", "q8"]);
+    thu.push(["wasm", "fp16"], ["wasm", null]);
+  }
+  ghiNK("Cách chạy: " + cach + " — sẽ thử " + thu.map(x => x.join("/")).join(", "));
 
   let loiCuoi = null;
   for (const [dev, dtype] of thu) {
@@ -264,9 +320,15 @@ $("b-tai").onclick = async () => {
       bao("Đang tải <b>" + id + "</b> qua <b>" + nhan + "</b>… lần đầu mất vài phút, " +
         "đừng tắt màn hình.");
       const opt = { device: dev, progress_callback: (p) => {
-        if (p && p.status === "progress" && p.file) {
+        if (!p) return;
+        if (p.status === "progress" && p.file) {
           bao("[" + nhan + "] đang tải <b>" + p.file + "</b> — " + Math.round(p.progress || 0) + "%" +
             (p.total ? " (" + (p.total / 1048576).toFixed(1) + " MB)" : ""));
+        } else if (p.status === "done" && p.file) {
+          /* Ghi cỡ từng file: có file vài trăm MB thì biết ngay vì sao hết bộ nhớ */
+          ghiNK("tải xong " + p.file + (p.total ? " — " + (p.total / 1048576).toFixed(1) + " MB" : ""));
+        } else if (p.status === "ready") {
+          ghiNK("đã tải đủ file, đang dựng mô hình — chỗ này tốn bộ nhớ nhất");
         }
       } };
       if (dtype) opt.dtype = dtype;
@@ -284,10 +346,13 @@ $("b-tai").onclick = async () => {
     bao("✕ <b>Không khởi động được mô hình này.</b> Chọn mô hình khác trong danh sách rồi " +
       "thử lại. Nếu cái nào cũng hỏng, chụp màn hình phần <b>Nhật ký</b> bên dưới gửi cho tôi." +
       "<br><br>Lỗi cuối: " + String((loiCuoi && loiCuoi.message) || loiCuoi), "loi");
+    luuNK(true);
     $("b-tai").disabled = false;
     return;
   }
 
+  luuNK(true);
+  const hopTruoc = $("truoc"); if (hopTruoc) hopTruoc.hidden = true;
   bao("✓ Xong sau <b>" + ((Date.now() - mocTai) / 1000).toFixed(1) + " giây</b>. " +
     "Đang chạy bằng <b>" + nen + "</b>. Từ giờ dùng được cả khi mất sóng.", "tot");
   $("c-cam").hidden = false;
@@ -405,6 +470,7 @@ veBang();
    Trang này là trang THỬ, không giữ dữ liệu gì, nên để lộ như vậy không sao. */
 window.__thu = {
   moCam, soi, veBang, ghiCham, layKhung, BO, NGUONG,
+  danhDauXong: () => luuNK(true),
   cham: () => cham,
   datMayNhinGia: (fn) => { mayNhin = fn; nen = "giả-lập"; tenMH = "thu-nghiem"; },
   hienPhanSau: () => { $("c-cam").hidden = false; $("c-cham").hidden = false; }
