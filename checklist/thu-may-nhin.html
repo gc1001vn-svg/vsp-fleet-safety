@@ -63,8 +63,9 @@ chứ chấm một câu đơn lẻ thì cái gì cũng “hơi giống”.</div>
 
 <div class="card" id="c-tai">
   <h2>Bước 1 — Tải mô hình về máy</h2>
-  <div class="mo">Chỉ tải một lần rồi trình duyệt giữ lại. <b>Cần wifi ở phòng</b> — đừng làm
-  việc này khi đang ở ngoài tàu. Tải xong thì lần sau chạy được cả khi không có mạng.</div>
+  <div class="mo">Chỉ tải một lần rồi trình duyệt giữ lại. Cần có mạng — <b>4G/5G là đủ</b>,
+  chừng 40 MB. Nên tải <b>trước khi ra tàu</b>: ngoài khơi hay mất sóng, mà tải xong rồi thì
+  chạy được cả khi không có mạng.</div>
 
   <label>Chọn mô hình</label>
   <select id="mh">
@@ -173,9 +174,10 @@ $("b-tai").onclick = async () => {
   try {
     ({ pipeline, env } = await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0"));
   } catch (e) {
-    bao("✕ <b>Không nạp được thư viện.</b> Máy đang không có mạng, hoặc mạng cơ quan chặn " +
-      "<code>cdn.jsdelivr.net</code>. Thử mạng 4G của điện thoại xem sao.<br><br>" +
-      "Chi tiết: " + String(e.message || e), "loi");
+    bao("✕ <b>Không nạp được thư viện.</b> Hoặc máy đang mất sóng, hoặc mạng đang dùng " +
+      "chặn <code>cdn.jsdelivr.net</code>.<br>" +
+      "Đang dùng wifi cơ quan thì chuyển sang 4G/5G thử; đang dùng 4G/5G rồi mà vẫn hỏng " +
+      "thì kiểm tra lại sóng.<br><br>Chi tiết: " + String(e.message || e), "loi");
     $("b-tai").disabled = false;
     return;
   }
