@@ -495,6 +495,31 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
 .lv-cai .ck{display:flex;gap:8px;align-items:flex-start;margin-top:10px}
 .lv-cai .ck input{margin-top:3px;flex:0 0 auto;width:17px;height:17px}
 .lv-cai .no{color:#A8BCC9;font-size:11.5px;margin-top:8px;line-height:1.5}
+.lv-ghi{max-height:64vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.gh-hd{display:flex;gap:9px;align-items:flex-start}
+.gh-hd img{width:52px;height:52px;object-fit:cover;border-radius:8px;flex:0 0 auto;
+  border:1px solid #2C4356}
+.gh-hd>div{flex:1;font-size:13px;color:#fff;line-height:1.45}
+.gh-nn{color:#9FB4C4;font-size:11.5px;line-height:1.45}
+.gh-chip{display:flex;flex-wrap:wrap;gap:6px}
+.gh-chip button{background:#16232E;border:1px solid #2C4356;color:#DCE6EE;border-radius:16px;
+  padding:9px 12px;font-size:12.5px;cursor:pointer;line-height:1.2}
+.gh-chip button.on{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
+.gh-nhom button{font-weight:600}
+.gh-tim{display:flex;gap:6px}
+.gh-tim input{flex:1;background:#16232E;color:#fff;border:1px solid #2C4356;
+  border-radius:7px;padding:10px 9px;font-size:13px}
+.gh-tim button{flex:0 0 auto;width:46px;background:#16232E;border:1px solid #2C4356;
+  color:#fff;border-radius:7px;font-size:17px;cursor:pointer}
+.gh-ds{display:flex;flex-direction:column;gap:5px;margin-top:7px}
+.gh-ds button{text-align:left;background:#16232E;border:1px solid #2C4356;color:#fff;
+  border-radius:8px;padding:11px 11px;font-size:12.5px;line-height:1.4;cursor:pointer}
+.gh-ds button:active{background:var(--acc);border-color:var(--acc)}
+.gh-tab{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.05em;
+  color:#8FA9BC;border:1px solid #2C4356;border-radius:5px;padding:1px 5px;margin-right:5px}
+.gh-day{display:flex;gap:7px;margin-top:11px}
+.gh-day button{flex:1;background:#1F3243;border:1px solid #2C4356;color:#DCE6EE;
+  border-radius:9px;padding:11px 8px;font-size:12.5px;font-weight:700;cursor:pointer}
 .lv-open{position:fixed;right:13px;bottom:96px;z-index:19;border:0;border-radius:26px;
   background:var(--acc);color:#fff;padding:13px 17px;font-size:13.5px;font-weight:800;
   box-shadow:0 6px 18px rgba(224,90,0,.42);cursor:pointer}
@@ -729,6 +754,7 @@ body.modal-open{position:fixed;left:0;right:0;overflow:hidden}
   </div>
   <div class="lv-mid" id="lv-mid"></div>
   <div class="lv-bot">
+    <div id="lv-ghi" hidden></div>
     <div id="lv-cai" hidden></div>
     <div class="lv-btn" id="lv-btn"></div>
   </div>
@@ -3935,6 +3961,10 @@ function soThem(o) {
   }
   var ds = khopMuc(nd, o.bp);
   var tot = khopTot(ds, nd);
+  /* Anh tự chạm đúng mục trên màn hình rồi thì nghe anh, đừng để bộ so khớp
+     đoán đè lên. Máy chỉ được đoán khi anh KHÔNG chỉ định. */
+  var tay = o.mucId ? ckMucCua(o.mucId) : null;
+  if (tay) tot = { it: tay };
   var r = {
     id: "s" + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36),
     luc: new Date().getTime(),
@@ -3962,6 +3992,12 @@ function ckGiong(a, b) {
   for (i = 0; i < tb.length; i++) if (tb[i].length > 2) { nb++; if (set[tb[i]]) hit++; }
   if (!na || !nb) return false;
   return hit / Math.min(na, nb) >= 0.62;
+}
+/* Lấy nguyên mục trong chỉ mục theo mã */
+function ckMucCua(mucId) {
+  var L = ckIndex(), i;
+  for (i = 0; i < L.length; i++) if (L[i].id === mucId) return L[i];
+  return null;
 }
 function ckRefCua(mucId) {
   var L = ckIndex(), i;
@@ -8562,30 +8598,184 @@ function lvNhanKetQua(list, du) {
 
 /* Chụp tay: chỗ này máy không biết là vi phạm nhưng anh thấy cần ghi lại.
    Ghi vào sổ ngay, và nhớ lại để lần sau máy tự để ý. */
+/* ═══════════════ GHI NHANH — hai chạm, không bàn phím ═══════════════
+   Đứng trên boong, đeo găng, tàu rung: gõ chữ vào điện thoại là chuyện khổ.
+   Trước đây bấm nút chụp là hiện ngay một ô bắt gõ mô tả — chậm và dễ bỏ.
+
+   Nay: bấm chụp → hình đứng lại → chạm NHÓM → chạm MỤC → xong.
+   Mục chạm được là mục checklist thật, nên ghi nhận gắn thẳng vào đúng mục,
+   không phải đoán mò như khi để máy tự khớp từ câu chữ.
+
+   Danh sách nhóm và mục dựng từ chính tab QUAN SÁT lúc chạy, nên sau này sửa
+   nội dung tab đó thì mấy nút này tự theo, không lệch nhau. */
+
+var LV_VITRI = ["Boong mũi", "Boong chính", "Boong lái", "Buồng lái", "Buồng máy",
+  "Buồng bơm", "Khu nhà ở", "Bếp & kho lương thực", "Kho sơn", "Kho boong",
+  "Hầm hàng", "Lối thoát nạn", "Mạn tàu", "Khu xuồng cứu sinh"];
+
+var LV_NHANH = null;      /* [{ g:"tên nhóm ngắn", items:[{id,t}] }] */
+function lvNhanhDung() {
+  if (LV_NHANH) return LV_NHANH;
+  LV_NHANH = [];
+  var qs = null, i, j;
+  for (i = 0; i < DATA.length; i++) if (DATA[i].id === "qs") qs = DATA[i];
+  if (!qs) return LV_NHANH;
+  for (i = 0; i < qs.groups.length; i++) {
+    var g = qs.groups[i], ds = [];
+    for (j = 0; j < g.items.length; j++) {
+      if (!g.items[j].refOnly) ds.push({ id: g.items[j].id, t: g.items[j].t });
+    }
+    if (!ds.length) continue;
+    LV_NHANH.push({ g: String(g.g).replace(/^\d+\.\s*/, ""), items: ds });
+  }
+  return LV_NHANH;
+}
+
+/* Trạng thái của bảng ghi nhanh */
+var ghMo = false;        /* bảng có đang mở không */
+var ghAnh = "";          /* ảnh vừa chụp, giữ lại chờ ghi */
+var ghNhom = -1;         /* nhóm đang mở, -1 là chưa chọn */
+var ghTim = "";          /* chữ trong ô tìm */
+
 function lvChupTay() {
   var du = lvChup(1400, 0.75);
   if (!du) { lvTrangThai("Chưa lấy được hình từ camera, đợi một chút…"); return; }
-  var mo = prompt("Ghi lại chỗ này là gì? (để trống thì chỉ lưu ảnh)\n\n" +
-    "Viết như câu sẽ ghi vào biên bản, ví dụ: “Lan can boong sau lỏng chốt, lung lay khi tì tay”.",
-    lvNhan ? lvNhan + ": " : "");
-  if (mo === null) return;
-  mo = String(mo).replace(/^\s+|\s+$/g, "");
-  if (!mo) mo = "Ảnh ghi nhận tại " + (lvNhan || "hiện trường") + " — chưa mô tả";
-  var r = soThem({ nd: mo, bp: lvNhan ? guessBP(lvNhan, mo) : guessBP("", mo),
+  ghAnh = du; ghMo = true; ghNhom = -1; ghTim = "";
+  lvMoCai = false;
+  lvVeGhi(); lvVeCaiDat();
+  lvTrangThai("Đã giữ hình. Chạm nhóm rồi chạm mục — hai chạm là xong.");
+}
+
+function ghDong() {
+  ghMo = false; ghAnh = ""; ghNhom = -1; ghTim = "";
+  lvVeGhi();
+}
+
+/* Ghi một mục vào sổ, gắn thẳng vào mục checklist đã chạm */
+function ghLuu(mucId, moTa) {
+  var nd = String(moTa || "").replace(/^\s+|\s+$/g, "");
+  if (!nd) { lvTrangThai("Chưa có mô tả — chạm một mục hoặc gõ vài chữ."); return; }
+  if (lvNhan) nd = nd + " — " + lvNhan;
+  var r = soThem({ nd: nd, mucId: mucId || "", bp: guessBP(lvNhan || "", nd),
     pl: "nc", muc: "", cc: "", kp: "", ctd: "", tinCay: "cao",
-    anh: du, nguon: "tay" });
-  if (!r) { lvTrangThai("Chỗ này đã có trong sổ rồi."); return; }
+    anh: ghAnh, nguon: "tay" });
+  if (!r) { lvTrangThai("Chỗ này đã có trong sổ rồi."); ghDong(); return; }
   lvSeq++;
   lvPh.unshift({ id: "p" + lvSeq, nd: r.nd, bp: r.bp, pl: r.pl, muc: r.muc,
     cc: r.cc, tin_cay: "", khac_phuc: "", chong_tai_dien: "",
-    anh: du, mucTen: r.mucTen, soId: r.id, tay: true });
+    anh: ghAnh, mucTen: r.mucTen, soId: r.id, tay: true });
+  ghDong();
   lvVeThe(); lvVeTop();
   lvTrangThai(r.mucId
-    ? "✓ Đã ghi vào sổ và gắn vào mục “" + r.mucTen + "”."
-    : "✓ Đã ghi vào sổ. Không có mục checklist nào khớp — mở 📓 Sổ để bổ sung vào checklist.");
+    ? "✓ Đã ghi và gắn vào mục “" + r.mucTen + "”. Đi tiếp."
+    : "✓ Đã ghi vào sổ. Cuối chuyến mở 📓 Sổ để soát lại.");
 }
 
-/* ---- Vẽ ---- */
+function lvVeGhi() {
+  var el = document.getElementById("lv-ghi");
+  if (!el) return;
+  el.hidden = !ghMo;
+  if (!ghMo) { el.innerHTML = ""; return; }
+
+  var i, s = '<div class="lv-cai lv-ghi">';
+  s += '<div class="gh-hd"><img src="' + ghAnh + '" alt="">' +
+    "<div><b>Ghi lại chỗ này</b><br>" +
+    '<span class="gh-nn">Chạm nhóm → chạm mục. Không có mục nào đúng thì gõ hoặc nói vào ô tìm.</span></div>' +
+    '<button class="lv-x" id="gh-x" title="Bỏ">✕</button></div>';
+
+  /* --- vị trí: chạm một lần, nhớ luôn cho những lần sau --- */
+  s += "<label>Vị trí (nhớ luôn cho lần sau)</label><div class=\"gh-chip\">";
+  for (i = 0; i < LV_VITRI.length; i++) {
+    s += '<button data-ghvt="' + esc(LV_VITRI[i]) + '"' +
+      (lvNhan === LV_VITRI[i] ? ' class="on"' : "") + ">" + esc(LV_VITRI[i]) + "</button>";
+  }
+  s += "</div>";
+
+  /* --- tìm trong toàn bộ checklist --- */
+  s += '<label>Tìm mục trong checklist</label><div class="gh-tim">' +
+    '<input type="text" id="gh-q" value="' + esc(ghTim) + '" placeholder="VD: lan can, la canh, bình chữa cháy">' +
+    '<button id="gh-noi" title="Nói thay vì gõ">🎤</button></div>';
+  if (ghTim.replace(/^\s+|\s+$/g, "").length >= 2) {
+    var kq = ckTim(ghTim, 8);
+    s += '<div class="gh-ds">';
+    if (!kq.length) s += '<div class="gh-nn">Không tìm thấy mục nào.</div>';
+    for (i = 0; i < kq.length; i++) {
+      s += '<button data-ghmuc="' + esc(kq[i].it.id) + '" data-ghnd="' + esc(kq[i].it.t) + '">' +
+        '<span class="gh-tab">' + esc(kq[i].it.tab) + "</span> " + esc(kq[i].it.t) + "</button>";
+    }
+    s += "</div>";
+  }
+
+  /* --- nhóm quan sát: hai chạm --- */
+  var N = lvNhanhDung();
+  s += "<label>Hoặc chọn nhanh theo nhóm</label><div class=\"gh-chip gh-nhom\">";
+  for (i = 0; i < N.length; i++) {
+    s += '<button data-ghnhom="' + i + '"' + (ghNhom === i ? ' class="on"' : "") + ">" +
+      esc(N[i].g) + "</button>";
+  }
+  s += "</div>";
+  if (ghNhom >= 0 && N[ghNhom]) {
+    s += '<div class="gh-ds">';
+    for (i = 0; i < N[ghNhom].items.length; i++) {
+      s += '<button data-ghmuc="' + esc(N[ghNhom].items[i].id) + '" data-ghnd="' +
+        esc(N[ghNhom].items[i].t) + '">' + esc(N[ghNhom].items[i].t) + "</button>";
+    }
+    s += "</div>";
+  }
+
+  s += '<div class="gh-day">' +
+    '<button id="gh-anh">Chỉ lưu ảnh, ghi sau</button>' +
+    '<button id="gh-bo">Bỏ ảnh này</button></div>';
+  s += "</div>";
+  el.innerHTML = s;
+}
+
+/* ── Nói thay vì gõ ──
+   Dùng bộ nhận giọng nói có sẵn của trình duyệt, không tốn tiền, không cần
+   chìa khóa API. NHƯNG tiếng nói được gửi lên máy chủ của Google hoặc Apple
+   để nhận dạng — không chạy hết trong máy. Vì vậy nút này chỉ chạy khi anh
+   bấm, và có thể tắt hẳn trong Cài đặt. */
+var ghNhanDang = null;
+function ghCoNoi() {
+  return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+}
+function ghNoi(xong) {
+  if (!ghCoNoi()) {
+    lvTrangThai("Máy này không có sẵn phần nhận giọng nói. Gõ tay giúp tôi.");
+    return;
+  }
+  var R = window.SpeechRecognition || window.webkitSpeechRecognition;
+  try {
+    if (ghNhanDang) { ghNhanDang.abort(); ghNhanDang = null; }
+    ghNhanDang = new R();
+    ghNhanDang.lang = "vi-VN";
+    ghNhanDang.interimResults = false;
+    ghNhanDang.maxAlternatives = 1;
+    ghNhanDang.onresult = function (e) {
+      var t = "";
+      try { t = e.results[0][0].transcript || ""; } catch (e2) {}
+      ghNhanDang = null;
+      if (t) xong(t);
+      else lvTrangThai("Chưa nghe rõ. Nói lại gần micro hơn.");
+    };
+    ghNhanDang.onerror = function (e) {
+      ghNhanDang = null;
+      var m = (e && e.error) || "";
+      lvTrangThai(m === "not-allowed"
+        ? "Máy chưa cho phép dùng micro. Mở cài đặt trình duyệt bật quyền micro rồi thử lại."
+        : (m === "network"
+          ? "Không có mạng nên không nhận được giọng nói. Gõ tay giúp tôi."
+          : "Không nghe được (" + m + "). Gõ tay giúp tôi."));
+    };
+    ghNhanDang.onend = function () { ghNhanDang = null; };
+    ghNhanDang.start();
+    lvTrangThai("🎤 Đang nghe… nói tên chỗ cần ghi, ví dụ “lan can boong chính rỉ sét”.");
+  } catch (e) {
+    ghNhanDang = null;
+    lvTrangThai("Không bật được micro trên máy này. Gõ tay giúp tôi.");
+  }
+}
+
 function lvTrangThai(s) {
   var el = document.getElementById("lv-st");
   if (el) el.textContent = s || "";
@@ -8627,11 +8817,17 @@ function lvVeThe() {
 function lvVeNut() {
   var b = document.getElementById("lv-btn");
   if (!b) return;
-  b.innerHTML = (lvOn
-    ? '<button class="stop" id="lv-stop">⏸ Dừng quét</button>'
-    : '<button class="go" id="lv-start">▶ Bắt đầu quét</button>') +
-    '<button class="sm" id="lv-ngay" title="Cho máy soi khung hình này ngay">🔎</button>' +
-    '<button class="sm" id="lv-tay" title="Tự chụp và ghi vào sổ">📸</button>';
+  /* Chưa có chìa khóa thì giấu hai nút nhờ máy soi, để lại nút chụp — nút chụp
+     chạy hoàn toàn trong máy, không gọi đi đâu. */
+  var coKhoa = !!(aiCfg && aiCfg.key);
+  b.innerHTML = (coKhoa
+    ? ((lvOn
+        ? '<button class="stop" id="lv-stop">⏸ Dừng quét</button>'
+        : '<button class="go" id="lv-start">▶ Bắt đầu quét</button>') +
+       '<button class="sm" id="lv-ngay" title="Cho máy soi khung hình này ngay">🔎</button>')
+    : "") +
+    '<button class="' + (coKhoa ? "sm" : "go") + '" id="lv-tay" title="Chụp và ghi vào sổ">' +
+    (coKhoa ? "📸" : "📸 Chụp và ghi") + "</button>";
 }
 function lvVeCaiDat() {
   var el = document.getElementById("lv-cai");
@@ -8706,6 +8902,15 @@ function lvVeCaiDat() {
     'Thực tế thấp hơn vì khung trùng bị bỏ qua.<br>' +
     '<b>Bốn cách giảm:</b> hạ cỡ ảnh · đổi mô hình rẻ hơn · giãn nhịp soi · ' +
     'đứng yên ngắm rồi mới quay máy, để bộ lọc khung trùng làm việc.</div>';
+
+  s += '<div class="no" style="margin-top:10px"><b>Nút 🎤 nói thay vì gõ</b><br>' +
+    (ghCoNoi()
+      ? 'Máy này có sẵn phần nhận giọng nói. <b>Lưu ý:</b> tiếng nói được gửi lên ' +
+        'máy chủ của Google hoặc Apple để nhận dạng, không chạy hết trong máy. ' +
+        'Nó chỉ chạy khi anh bấm nút 🎤, và cần có mạng. Không nói tên người hay ' +
+        'nội dung mật vào đó.'
+      : 'Máy này KHÔNG có sẵn phần nhận giọng nói — nút 🎤 sẽ báo và anh gõ tay như thường.') +
+    "</div>";
 
   s += '<div class="no"><b>Máy nhìn có thể sai.</b> Đây là để nhắc anh khỏi bỏ sót, ' +
     'không thay được mắt người. Mọi dòng đều phải tự xác minh tại chỗ trước khi ký biên bản.<br>' +
@@ -8788,11 +8993,15 @@ function lvMo() {
   lvTrangThai("Đang mở camera…");
   lvMoCam(function (loi) {
     if (loi) { lvTrangThai("✕ " + loi); return; }
-    lvTrangThai("Camera sẵn sàng. ▶ để quét liên tục · 🔎 cho máy soi khung này · " +
-      "📸 tự chụp ghi vào sổ. Máy ghi im lặng, không báo động — xong chuyến mở 📓 Sổ soát lại.");
+    lvTrangThai(aiCfg && aiCfg.key
+    ? "Camera sẵn sàng. ▶ quét liên tục · 🔎 soi khung này · 📸 tự chụp ghi vào sổ. " +
+      "Máy ghi im lặng, không báo động — xong chuyến mở 📓 Sổ soát lại."
+    : "Camera sẵn sàng. Bấm 📸 khi thấy chỗ cần ghi — chạm nhóm rồi chạm mục, hai chạm là xong. " +
+      "Phần này chạy hoàn toàn trong máy, không cần chìa khóa API, không tốn tiền.");
   });
 }
 function lvDong() {
+  ghDong();
   lvDung("");
   lvDongCam();
   var el = document.getElementById("lv");
@@ -8813,11 +9022,57 @@ function lvDong() {
     var t = e.target;
     if (t.id === "lv-dong") { lvDong(); return; }
     if (t.id === "lv-cai-nut") { lvMoCai = !lvMoCai; lvVeCaiDat(); return; }
+
+    /* --- bảng ghi nhanh --- */
+    if (t.id === "gh-x" || t.id === "gh-bo") { ghDong(); lvTrangThai("Đã bỏ ảnh."); return; }
+    if (t.id === "gh-anh") {
+      ghLuu("", "Ảnh ghi nhận tại " + (lvNhan || "hiện trường") + " — chưa mô tả");
+      return;
+    }
+    if (t.id === "gh-noi") {
+      ghNoi(function (chu) {
+        ghTim = chu; lvVeGhi();
+        var o = document.getElementById("gh-q");
+        if (o) { o.value = chu; }
+        lvTrangThai("Nghe được: “" + chu + "”. Chạm mục đúng bên dưới.");
+      });
+      return;
+    }
+    var vt = t.closest && t.closest("[data-ghvt]");
+    if (vt) {
+      lvNhan = vt.getAttribute("data-ghvt");
+      lvVeGhi(); lvVeTop();
+      return;
+    }
+    var nh = t.closest && t.closest("[data-ghnhom]");
+    if (nh) {
+      var k = +nh.getAttribute("data-ghnhom");
+      ghNhom = (ghNhom === k ? -1 : k);
+      lvVeGhi();
+      return;
+    }
+    var mc = t.closest && t.closest("[data-ghmuc]");
+    if (mc) {
+      ghLuu(mc.getAttribute("data-ghmuc"), mc.getAttribute("data-ghnd"));
+      return;
+    }
     if (t.id === "lv-start") { lvChay(); return; }
     if (t.id === "lv-stop") { lvDung("Đã dừng. Bấm ▶ để quét tiếp."); return; }
     if (t.id === "lv-ngay") { lvSoiNgay(null); return; }
     if (t.id === "lv-tay") { lvChupTay(); return; }
   }, false);
+  el.addEventListener("input", function (e) {
+    if (e.target && e.target.id === "gh-q") {
+      ghTim = e.target.value;
+      var o = document.getElementById("lv-ghi");
+      var giu = document.activeElement === e.target;
+      lvVeGhi();
+      if (giu) {
+        var n = document.getElementById("gh-q");
+        if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); }
+      }
+    }
+  });
   el.addEventListener("change", function (e) {
     var t = e.target;
     if (t.id === "lv-giay") { lvCfg.giay = +t.value; lvSave(); return; }
@@ -9333,14 +9588,10 @@ return {
 })();
 
 
+/* Mở camera KHÔNG cần chìa khóa API. Chụp và ghi nhanh vào sổ là việc chạy
+   hoàn toàn trong máy — chặn ở đây là chặn nhầm. Chỉ hai nút nhờ máy soi
+   (▶ quét liên tục và 🔎 soi khung này) mới cần chìa khóa. */
 document.getElementById("lv-open").addEventListener("click", function () {
-  if (!PT.coChiaKhoa()) {
-    alert("Quét trực tiếp cần chìa khóa API.\n\n" +
-      "Vào 📊 Tổng hợp & phân tích → 🤖 TRỢ LÝ, làm theo 6 bước lấy chìa khóa, " +
-      "dán vào rồi quay lại đây.");
-    setMode("pt");
-    return;
-  }
   PT.moQuet();
 }, false);
 
@@ -9691,7 +9942,7 @@ document.getElementById("bb-sync").onclick = function () {
 /* ===================== KHỞI ĐỘNG =====================
    APP_VER hiện ở góc phải đầu trang. Nếu số này không đổi sau khi cập nhật,
    nghĩa là trình duyệt còn giữ bản cũ trong bộ nhớ đệm — tải lại trang. */
-var APP_VER = "b\u1ea3n 2026-08-21/19";
+var APP_VER = "b\u1ea3n 2026-08-21/20";
 document.getElementById("ver").textContent = APP_VER;
 khoBenVung();
 /* Đợi nạp kho xong mới vẽ — IndexedDB đọc bất đồng bộ, vẽ trước thì màn hình
