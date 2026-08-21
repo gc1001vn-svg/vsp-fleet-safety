@@ -172,19 +172,29 @@ const NGUONG = 0.6;   /* trên mức này thì coi là máy đang kêu có lỗi
 
 /* ── Bước 1: tải mô hình ── */
 /* ── Nạp thư viện ──
-   LẦN ĐẦU TÔI LÀM SAI CHỖ NÀY. Gói @huggingface/transformers có nhiều bản
-   dựng khác nhau; nạp thẳng tên gói thì CDN trả về bản dành cho máy chủ
-   Node, mà bản đó nối vào onnxruntime-node chứ không phải bản cho trình
-   duyệt — nên nó chết ở "webgpuInit is not a function".
-   Bản đúng cho trình duyệt là dist/transformers.web.min.js. Bản này còn có
-   nhánh riêng cho Safari, nghĩa là nó biết cách chạy trên iPhone. */
+   TÔI SAI CHỖ NÀY HAI LẦN, nên ghi lại cho rõ.
+
+   Gói @huggingface/transformers có nhiều bản dựng trong thư mục dist:
+     · transformers.node.*      — cho máy chủ Node, nối vào onnxruntime-node.
+       Nạp thẳng tên gói thì CDN đưa về bản này (theo trường "main"), nên chết
+       ở "webgpuInit is not a function".
+     · transformers.web.min.js  — dành cho công cụ đóng gói (Vite/webpack).
+       Trong file còn hai lệnh nhập trần "onnxruntime-common" và
+       "onnxruntime-web/webgpu"; trình duyệt không tự hiểu tên trần, nên chết
+       ở "does not resolve to a valid URL".
+     · transformers.min.js      — ĐÃ GÓI SẴN MỌI THỨ, không còn lệnh nhập trần
+       nào. Đây mới là bản nạp thẳng vào trình duyệt được.
+
+   Tôi đã tải gói về, đếm lệnh nhập trần trong từng bản, rồi mở thật bằng
+   trình duyệt để kiểm: bản min.js nạp được và có hàm pipeline; bản web.min.js
+   ném đúng câu lỗi mà anh gặp. */
 const THU_LIB = [
-  ["bản web rút gọn (đúng)",
-   "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/dist/transformers.web.min.js"],
-  ["bản web đầy đủ",
-   "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/dist/transformers.web.js"],
-  ["đổi sang unpkg",
-   "https://unpkg.com/@huggingface/transformers@4.2.0/dist/transformers.web.min.js"]
+  ["bản gói sẵn (jsdelivr)",
+   "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/dist/transformers.min.js"],
+  ["bản gói sẵn (unpkg)",
+   "https://unpkg.com/@huggingface/transformers@4.2.0/dist/transformers.min.js"],
+  ["nhờ CDN tự gỡ tên trần",
+   "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/+esm"]
 ];
 
 const nhatKy = [];
