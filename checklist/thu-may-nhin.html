@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Thử máy nhìn chạy trong điện thoại — không cần API</title>
+<style>
+:root{--bg:#0B141B;--card:#101B24;--vien:#2C4356;--chu:#DCE6EE;--mo:#9FB4C4;
+  --ok:#1F9D55;--ng:#D93F2B;--warn:#D98324;--acc:#E05A00}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--chu);
+  font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:720px;margin:0 auto;padding:14px 13px calc(env(safe-area-inset-bottom) + 24px)}
+h1{font-size:18px;margin:6px 0 4px}
+h2{font-size:14.5px;margin:0 0 8px}
+.mo{color:var(--mo);font-size:12.5px;line-height:1.5}
+.card{background:var(--card);border:1px solid var(--vien);border-radius:11px;
+  padding:12px;margin:11px 0}
+button{font:inherit;cursor:pointer}
+.b{background:#1F3243;border:1px solid var(--vien);color:var(--chu);border-radius:9px;
+  padding:11px 13px;font-size:13.5px;font-weight:700}
+.b.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.b.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.b.ng{background:var(--ng);border-color:var(--ng);color:#fff}
+.b[disabled]{opacity:.45}
+.hang{display:flex;gap:7px;flex-wrap:wrap}
+.hang>.b{flex:1;min-width:110px}
+select,input{width:100%;background:#16232E;color:#fff;border:1px solid var(--vien);
+  border-radius:7px;padding:9px;font:inherit;font-size:13px}
+label{display:block;color:var(--mo);font-size:11.5px;margin:9px 0 3px}
+video{width:100%;border-radius:10px;background:#000;display:block;aspect-ratio:4/3;
+  object-fit:cover}
+.tt{font-size:12.5px;color:var(--mo);margin-top:8px;min-height:18px;line-height:1.5}
+.kq{margin-top:9px}
+.d{margin:7px 0}
+.d-t{display:flex;justify-content:space-between;font-size:12.5px;gap:8px}
+.d-t b{font-variant-numeric:tabular-nums}
+.thanh{height:8px;background:#16232E;border-radius:5px;overflow:hidden;margin-top:3px}
+.thanh i{display:block;height:100%;background:var(--mo)}
+.d.cao .thanh i{background:var(--ng)}
+.d.cao .d-t{color:#fff;font-weight:700}
+.so{display:flex;gap:9px;flex-wrap:wrap;margin-top:9px}
+.so div{flex:1;min-width:88px;background:#16232E;border:1px solid var(--vien);
+  border-radius:8px;padding:8px 9px}
+.so b{display:block;font-size:17px}
+.so span{font-size:10.5px;color:var(--mo)}
+.loi{background:#2A1512;border-color:#5C2A20;color:#F3C8C0}
+.tot{background:#10241A;border-color:#1F5C3C}
+code{background:#16232E;padding:1px 5px;border-radius:4px;font-size:11.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Thử máy nhìn chạy hẳn trong điện thoại</h1>
+<div class="mo">Trang này <b>tách rời app chính</b>, không đụng gì tới dữ liệu kiểm tra của anh.
+Mục đích duy nhất: xem một mô hình nhận dạng chạy <b>ngay trong điện thoại</b> — không cần chìa
+khóa API, không tốn tiền — thì nhận ra lỗi tàu tới đâu.<br><br>
+<b>Cách nó làm việc:</b> mô hình này không được ai dạy về tàu biển. Nó chỉ biết so một tấm ảnh
+với những câu mô tả bằng chữ. Nên với mỗi loại lỗi, tôi cho nó <b>hai câu đối nhau</b> — một câu
+tả chỗ hỏng, một câu tả chỗ tốt — rồi xem nó nghiêng về bên nào. Cách đó cho ra con số có nghĩa,
+chứ chấm một câu đơn lẻ thì cái gì cũng “hơi giống”.</div>
+
+<div class="card" id="c-tai">
+  <h2>Bước 1 — Tải mô hình về máy</h2>
+  <div class="mo">Chỉ tải một lần rồi trình duyệt giữ lại. <b>Cần wifi ở phòng</b> — đừng làm
+  việc này khi đang ở ngoài tàu. Tải xong thì lần sau chạy được cả khi không có mạng.</div>
+
+  <label>Chọn mô hình</label>
+  <select id="mh">
+    <option value="Xenova/clip-vit-base-patch32">CLIP base patch32 — phổ biến nhất, khoảng 40 MB</option>
+    <option value="Xenova/siglip-base-patch16-224">SigLIP base 224 — thường nhận tốt hơn, nặng hơn</option>
+    <option value="Xenova/mobileclip_s0">MobileCLIP s0 — nhẹ và nhanh nhất</option>
+    <option value="Xenova/clip-vit-large-patch14">CLIP large — tốt nhất nhưng rất nặng, chỉ để so sánh</option>
+  </select>
+  <div class="mo" style="margin-top:6px">Nếu một mô hình báo lỗi không tải được thì chọn cái
+  khác thử. Tôi không kiểm tra trước được vì máy dựng app không ra được mạng ngoài.</div>
+
+  <div class="hang" style="margin-top:10px">
+    <button class="b pri" id="b-tai">⬇ Tải và khởi động</button>
+  </div>
+  <div class="tt" id="tt-tai">Chưa tải.</div>
+</div>
+
+<div class="card" id="c-cam" hidden>
+  <h2>Bước 2 — Chĩa camera vào chỗ cần xem</h2>
+  <video id="cam" playsinline muted autoplay></video>
+  <div class="hang" style="margin-top:9px">
+    <button class="b pri" id="b-soi">🔎 Soi khung này</button>
+    <button class="b" id="b-lien">▶ Soi liên tục</button>
+  </div>
+  <div class="tt" id="tt-soi"></div>
+  <div class="kq" id="kq"></div>
+</div>
+
+<div class="card" id="c-cham" hidden>
+  <h2>Bước 3 — Chấm điểm cho máy</h2>
+  <div class="mo">Đây là phần quan trọng nhất. Sau mỗi lần soi, anh bấm cho tôi biết
+  <b>thực tế chỗ đó có lỗi hay không</b>. Làm chừng 20–30 lần là ra con số thật, khỏi phải
+  đoán mò xem nó khá hay dở.</div>
+  <div class="hang" style="margin-top:9px">
+    <button class="b ng" id="b-co">Chỗ này CÓ lỗi thật</button>
+    <button class="b ok" id="b-khong">Chỗ này KHÔNG có lỗi</button>
+  </div>
+  <div class="so" id="bang"></div>
+  <div class="tt" id="tt-cham"></div>
+  <div class="hang" style="margin-top:9px">
+    <button class="b" id="b-xuat">📤 Xuất kết quả để gửi lại</button>
+    <button class="b" id="b-xoa">Xóa và đếm lại</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Máy này chạy được gì</h2>
+  <div class="mo" id="may"></div>
+</div>
+
+<script type="module">
+/* Trang thử — KHÔNG phải app chính. Dùng cú pháp mới vì phải nạp thư viện
+   theo kiểu module, và vì máy đích là iPhone đời mới. */
+
+const $ = (id) => document.getElementById(id);
+
+/* ── Các cặp câu đối nhau. Viết tiếng Anh vì mô hình học chủ yếu từ tiếng Anh;
+      tiếng Việt hiện cho anh đọc. ── */
+const BO = [
+  { ten: "Rỉ sét, ăn mòn",
+    co: "a photo of heavy rust and corrosion on a steel surface",
+    khong: "a photo of a clean well painted steel surface" },
+  { ten: "Dầu mỡ rò rỉ, bám bẩn",
+    co: "a photo of an oil leak and grease stains on a metal floor",
+    khong: "a photo of a clean dry metal floor" },
+  { ten: "Nước đọng, nước la canh",
+    co: "a photo of dirty water flooding the floor of a ship engine room",
+    khong: "a photo of a dry clean engine room floor" },
+  { ten: "Bừa bộn, không chằng buộc",
+    co: "a photo of a messy cluttered area with tools and objects lying loose",
+    khong: "a photo of a tidy organised area with everything stowed properly" },
+  { ten: "Lối đi bị chặn",
+    co: "a photo of a corridor or walkway blocked by stored objects",
+    khong: "a photo of a clear unobstructed corridor or walkway" },
+  { ten: "Sơn bong tróc, hư hỏng bề mặt",
+    co: "a photo of peeling flaking paint on a damaged metal surface",
+    khong: "a photo of an intact smooth painted metal surface" }
+];
+
+let mayNhin = null, nen = "", tenMH = "";
+let dangLien = false, lanCuoi = null, mocTai = 0;
+const cham = { n: 0, coLoi: 0, khongLoi: 0, batDung: 0, baoNham: 0, boSot: 0, dungKhong: 0, ds: [] };
+const NGUONG = 0.6;   /* trên mức này thì coi là máy đang kêu có lỗi */
+
+/* ── Máy này chạy được gì ── */
+(async () => {
+  const t = [];
+  t.push("WebGPU: <b>" + (navigator.gpu ? "có" : "không — sẽ chạy bằng WASM, chậm hơn") + "</b>");
+  if (navigator.gpu) {
+    try { t.push("Card đồ họa: <b>" + (await navigator.gpu.requestAdapter() ? "lấy được" : "không lấy được") + "</b>"); }
+    catch (e) { t.push("Card đồ họa: <b>lỗi</b>"); }
+  }
+  t.push("Số luồng: <b>" + (navigator.hardwareConcurrency || "?") + "</b>");
+  t.push("Máy: <code>" + (navigator.userAgent || "").slice(0, 110) + "</code>");
+  $("may").innerHTML = t.join("<br>");
+})();
+
+/* ── Bước 1: tải mô hình ── */
+$("b-tai").onclick = async () => {
+  const id = $("mh").value;
+  $("b-tai").disabled = true;
+  mocTai = Date.now();
+  const bao = (s, mau) => { $("tt-tai").innerHTML = s; if (mau) $("c-tai").className = "card " + mau; };
+  bao("Đang nạp thư viện…");
+  let pipeline, env;
+  try {
+    ({ pipeline, env } = await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0"));
+  } catch (e) {
+    bao("✕ <b>Không nạp được thư viện.</b> Máy đang không có mạng, hoặc mạng cơ quan chặn " +
+      "<code>cdn.jsdelivr.net</code>. Thử mạng 4G của điện thoại xem sao.<br><br>" +
+      "Chi tiết: " + String(e.message || e), "loi");
+    $("b-tai").disabled = false;
+    return;
+  }
+  env.allowLocalModels = false;
+
+  /* Thử card đồ họa trước cho nhanh; không được thì lui về WASM */
+  const thu = navigator.gpu
+    ? [["webgpu", "q8"], ["webgpu", "fp16"], [null, "q8"]]
+    : [[null, "q8"], [null, null]];
+  let loiCuoi = null;
+  for (const [dev, dtype] of thu) {
+    try {
+      bao("Đang tải <b>" + id + "</b> qua <b>" + (dev || "WASM") + "</b>… " +
+        "lần đầu có thể mất vài phút, đừng tắt màn hình.");
+      const opt = { progress_callback: (p) => {
+        if (p && p.status === "progress" && p.file) {
+          bao("Đang tải <b>" + p.file + "</b> — " + Math.round(p.progress || 0) + "%" +
+            (p.total ? " (" + (p.total / 1048576).toFixed(1) + " MB)" : ""));
+        }
+      } };
+      if (dev) opt.device = dev;
+      if (dtype) opt.dtype = dtype;
+      mayNhin = await pipeline("zero-shot-image-classification", id, opt);
+      nen = dev || "WASM"; tenMH = id;
+      break;
+    } catch (e) { loiCuoi = e; mayNhin = null; }
+  }
+
+  if (!mayNhin) {
+    bao("✕ <b>Không tải được mô hình này.</b> Chọn mô hình khác trong danh sách rồi thử lại.<br><br>" +
+      "Chi tiết: " + String((loiCuoi && loiCuoi.message) || loiCuoi), "loi");
+    $("b-tai").disabled = false;
+    return;
+  }
+
+  bao("✓ Xong sau <b>" + ((Date.now() - mocTai) / 1000).toFixed(1) + " giây</b>. " +
+    "Đang chạy bằng <b>" + nen + "</b>. Từ giờ dùng được cả khi mất mạng.", "tot");
+  $("c-cam").hidden = false;
+  $("c-cham").hidden = false;
+  moCam();
+};
+
+/* ── Camera ── */
+async function moCam() {
+  try {
+    const st = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 } }, audio: false });
+    $("cam").srcObject = st;
+  } catch (e) {
+    $("tt-soi").innerHTML = "✕ Không mở được camera: " + String(e.message || e);
+  }
+}
+
+function layKhung(canh) {
+  const v = $("cam");
+  if (!v.videoWidth) return null;
+  const t = Math.min(canh / v.videoWidth, canh / v.videoHeight);
+  const c = document.createElement("canvas");
+  c.width = Math.round(v.videoWidth * t);
+  c.height = Math.round(v.videoHeight * t);
+  c.getContext("2d").drawImage(v, 0, 0, c.width, c.height);
+  return c.toDataURL("image/jpeg", 0.85);
+}
+
+/* ── Soi một khung: chấm từng cặp câu riêng, mỗi cặp là một phép so hai bên ── */
+async function soi() {
+  if (!mayNhin) return;
+  const anh = layKhung(384);
+  if (!anh) { $("tt-soi").textContent = "Camera chưa sẵn sàng."; return; }
+  const t0 = performance.now();
+  const ra = [];
+  try {
+    for (const b of BO) {
+      const r = await mayNhin(anh, [b.co, b.khong]);
+      const d = r.find(x => x.label === b.co);
+      ra.push({ ten: b.ten, diem: d ? d.score : 0 });
+    }
+  } catch (e) {
+    $("tt-soi").innerHTML = "✕ Soi hỏng: " + String(e.message || e);
+    return;
+  }
+  const ms = Math.round(performance.now() - t0);
+  ra.sort((a, b) => b.diem - a.diem);
+  lanCuoi = { ra, ms, luc: new Date().toISOString() };
+
+  $("kq").innerHTML = ra.map(x =>
+    '<div class="d' + (x.diem >= NGUONG ? " cao" : "") + '">' +
+      '<div class="d-t"><span>' + x.ten + "</span><b>" + Math.round(x.diem * 100) + "%</b></div>" +
+      '<div class="thanh"><i style="width:' + Math.round(x.diem * 100) + '%"></i></div></div>').join("");
+
+  const keu = ra.filter(x => x.diem >= NGUONG);
+  $("tt-soi").innerHTML = (keu.length
+    ? "Máy đang nghiêng về: <b>" + keu.map(x => x.ten).join(", ") + "</b>"
+    : "Máy không thấy gì rõ rệt.") +
+    " · " + ms + " ms · " + nen;
+}
+
+$("b-soi").onclick = soi;
+$("b-lien").onclick = async () => {
+  dangLien = !dangLien;
+  $("b-lien").textContent = dangLien ? "⏸ Dừng" : "▶ Soi liên tục";
+  $("b-lien").className = dangLien ? "b ng" : "b";
+  while (dangLien) { await soi(); await new Promise(r => setTimeout(r, 250)); }
+};
+
+/* ── Bước 3: chấm điểm ── */
+function veBang() {
+  const c = cham;
+  const batDuoc = c.coLoi ? Math.round(c.batDung / c.coLoi * 100) : 0;
+  const nham = c.khongLoi ? Math.round(c.baoNham / c.khongLoi * 100) : 0;
+  $("bang").innerHTML =
+    '<div><b>' + c.n + "</b><span>lần đã chấm</span></div>" +
+    '<div><b>' + batDuoc + '%</b><span>bắt được lỗi thật<br>(' + c.batDung + "/" + c.coLoi + ")</span></div>" +
+    '<div><b>' + nham + '%</b><span>báo nhầm chỗ tốt<br>(' + c.baoNham + "/" + c.khongLoi + ")</span></div>";
+  $("tt-cham").innerHTML = c.n < 10
+    ? "Chấm thêm cho đủ ít nhất 10 lần rồi con số mới nói được gì."
+    : (batDuoc >= 70 && nham <= 30
+      ? "<b style='color:#8FE0B4'>Nhìn có vẻ dùng được.</b> Gửi kết quả này lại cho tôi."
+      : "<b style='color:#F3C8C0'>Chưa đủ tốt để đưa vào app.</b> Gửi kết quả lại, tôi xem có sửa được câu mô tả không.");
+}
+function ghiCham(coLoiThat) {
+  if (!lanCuoi) { $("tt-cham").textContent = "Soi một khung đã rồi mới chấm được."; return; }
+  const keu = lanCuoi.ra.some(x => x.diem >= NGUONG);
+  cham.n++;
+  if (coLoiThat) { cham.coLoi++; keu ? cham.batDung++ : cham.boSot++; }
+  else { cham.khongLoi++; keu ? cham.baoNham++ : cham.dungKhong++; }
+  cham.ds.push({ that: coLoiThat, keu, dau: lanCuoi.ra[0], ms: lanCuoi.ms });
+  lanCuoi = null;
+  veBang();
+}
+$("b-co").onclick = () => ghiCham(true);
+$("b-khong").onclick = () => ghiCham(false);
+$("b-xoa").onclick = () => {
+  Object.assign(cham, { n: 0, coLoi: 0, khongLoi: 0, batDung: 0, baoNham: 0, boSot: 0, dungKhong: 0, ds: [] });
+  veBang();
+};
+$("b-xuat").onclick = () => {
+  const goi = { moHinh: tenMH, nen, may: navigator.userAgent, luc: new Date().toISOString(), cham };
+  const b = new Blob([JSON.stringify(goi, null, 1)], { type: "application/json" });
+  const f = new File([b], "ket-qua-thu-may-nhin.json", { type: "application/json" });
+  if (navigator.canShare && navigator.canShare({ files: [f] })) { navigator.share({ files: [f] }); return; }
+  const u = URL.createObjectURL(b);
+  const a = document.createElement("a");
+  a.href = u; a.download = f.name; a.click();
+  setTimeout(() => URL.revokeObjectURL(u), 4000);
+};
+veBang();
+
+/* Mở một cửa nhỏ ra ngoài để kiểm thử tự động chạm được vào bên trong.
+   Trang này là trang THỬ, không giữ dữ liệu gì, nên để lộ như vậy không sao. */
+window.__thu = {
+  moCam, soi, veBang, ghiCham, layKhung, BO, NGUONG,
+  cham: () => cham,
+  datMayNhinGia: (fn) => { mayNhin = fn; nen = "giả-lập"; tenMH = "thu-nghiem"; },
+  hienPhanSau: () => { $("c-cam").hidden = false; $("c-cham").hidden = false; }
+};
+</script>
+</div>
+</body>
+</html>
