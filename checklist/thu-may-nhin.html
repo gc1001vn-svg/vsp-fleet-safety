@@ -47,6 +47,9 @@ video{width:100%;border-radius:10px;background:#000;display:block;aspect-ratio:4
 .loi{background:#2A1512;border-color:#5C2A20;color:#F3C8C0}
 .tot{background:#10241A;border-color:#1F5C3C}
 code{background:#16232E;padding:1px 5px;border-radius:4px;font-size:11.5px}
+.nk{background:#0A1119;border:1px solid var(--vien);border-radius:7px;padding:8px 9px;
+  font:11px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;color:#A8BCC9;
+  max-height:190px;overflow:auto;white-space:pre-wrap;word-break:break-word}
 </style>
 </head>
 <body>
@@ -81,6 +84,10 @@ chứ chấm một câu đơn lẻ thì cái gì cũng “hơi giống”.</div>
     <button class="b pri" id="b-tai">⬇ Tải và khởi động</button>
   </div>
   <div class="tt" id="tt-tai">Chưa tải.</div>
+  <div id="nk-hop" hidden>
+    <label>Nhật ký — hỏng thì chụp màn hình chỗ này gửi tôi</label>
+    <div id="nk" class="nk"></div>
+  </div>
 </div>
 
 <div class="card" id="c-cam" hidden>
@@ -164,57 +171,115 @@ const NGUONG = 0.6;   /* trên mức này thì coi là máy đang kêu có lỗi
 })();
 
 /* ── Bước 1: tải mô hình ── */
+/* ── Nạp thư viện ──
+   LẦN ĐẦU TÔI LÀM SAI CHỖ NÀY. Gói @huggingface/transformers có nhiều bản
+   dựng khác nhau; nạp thẳng tên gói thì CDN trả về bản dành cho máy chủ
+   Node, mà bản đó nối vào onnxruntime-node chứ không phải bản cho trình
+   duyệt — nên nó chết ở "webgpuInit is not a function".
+   Bản đúng cho trình duyệt là dist/transformers.web.min.js. Bản này còn có
+   nhánh riêng cho Safari, nghĩa là nó biết cách chạy trên iPhone. */
+const THU_LIB = [
+  ["bản web rút gọn (đúng)",
+   "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/dist/transformers.web.min.js"],
+  ["bản web đầy đủ",
+   "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/dist/transformers.web.js"],
+  ["đổi sang unpkg",
+   "https://unpkg.com/@huggingface/transformers@4.2.0/dist/transformers.web.min.js"]
+];
+
+const nhatKy = [];
+function ghiNK(s, xong) {
+  nhatKy.push((xong === true ? "✓ " : xong === false ? "✕ " : "· ") + s);
+  const el = $("nk");
+  if (el) { el.innerHTML = nhatKy.join("<br>"); el.scrollTop = el.scrollHeight; }
+}
+
 $("b-tai").onclick = async () => {
   const id = $("mh").value;
   $("b-tai").disabled = true;
+  nhatKy.length = 0;
+  $("nk-hop").hidden = false;
   mocTai = Date.now();
-  const bao = (s, mau) => { $("tt-tai").innerHTML = s; if (mau) $("c-tai").className = "card " + mau; };
-  bao("Đang nạp thư viện…");
-  let pipeline, env;
-  try {
-    ({ pipeline, env } = await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0"));
-  } catch (e) {
-    bao("✕ <b>Không nạp được thư viện.</b> Hoặc máy đang mất sóng, hoặc mạng đang dùng " +
-      "chặn <code>cdn.jsdelivr.net</code>.<br>" +
-      "Đang dùng wifi cơ quan thì chuyển sang 4G/5G thử; đang dùng 4G/5G rồi mà vẫn hỏng " +
-      "thì kiểm tra lại sóng.<br><br>Chi tiết: " + String(e.message || e), "loi");
+  const bao = (s, mau) => { $("tt-tai").innerHTML = s; $("c-tai").className = "card " + (mau || ""); };
+
+  /* 1. Nạp thư viện — thử lần lượt mấy đường */
+  let pipeline = null, env = null, loiLib = [];
+  for (const [ten, url] of THU_LIB) {
+    try {
+      ghiNK("Đang nạp: " + ten + " [" + url.split("/").pop() + "]");
+      bao("Đang nạp thư viện (" + ten + ")…");
+      ({ pipeline, env } = await import(url));
+      if (typeof pipeline !== "function") throw new Error("nạp được nhưng không có hàm pipeline");
+      ghiNK("Nạp thư viện: " + ten, true);
+      break;
+    } catch (e) {
+      pipeline = null;
+      loiLib.push(ten + " → " + String(e.message || e).slice(0, 120));
+      ghiNK("[" + url.split("/").pop() + "] " + String(e.message || e).slice(0, 90), false);
+    }
+  }
+  if (!pipeline) {
+    bao("✕ <b>Không nạp được thư viện bằng đường nào.</b><br>" +
+      "Nếu đang dùng wifi cơ quan thì thử 4G/5G; đang 4G/5G rồi thì kiểm tra sóng.<br><br>" +
+      loiLib.join("<br>"), "loi");
     $("b-tai").disabled = false;
     return;
   }
-  env.allowLocalModels = false;
 
-  /* Thử card đồ họa trước cho nhanh; không được thì lui về WASM */
-  const thu = navigator.gpu
-    ? [["webgpu", "q8"], ["webgpu", "fp16"], [null, "q8"]]
-    : [[null, "q8"], [null, null]];
+  /* 2. Chỉnh cho hợp chỗ chạy.
+     GitHub Pages không gửi hai tiêu đề COOP/COEP, nên trình duyệt không cho
+     dùng bộ nhớ chia sẻ — mà chạy nhiều luồng lại cần đúng thứ đó. Ép về một
+     luồng cho chắc: chậm hơn một chút nhưng không chết. */
+  try { env.allowLocalModels = false; } catch (e) {}
+  try {
+    if (env.backends && env.backends.onnx && env.backends.onnx.wasm) {
+      env.backends.onnx.wasm.numThreads = 1;
+      env.backends.onnx.wasm.proxy = false;
+      ghiNK("Ép chạy một luồng (GitHub Pages không cho dùng bộ nhớ chia sẻ)", true);
+    }
+  } catch (e) { ghiNK("Không chỉnh được số luồng: " + String(e.message || e)); }
+  ghiNK("Bộ nhớ chia sẻ (SharedArrayBuffer): " +
+    (typeof SharedArrayBuffer !== "undefined" ? "có" : "không — đúng như dự đoán"));
+
+  /* 3. Thử từng cách chạy: card đồ họa trước, không được thì WASM */
+  const thu = [];
+  if (navigator.gpu) { thu.push(["webgpu", "q8"], ["webgpu", "fp32"]); }
+  thu.push(["wasm", "q8"], ["wasm", null]);
+
   let loiCuoi = null;
   for (const [dev, dtype] of thu) {
+    const nhan = dev + (dtype ? " · " + dtype : "");
     try {
-      bao("Đang tải <b>" + id + "</b> qua <b>" + (dev || "WASM") + "</b>… " +
-        "lần đầu có thể mất vài phút, đừng tắt màn hình.");
-      const opt = { progress_callback: (p) => {
+      ghiNK("Thử " + nhan + " …");
+      bao("Đang tải <b>" + id + "</b> qua <b>" + nhan + "</b>… lần đầu mất vài phút, " +
+        "đừng tắt màn hình.");
+      const opt = { device: dev, progress_callback: (p) => {
         if (p && p.status === "progress" && p.file) {
-          bao("Đang tải <b>" + p.file + "</b> — " + Math.round(p.progress || 0) + "%" +
+          bao("[" + nhan + "] đang tải <b>" + p.file + "</b> — " + Math.round(p.progress || 0) + "%" +
             (p.total ? " (" + (p.total / 1048576).toFixed(1) + " MB)" : ""));
         }
       } };
-      if (dev) opt.device = dev;
       if (dtype) opt.dtype = dtype;
       mayNhin = await pipeline("zero-shot-image-classification", id, opt);
-      nen = dev || "WASM"; tenMH = id;
+      nen = nhan; tenMH = id;
+      ghiNK("Chạy được bằng " + nhan, true);
       break;
-    } catch (e) { loiCuoi = e; mayNhin = null; }
+    } catch (e) {
+      mayNhin = null; loiCuoi = e;
+      ghiNK(nhan + " → " + String(e.message || e).slice(0, 110), false);
+    }
   }
 
   if (!mayNhin) {
-    bao("✕ <b>Không tải được mô hình này.</b> Chọn mô hình khác trong danh sách rồi thử lại.<br><br>" +
-      "Chi tiết: " + String((loiCuoi && loiCuoi.message) || loiCuoi), "loi");
+    bao("✕ <b>Không khởi động được mô hình này.</b> Chọn mô hình khác trong danh sách rồi " +
+      "thử lại. Nếu cái nào cũng hỏng, chụp màn hình phần <b>Nhật ký</b> bên dưới gửi cho tôi." +
+      "<br><br>Lỗi cuối: " + String((loiCuoi && loiCuoi.message) || loiCuoi), "loi");
     $("b-tai").disabled = false;
     return;
   }
 
   bao("✓ Xong sau <b>" + ((Date.now() - mocTai) / 1000).toFixed(1) + " giây</b>. " +
-    "Đang chạy bằng <b>" + nen + "</b>. Từ giờ dùng được cả khi mất mạng.", "tot");
+    "Đang chạy bằng <b>" + nen + "</b>. Từ giờ dùng được cả khi mất sóng.", "tot");
   $("c-cam").hidden = false;
   $("c-cham").hidden = false;
   moCam();
