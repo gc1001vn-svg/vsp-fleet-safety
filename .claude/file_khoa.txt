@@ -1,0 +1,9 @@
+# Cac duong dan Claude khong duoc sua khi chua hoi chu du an.
+# Moi dong mot duong dan tuong doi goc repo. Ket thuc bang "/" = ca thu muc.
+CLAUDE.md
+.claude/settings.json
+.claude/file_khoa.txt
+requirements.txt
+checklist/vendor/
+data/
+uploads/
