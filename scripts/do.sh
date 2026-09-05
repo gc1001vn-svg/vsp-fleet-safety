@@ -48,6 +48,9 @@ sys.exit(1 if loi or not duong else 0)
 PY
 ghi $? "duong GET tra 200"
 
+python3 -m unittest discover -s tests >/dev/null 2>&1
+ghi $? "test trong tests/"
+
 echo "So do: $dat/$tong muc dat"
 if [ "${#sai[@]}" -gt 0 ]; then
   printf 'Sai: %s\n' "${sai[@]}"
