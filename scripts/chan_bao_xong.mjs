@@ -54,7 +54,13 @@ process.stdin.on('end', () => {
     .replace(/["\u201C\u201D][^"\u201C\u201D\n]*["\u201C\u201D]/g, ' ')
     .replace(/['\u2018\u2019][^'\u2018\u2019\n]*['\u2018\u2019]/g, ' ')
     .replace(new RegExp(`(${PHU_DINH})\\s+(${BAO_XONG})`, 'g'), ' ');
-  const baoXong = new RegExp(`(^|[^\\p{L}])(${BAO_XONG})([^\\p{L}]|$)`, 'u').test(t);
+  // Chi tinh la BAO xong khi cum tu dung DAU DONG hoac DAU CAU. Nam giua dong
+  // la dang nhac toi no (vd mot muc trong danh sach), khong phai bao xong.
+  const RAC = String.raw`[\s>*_\-#\d.)\]]*`;
+  const baoXong = t.split('\n').some((dong) =>
+    new RegExp(`^${RAC}(${BAO_XONG})(?!\\p{L})`, 'u').test(dong) ||
+    new RegExp(`[.!?\u2026]\\s+${RAC}(${BAO_XONG})(?!\\p{L})`, 'u').test(dong),
+  );
   if (!baoXong) process.exit(0);
 
   const dongSoDo = msg.split('\n').find((l) => CO_SO_DO.test(l));
