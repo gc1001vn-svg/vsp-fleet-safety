@@ -48,11 +48,19 @@ if (existsSync(pSet)) {
     if (n === 0) {
       d.push('skillOverrides TRONG — moi phien phi ~12.500 ky tu. Chay cong-cu/cai_dat.mjs');
     } else {
+      // Skill CO Y de bat liet ke o `.claude/skill_bat.txt` (mot ten mot dong,
+      // `#` la ghi chu). Khong co file do thi moi skill khong khoa deu bi bao.
+      const pBat = '.claude/skill_bat.txt';
+      const batCoY = new Set(
+        existsSync(pBat)
+          ? readFileSync(pBat, 'utf8').split('\n').map((l) => l.split('#')[0].trim()).filter(Boolean)
+          : [],
+      );
       const thuMuc = chay('ls -d ~/.claude/skills/synced/*/*/ 2>/dev/null')
         .split('\n').filter(Boolean)
         .map((p) => p.replace(/\/$/, '').split('/').pop());
-      const sot = thuMuc.filter((t) => !(t in khoa));
-      if (sot.length) d.push(`skill CHUA co khoa: ${sot.join(' ')} — them vao skillOverrides neu khong dung`);
+      const sot = thuMuc.filter((t) => !(t in khoa) && !batCoY.has(t));
+      if (sot.length) d.push(`skill CHUA co khoa: ${sot.join(' ')} — tat trong skillOverrides, hoac ghi vao ${pBat} neu co y bat`);
     }
   } catch { d.push(`${pSet} hong dinh dang`); }
 } else if (existsSync('.git')) {

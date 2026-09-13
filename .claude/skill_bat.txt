@@ -1,0 +1,5 @@
+# Skill CO Y de bat — hook `dau_phien` bo qua nhung ten o day.
+# Moi dong mot ten, ghi ly do sau dau `#`.
+
+md   # co convert.sh, khong co ban thay the. Gui file ma khong goi no thi doc
+     # file goc: mot .json 27 MB ~7 trieu token. 73 token/phien la bao hiem re nhat.
