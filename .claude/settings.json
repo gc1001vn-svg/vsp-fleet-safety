@@ -2,7 +2,7 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Edit|Write|NotebookEdit",
+        "matcher": "Edit|Write|NotebookEdit|Bash",
         "hooks": [
           {
             "type": "command",
@@ -34,5 +34,33 @@
         ]
       }
     ]
+  },
+  "skillOverrides": {
+    "ghi-nho": "user-invocable-only",
+    "bo-tro": "user-invocable-only",
+    "ponytail": "user-invocable-only",
+    "pptx": "off",
+    "docx": "off",
+    "xlsx": "off",
+    "ponytail-audit": "user-invocable-only",
+    "ponytail-debt": "user-invocable-only",
+    "ponytail-gain": "user-invocable-only",
+    "ponytail-help": "user-invocable-only",
+    "ponytail-review": "user-invocable-only",
+    "session-start-hook": "off",
+    "update-config": "off",
+    "fewer-permission-prompts": "off",
+    "security-review": "off",
+    "loop": "user-invocable-only",
+    "run": "off",
+    "simplify": "off",
+    "dataviz": "off",
+    "design": "off",
+    "artifact-design": "off",
+    "artifact-diagramming": "off",
+    "artifact-capabilities": "off",
+    "claude-api": "off",
+    "keybindings-help": "off",
+    "init": "off"
   }
 }
