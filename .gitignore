@@ -11,3 +11,6 @@ uploads/*
 
 .env
 .claude/so_lenh.log
+
+# Ve duyet sua file khoa - dung mot lan, KHONG len git
+.claude/da_duyet.txt
