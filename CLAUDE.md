@@ -6,10 +6,10 @@ Chi tiết: `README.md`.
 ## Lệnh
 
 ```bash
-pip install -r requirements.txt httpx   # httpx chỉ để chạy đo
+pip install -r requirements.txt         # máy ảo mới mỗi phiên, luôn phải chạy
 uvicorn app.main:app --reload --port 8000
 python -m app.seed                      # dữ liệu mẫu
-bash scripts/do.sh                      # ĐO: đạt 2/2, thoát 0
+bash scripts/do.sh                      # ĐO: đạt 3/3, thoát 0
 ```
 
 Chạy `scripts/do.sh` trước mỗi commit. Ngưỡng và phần còn nợ: `docs/thuoc-do.md`.

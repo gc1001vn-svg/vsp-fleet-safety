@@ -7,7 +7,13 @@ Luật chung: `ghi-nho/cong-cu/thuoc_do.md`. Bảng này là phần riêng của
 | Cú pháp · đường GET · test | `bash scripts/do.sh` | 3/3, thoát 0 | máy ảo được |
 | Riêng test | `python3 -m unittest discover -s tests` | 6 test, 0 lỗi | máy ảo được |
 
-Cần cài trước: `pip install -r requirements.txt httpx`.
+Cần cài trước: `pip install -r requirements.txt` — **một lệnh, không thêm gói tay**.
+
+> Sửa 13/09: trước đây ghi `... httpx` và `requirements.txt` không có gói đó. Sai hai
+> đường: `starlette.testclient` bản mới đòi **`httpx2`** chứ không phải `httpx`, và gói
+> chạy đo mà nằm ngoài `requirements.txt` thì máy ảo mới nào cũng vấp. Đã thêm
+> `httpx2>=2.12` vào `requirements.txt`. Kiểm bằng cách gỡ `httpx2`, cài lại chỉ bằng
+> `pip install -r requirements.txt`, rồi `bash scripts/do.sh` → **3/3**.
 
 `scripts/do.sh` đo ba mục:
 
