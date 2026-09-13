@@ -36,11 +36,24 @@ if (existsSync('requirements.txt')) {
 }
 
 // --- skillOverrides ----------------------------------------------------------
+// Khoa cu KHONG tu phu skill moi. Anthropic them mot skill dung san, hoac chu du
+// an tai len skill moi, la no lot vao ngu canh moi phien ma khong ai bao.
+// Doan duoi bat duoc phan skill DONG BO (co file tren dia). Skill dung san thi
+// khong co file — phan do van phai do A/B, xem `so-thich.md`.
 const pSet = '.claude/settings.json';
 if (existsSync(pSet)) {
   try {
-    const n = Object.keys(JSON.parse(readFileSync(pSet, 'utf8')).skillOverrides || {}).length;
-    if (n === 0) d.push('skillOverrides TRONG — moi phien phi ~12.500 ky tu. Chay cong-cu/cai_dat.mjs');
+    const khoa = JSON.parse(readFileSync(pSet, 'utf8')).skillOverrides || {};
+    const n = Object.keys(khoa).length;
+    if (n === 0) {
+      d.push('skillOverrides TRONG — moi phien phi ~12.500 ky tu. Chay cong-cu/cai_dat.mjs');
+    } else {
+      const thuMuc = chay('ls -d ~/.claude/skills/synced/*/*/ 2>/dev/null')
+        .split('\n').filter(Boolean)
+        .map((p) => p.replace(/\/$/, '').split('/').pop());
+      const sot = thuMuc.filter((t) => !(t in khoa));
+      if (sot.length) d.push(`skill CHUA co khoa: ${sot.join(' ')} — them vao skillOverrides neu khong dung`);
+    }
   } catch { d.push(`${pSet} hong dinh dang`); }
 } else if (existsSync('.git')) {
   d.push('CHUA co .claude/settings.json — chay `node /home/user/ghi-nho/cong-cu/cai_dat.mjs`');
