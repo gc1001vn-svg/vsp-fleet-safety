@@ -55,6 +55,10 @@ ghi $? "test trong tests/"
 node "$GOC/scripts/check_token.mjs" >/dev/null 2>&1
 ghi $? "CLAUDE.md duoi nguong token"
 
+# Ke hoach khong duoc dai qua 60 dong.
+node "$GOC/scripts/check_ke_hoach.mjs" >/dev/null 2>&1
+ghi $? "ke hoach duoi nguong dong"
+
 echo "So do: $dat/$tong muc dat"
 if [ "${#sai[@]}" -gt 0 ]; then
   printf 'Sai: %s\n' "${sai[@]}"
