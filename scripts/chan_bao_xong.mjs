@@ -56,10 +56,13 @@ process.stdin.on('end', () => {
     .replace(new RegExp(`(${PHU_DINH})\\s+(${BAO_XONG})`, 'g'), ' ');
   // Chi tinh la BAO xong khi cum tu dung DAU DONG hoac DAU CAU. Nam giua dong
   // la dang nhac toi no (vd mot muc trong danh sach), khong phai bao xong.
+  // Sau cum tu phai la dau cau, het dong, hoac mot trong may tu chot cau.
+  // "Xong chup bang skill gui em" la sai bao chu du an lam, khong phai bao xong.
   const RAC = String.raw`[\s>*_\-#\d.)\]]*`;
+  const TIEP = '(?:[\\s*_`)\\]]*(?:[.!?,:;…]|$)|\\s+(?:rồi|roi|cả|ca|hết|het|luôn|luon|nhé|nhe))';
   const baoXong = t.split('\n').some((dong) =>
-    new RegExp(`^${RAC}(${BAO_XONG})(?!\\p{L})`, 'u').test(dong) ||
-    new RegExp(`[.!?\u2026]\\s+${RAC}(${BAO_XONG})(?!\\p{L})`, 'u').test(dong),
+    new RegExp(`^${RAC}(${BAO_XONG})${TIEP}`, 'u').test(dong) ||
+    new RegExp(`[.!?\u2026]\\s+${RAC}(${BAO_XONG})${TIEP}`, 'u').test(dong),
   );
   if (!baoXong) process.exit(0);
 

@@ -51,6 +51,10 @@ ghi $? "duong GET tra 200"
 python3 -m unittest discover -s tests >/dev/null 2>&1
 ghi $? "test trong tests/"
 
+# CLAUDE.md phinh la loi. Nguong: `.claude/nguong_token.txt` hoac mac dinh 1600.
+node "$GOC/scripts/check_token.mjs" >/dev/null 2>&1
+ghi $? "CLAUDE.md duoi nguong token"
+
 echo "So do: $dat/$tong muc dat"
 if [ "${#sai[@]}" -gt 0 ]; then
   printf 'Sai: %s\n' "${sai[@]}"
