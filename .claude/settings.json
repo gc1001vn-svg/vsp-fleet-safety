@@ -75,7 +75,6 @@
     "init": "off",
     "giam-token": "user-invocable-only",
     "lap-ke-hoach": "user-invocable-only",
-    "md": "user-invocable-only",
     "code-review": "user-invocable-only"
   }
 }
