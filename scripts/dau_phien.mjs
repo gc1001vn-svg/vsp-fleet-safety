@@ -67,6 +67,24 @@ if (existsSync(pSet)) {
   d.push('CHUA co .claude/settings.json — chay `node /home/user/ghi-nho/cong-cu/cai_dat.mjs`');
 }
 
+// --- phien truoc co ghi nhat ky khong ----------------------------------------
+// Lo hong duy nhat con lai (do 13/09): may KHONG cuong che duoc ba viec cuoi
+// phien — ghi nhat ky, ghi de tien do, cap nhat trang-thai. Hook `chan_bao_xong`
+// chi doi dong "So do:", khong kiem da ghi chua. Mot phien lam xong roi quen ghi
+// thi phien sau KHONG BIET chuyen do tung xay ra — dung cai chu du an lam kho
+// ghi nho de chong.
+//
+// Khong chan giua phien (lam code truoc, ghi nhat ky sau la binh thuong). Bat o
+// DAU phien sau: commit code moi hon commit tai lieu thi phien truoc da quen.
+if (nhanh && existsSync('docs/NHAT_KY')) {
+  const ngay = (c) => chay(c).slice(0, 10);
+  const code = ngay(`git log -1 --format=%cd --date=short -- . ':(exclude)docs' ':(exclude).claude' 2>/dev/null`);
+  const tl = ngay(`git log -1 --format=%cd --date=short -- docs/NHAT_KY docs/TIEN_DO.md 2>/dev/null`);
+  if (code && tl && code > tl) {
+    d.push(`phien truoc sua code ${code} ma nhat ky/tien do dung o ${tl} — doc git log roi ghi bu`);
+  }
+}
+
 // --- lenh do cua repo --------------------------------------------------------
 let lenhDo = '';
 if (existsSync('package.json')) {
