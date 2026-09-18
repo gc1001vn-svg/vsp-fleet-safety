@@ -3,3 +3,7 @@
 
 md   # co convert.sh, khong co ban thay the. Gui file ma khong goi no thi doc
      # file goc: mot .json 27 MB ~7 trieu token. 73 token/phien la bao hiem re nhat.
+
+vsp-safety-expert   # viec that cua chu du an: JSA, Audit LPA, kiem tra an toan cap IV
+vsp-van-ban   # soan quyet dinh, cong van, bien ban su co — song ngu Viet-Nga
+pdf   # van ban VSP gui toi phan lon la PDF; khong co ban thay the

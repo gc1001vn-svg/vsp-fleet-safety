@@ -109,7 +109,7 @@ d.push(lenhDo ? `lenh do: ${lenhDo}` : 'repo CHUA co lenh do — dung mot cai tr
 // Luat kho: so lieu phai SINH TU LENH, dung go tay vao tai lieu. Khoi nay vao
 // ngu canh moi phien ma truoc gio khong ai biet no ton bao nhieu — tran "duoi
 // ~10 dong" la uoc bang mat. In ra thi lan sau cat hay giu deu co so ma cai.
-// ~4 ky tu/token, du de thay xu huong.
+// Uoc bang `uoc_tok` (byte/3) — cung cong thuc voi moi thuoc trong kho.
 const tho = `[dau phien] ${d.join('\n[dau phien] ')}`;
 const { van, tok, cat } = cat_tran(tho);
 thoat(0, { ra: `${van}\n[dau phien] khoi nay: ${d.length} dong · ~${tok} tok${cat ? ' (DA CAT)' : ''}\n` });

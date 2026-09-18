@@ -181,8 +181,26 @@ export function thoat(ma, chu = {}) {
  */
 export function cat_tran(van, tran = TRAN_NGU_CANH) {
   const s = String(van ?? '');
-  if (s.length <= tran) return { van: s, tok: Math.round(s.length / 4), cat: false };
+  if (s.length <= tran) return { van: s, tok: uoc_tok(s), cat: false };
   const dau = `\n[cat bot — vuot tran ${tran} ky tu. Sua TRAN_NGU_CANH trong scripts/hook_chung.mjs neu that su can]`;
   const v = s.slice(0, Math.max(0, tran - dau.length)) + dau;
-  return { van: v, tok: Math.round(v.length / 4), cat: true };
+  return { van: v, tok: uoc_tok(v), cat: true };
+}
+
+/**
+ * Uoc token: BYTE chia 3. Mot cong thuc duy nhat cho ca kho.
+ *
+ * Do 18/09, moc neo la repomix (bo tach tu that) tren 84 file `src`+`tests` cua
+ * `quoc-chien`: that 134.317 token · `byte/3` ra 132.023 (**-1,7%**) ·
+ * `ky tu/4` ra 98.721 (**-26,5%**). Thuc do 2,95 byte/token.
+ *
+ * Truoc 18/09 hai hook nay dung `ky tu/4` con cac thuoc (`check_token.mjs`,
+ * `do_token.sh`, `check_kho.mjs`) dung `byte/3` — hai so canh nhau lech 60%+ ma
+ * khong ai doi chieu duoc. Gio ca kho mot cong thuc.
+ *
+ * Van la UOC: moc neo do tren MA (ty le byte/ky tu 1,00). Van xuoi tieng Viet co
+ * dau ty le 1,20-1,25, chua co moc neo that — dung tin so tuyet doi qua 10%.
+ */
+export function uoc_tok(s) {
+  return Math.floor(Buffer.byteLength(String(s ?? ''), 'utf8') / 3);
 }
