@@ -68,9 +68,16 @@ if (existsSync(pSet)) {
           ? readFileSync(pBat, 'utf8').split('\n').map((l) => l.split('#')[0].trim()).filter(Boolean)
           : [],
       );
-      const thuMuc = chay('ls -d ~/.claude/skills/synced/*/*/ 2>/dev/null')
-        .split('\n').filter(Boolean)
-        .map((p) => p.replace(/\/$/, '').split('/').pop());
+      // Quet CA HAI chO. Ban cu chi quet `synced/*/*/` va bo sot moi thu nam
+      // thang duoi `skills/` — do 18/09: `session-start-hook` nam ngoai `synced/`,
+      // thoat kiem suot, may man la no da co khoa san. Dung skill gia de thu:
+      // tao `~/.claude/skills/skill-la-mat/` thi ban cu IM, ban nay bao.
+      // `-maxdepth 2 -name SKILL.md` bat duoc ca hai kieu long thu muc.
+      const thuMuc = [...new Set(
+        chay('find ~/.claude/skills -mindepth 2 -maxdepth 4 -name SKILL.md 2>/dev/null')
+          .split('\n').filter(Boolean)
+          .map((p) => p.split('/').slice(-2)[0]),
+      )];
       const sot = thuMuc.filter((t) => !(t in khoa) && !batCoY.has(t));
       if (sot.length) d.push(`skill CHUA co khoa: ${sot.join(' ')} — tat trong skillOverrides, hoac ghi vao ${pBat} neu co y bat`);
     }
