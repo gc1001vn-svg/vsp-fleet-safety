@@ -16,10 +16,24 @@
 
 import { appendFileSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
+// Hook nay khong in gi ra stdout/stderr nen khong can `thoat()` — moi duong ra
+// deu la `process.exit(0)` tay khong, khong co chu de mat.
+import { bat } from './hook_chung.mjs';
 
+const ID = 'sau:ghi-so-lenh';
 const GIU_DONG = 300;
 
+// Than ham da boc try/catch, nhung loi NGOAI than — stdin dut, JSON qua lon —
+// van lam Node in vet stack vao ngu canh. Boc not.
+process.on('uncaughtException', () => process.exit(0));
+process.on('unhandledRejection', () => process.exit(0));
+
+// Chay o CA BA muc, ke ca `nhe`: `chan_bao_xong` lay chinh so nay lam bang chung
+// cho dong "So do:". Tat cai nay thi thuoc do ben kia thanh loi noi suong.
+if (!bat(ID, ['nhe', 'thuong', 'chat'])) process.exit(0);
+
 let raw = '';
+process.stdin.on('error', () => process.exit(0));
 process.stdin.on('data', (c) => { raw += c; });
 process.stdin.on('end', () => {
   try {

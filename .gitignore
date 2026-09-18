@@ -14,3 +14,7 @@ uploads/*
 
 # Ve duyet sua file khoa - dung mot lan, KHONG len git
 .claude/da_duyet.txt
+
+# Ve duyet dung mot lan, so lenh, co hook mot phien — KHONG len git
+.claude/nhac_kho.log
+.claude/hook_phien.txt

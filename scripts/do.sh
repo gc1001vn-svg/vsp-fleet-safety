@@ -59,6 +59,10 @@ ghi $? "CLAUDE.md duoi nguong token"
 node "$GOC/scripts/check_ke_hoach.mjs" >/dev/null 2>&1
 ghi $? "ke hoach duoi nguong dong"
 
+# Bo hook dung luat: fail-open, ma thoat chi 0/2, cam console.*, phai goi bat(ID).
+node "$GOC/scripts/check_hook.mjs" >/dev/null 2>&1
+ghi $? "bo hook dung luat"
+
 echo "So do: $dat/$tong muc dat"
 if [ "${#sai[@]}" -gt 0 ]; then
   printf 'Sai: %s\n' "${sai[@]}"

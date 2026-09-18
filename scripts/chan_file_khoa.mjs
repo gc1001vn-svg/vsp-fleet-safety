@@ -58,6 +58,9 @@
 
 import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative, isAbsolute } from 'node:path';
+import { bat, thoat } from './hook_chung.mjs';
+
+const ID = 'truoc:chan-file-khoa';
 
 /** Danh sach khoa mac dinh khi du an khong co .claude/file_khoa.txt. */
 const MAC_DINH = ['CLAUDE.md', '.claude/settings.json', '.github/workflows/'];
@@ -157,18 +160,34 @@ function ghiSo(root, van) {
 }
 
 function chan(norm, khoa, nguon) {
-  console.error(
-    `File "${norm}" trung muc khoa "${khoa}" (${nguon}).\n` +
-    `Phai HOI CHU DU AN va duoc dong y truoc khi sua.\n` +
-    `Duoc dong y roi thi ghi mot dong "${norm}" vao ${DUONG_VE} roi sua lai — ` +
-    `ve dung mot lan, va moi lan cho qua deu ghi vao ${DUONG_SO}.\n` +
-    `CHUA duoc dong y thi KHONG duoc tu ghi ve. Duong Bash tu 12/09 khong bi chan ` +
-    `nhung van GHI SO — di duong do ma chua hoi thi chi la sua trom co dau vet.`,
-  );
-  process.exit(2);
+  thoat(2, {
+    loi:
+      `File "${norm}" trung muc khoa "${khoa}" (${nguon}).\n` +
+      `Phai HOI CHU DU AN va duoc dong y truoc khi sua.\n` +
+      `Duoc dong y roi thi ghi mot dong "${norm}" vao ${DUONG_VE} roi sua lai — ` +
+      `ve dung mot lan, va moi lan cho qua deu ghi vao ${DUONG_SO}.\n` +
+      `CHUA duoc dong y thi KHONG duoc tu ghi ve. Duong Bash tu 12/09 khong bi chan ` +
+      `nhung van GHI SO — di duong do ma chua hoi thi chi la sua trom co dau vet.`,
+  });
 }
 
+// FAIL-OPEN khi chinh hook hong. Chan la exit 2; moi ma thoat khac deu cho lenh
+// di tiep. Nhung loi khong bat thi Node in ca vet stack ra stderr va vet do vao
+// ngu canh — nen bat lay roi thoat 0 im lang.
+//
+// Chon fail-open chu khong fail-closed: do mot phien 12/09, 13 lan chan thi 4
+// lan chan NHAM. Hook hong ma chan het thi khong ai lam viec duoc; hook hong ma
+// cho qua thi chi mat mot lop nhac — so lenh van ghi, van con dau vet.
+process.on('uncaughtException', () => process.exit(0));
+process.on('unhandledRejection', () => process.exit(0));
+
+// Chay o CA BA muc. Day la lop bao ve, khong phai lop tien nghi: ha muc de re
+// ngu canh thi van phai giu cai nhac "file nay hoi truoc da" va cuon so.
+// Muon tat that thi ghi ID vao .claude/hook_phien.txt — co ghi la co dau vet.
+if (!bat(ID, ['nhe', 'thuong', 'chat'])) process.exit(0);
+
 let raw = '';
+process.stdin.on('error', () => process.exit(0));
 process.stdin.on('data', (c) => { raw += c; });
 process.stdin.on('end', () => {
   let tho;
