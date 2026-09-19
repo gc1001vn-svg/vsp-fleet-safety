@@ -32,6 +32,14 @@ const ID = 'dung:chan-bao-xong';
 
 /** Tu phu dinh dung ngay truoc "xong" -> khong tinh la bao xong. */
 const PHU_DINH = 'chưa|chua|không|khong|sắp|sap|gần|gan|nếu|neu|khi nào|khi nao';
+/**
+ * Tu dung ngay truoc "xong" cho thay dang NHAC TOI no chu khong bao: "đợi xong",
+ * "sau khi xong", "dạng báo xong", "chữ xong".
+ *
+ * Can tu 18/09 (lan 4), khi bo neo dau dong. Truoc do chinh cai neo do lam viec nay -
+ * va lam qua tay: no cat luon dang `<viec> xong`, tuc dang bao xong HAY DUNG NHAT.
+ */
+const NOI_TOI = 'đợi|doi|chờ|cho|khi|báo|bao|dạng|dang|kiểu|kieu|lúc|luc|chữ|chu';
 const BAO_XONG = 'xong|hoàn thành|hoan thanh|hoàn tất|hoan tat';
 // Cho phep ky tu trang tri Markdown dung truoc: ` * _ ~ # - > va khoang trang.
 const CO_SO_DO = /^[\s>*_`~#-]*(số đo|so do)\s*:/im;
@@ -75,16 +83,18 @@ process.stdin.on('end', () => {
     .replace(/`[^`\n]*`/g, ' ')
     .replace(/["\u201C\u201D][^"\u201C\u201D\n]*["\u201C\u201D]/g, ' ')
     .replace(/['\u2018\u2019][^'\u2018\u2019\n]*['\u2018\u2019]/g, ' ')
-    .replace(new RegExp(`(${PHU_DINH})\\s+(${BAO_XONG})`, 'g'), ' ');
-  // Chi tinh la BAO xong khi cum tu dung DAU DONG hoac DAU CAU. Nam giua dong
-  // la dang nhac toi no (vd mot muc trong danh sach), khong phai bao xong.
-  // Sau cum tu phai la dau cau, het dong, hoac mot trong may tu chot cau.
-  // "Xong chup bang skill gui em" la sai bao chu du an lam, khong phai bao xong.
-  const RAC = String.raw`[\s>*_\-#\d.)\]]*`;
+    .replace(new RegExp(`(${PHU_DINH})\\s+(${BAO_XONG})`, 'g'), ' ')
+    .replace(new RegExp(`(${NOI_TOI})\\s+(${BAO_XONG})`, 'g'), ' ');
+  // Cum tu nam O GIUA dong cung tinh - "Buoc 1 va 2 xong, da gop main" la bao xong that,
+  // ma ban truoc bo qua vi doi no dung dau dong hay ngay sau dau cham cau. Do 18/09:
+  // dang `<viec> xong` la dang bao xong HAY DUNG NHAT, ma lot sach.
+  //
+  // Cai giu cho khoi bat nham la `TIEP`: sau cum tu PHAI la dau cau, het dong, hay mot
+  // trong may tu chot cau. Nho vay "xong thi gui" va "xong chup bang gui em" van lot
+  // luoi - hai cai do la sai bao chu du an lam, khong phai bao xong.
   const TIEP = '(?:[\\s*_`)\\]]*(?:[.!?,:;…]|$)|\\s+(?:rồi|roi|cả|ca|hết|het|luôn|luon|nhé|nhe))';
-  const baoXong = t.split('\n').some((dong) =>
-    new RegExp(`^${RAC}(${BAO_XONG})${TIEP}`, 'u').test(dong) ||
-    new RegExp(`[.!?\u2026]\\s+${RAC}(${BAO_XONG})${TIEP}`, 'u').test(dong),
+  const baoXong = t.split('\n').some(
+    (dong) => new RegExp(`(?:^|[^\\p{L}])(${BAO_XONG})${TIEP}`, 'u').test(dong),
   );
   if (!baoXong) process.exit(0);
 
