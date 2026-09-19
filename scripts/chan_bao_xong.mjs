@@ -41,6 +41,9 @@ const PHU_DINH = 'chưa|chua|không|khong|sắp|sap|gần|gan|nếu|neu|khi nào
  */
 const NOI_TOI = 'đợi|doi|chờ|cho|khi|báo|bao|dạng|dang|kiểu|kieu|lúc|luc|chữ|chu';
 const BAO_XONG = 'xong|hoàn thành|hoan thanh|hoàn tất|hoan tat';
+/** Tu chao dong phien. Xem cho dung no o duoi - phai di kem dieu kien DO DAI. */
+const CHAO = 'hẹn phiên sau|hen phien sau|hẹn gặp|hen gap|tạm biệt|tam biet'
+  + '|chào anh|chao anh|chúc anh|chuc anh|hẹn anh|hen anh';
 // Cho phep ky tu trang tri Markdown dung truoc: ` * _ ~ # - > va khoang trang.
 const CO_SO_DO = /^[\s>*_`~#-]*(số đo|so do)\s*:/im;
 /** Dong de xuat buoc ke, hay khoi viec cuoi phien - mot trong hai la du. */
@@ -73,6 +76,16 @@ process.stdin.on('end', () => {
     ? d.last_assistant_message
     : '';
   if (!msg) process.exit(0);
+
+  // Cau chao dong phien: "Xong. Hen phien sau." So do da dua o luot TRUOC, day chi la
+  // cau chao - ma hook chi nhin thay mot luot. Do 19/09, bat nham that.
+  //
+  // HAI dieu kien phai dung CUNG luc: ngan (mot doan, duoi 120 ky tu) VA co tu chao.
+  // Chi mot trong hai thi "Xong roi." cung lot, ma cau do chu du an muon bat; con mot
+  // bao cao dai ket bang "Hen phien sau" thi tu chao thanh cua thoat cho moi lan bao xong.
+  const than = msg.trim();
+  const soDong = than.split('\n').filter((l) => l.trim() !== '').length;
+  if (than.length <= 120 && soDong <= 2 && RegExp(CHAO, 'i').test(than)) process.exit(0);
 
   // Bo phan trich dan truoc: khoi ma, nhay nguoc, nhay kep, nhay don.
   // Nhac lai chu "xong" de ban bac thi khong phai la bao xong.
